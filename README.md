@@ -1,1 +1,1 @@
-# tecnico
+# projetos e listas do tecnico
