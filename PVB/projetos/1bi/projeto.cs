@@ -1,4 +1,3 @@
-
 /* *******************************************************************
 * Colegio Técnico Antônio Teixeira Fernandes (Univap)
 * Curso Técnico em Informática - Data de Entrega: DD/MM/2026
@@ -23,103 +22,100 @@ namespace ConsoleApplication1
     {
         static void Main(string[] args)
         {
-            int qtdPicos = 0,qtdNaoPicos = 0, qtdNumeros = 0;
+            int qtdPicos = 0, qtdNaoPicos = 0, qtdNumeros = 0;
             int maiorDigitoPico = 0, maiorDigito = 0;
             int somaNaoPicos = 0;
             int input, numero;
-            char condicao;
+            // flag ou variavel onde é guardado o estado do teste para descobrir se é numero pico, podendo assumir 
+            // 4 valores diferentes:
+            // 'c' - significa 'começo' que é o primeiro teste a ser feito no laço;
+            // 'n' - quer dizer que já foi enquadrado como não pico;
+            // '>' numeros crescendo, da direita à esquerda;
+            // '<' numeros diminuindo, da direita à esquerda.
+            char condicao; 
 
             do
             {
-                input = int.Parse(Console.ReadLine());
-                // impede numeros negativos
-                while(input<0)
+                do
                 {
                     input = int.Parse(Console.ReadLine());
-                }
+                } while (input < 0);
+
                 numero = input;
+
                 if (input == 0)
                     break;
-                if (input < 120)
-                    condicao = 'n';
-                else
+                if (input >= 120)
                     condicao = 'c';
-                while(numero>=10 && condicao!= 'n')
+                else
+                    condicao = 'n';
+
+                while (numero >= 10 && condicao != 'n')
                 {
                     int digito = numero % 10;
-                    int pdigito = ((numero - digito)/10) % 10;
+                    int pdigito = (numero / 10) % 10;
 
                     // teste do maior digito do numero digitado
-                    if(digito>maiorDigito)
+
+                    // erro ingnorado : 120 nesse numero por exemplo o digito 1 foi ingnorado a partir do código existente
+                    // já que é levado em consideração o 'digito' e não o 'pdigito', no entanto, esse erro não faz diferença 
+                    // no resultado final pois é impossível o digito mais à esquerda ser maior do que os outros à direita num número pico.
+                    if (digito > maiorDigito)
                     {
                         maiorDigito = digito;
                     }
-                    //Console.Write(pdigito);
-                    //Console.WriteLine(digito);
-                    //Console.WriteLine(input);
-
+                    // a entrada aqui acontece de duas formas: seja por ter iniciado o laço (onde a flag = 'c') ou por estar 
+                    // em ordem crescente os números da direita à esquerda (onde flag = '>')
+                    // em caso de estar incializando e não entrar nesse if, o número automaticamente já é considerado não pico 
                     if (pdigito > digito && (condicao == 'c' || condicao == '>'))
                     {
-                        numero = (numero - digito) / 10;
+                        numero /= 10;
                         condicao = '>';
+                    }
+                    else if (pdigito < digito && condicao == '<')
+                    {
+                        numero = numero / 10;
+                    }
+                    else if (pdigito < digito && condicao == '>')
+                    {
+                        numero = numero / 10;
+                        condicao = '<';
                     }
                     else
                     {
-                        if (pdigito < digito && condicao == '<')
-                        {
-                            numero = (numero - digito) / 10;
-                        }
-                        else
-                        {
-                            if (pdigito < digito && condicao == '>')
-                            {
-                                numero = (numero - digito) / 10;
-                                condicao = '<';
-                            }
-                            else
-                            {
-                                condicao = 'n';
-                            }
-                        }
+                        condicao = 'n';
                     }
-                    //Console.WriteLine(condicao);    
                 }
 
                 if (condicao == '<')
                 {
-                    qtdPicos++; 
+                    qtdPicos++;
                     // teste que compara o maior digito do numero pico com o maior digito do numero atual, agora sabendo que ele é pico
-                    if(maiorDigito>maiorDigitoPico)
+                    if (maiorDigito > maiorDigitoPico)
                     {
                         maiorDigitoPico = maiorDigito;
                     }
-                    //Console.WriteLine("eh pico");
-                } 
+                }
                 else
                 {
-                    if(input!=0)
-                    {
-                        qtdNaoPicos++;
-                        somaNaoPicos += input;
-                    }
+                    qtdNaoPicos++;
+                    somaNaoPicos += input;
                 }
                 qtdNumeros++;
                 //Console.WriteLine(condicao);
 
-            } while (input!=0);
-
+            } while (input != 0);
 
             string textoMaiorDigito = (maiorDigitoPico == 0) ? "N/A" : maiorDigitoPico.ToString("0");
-            float media = (qtdNaoPicos>0) ? (somaNaoPicos) / (qtdNaoPicos*1.0F) : 0;
+            float media = (qtdNaoPicos > 0) ? (somaNaoPicos) / (qtdNaoPicos * 1.0F) : 0;
             string textoMedia = (qtdNaoPicos > 0) ? media.ToString("0.00") : "N/A";
-            float porcentagemPicos = (qtdNumeros > 0) ? (qtdPicos / (qtdNumeros*1.0F)) * 100 : 0;
-            string textoPorcentagem = (qtdNumeros > 0 ) ? porcentagemPicos.ToString("0.00")+'%' : "0.00%";
+            float porcentagemPicos = (qtdNumeros > 0) ? (qtdPicos / (qtdNumeros * 1.0F)) * 100 : 0;
+            string textoPorcentagem = (qtdNumeros > 0) ? porcentagemPicos.ToString("0.00") + '%' : "0.00%";
 
             Console.WriteLine("Total de numeros picos: " + qtdPicos);
             Console.WriteLine("Maior digito em picos: " + textoMaiorDigito);
             Console.WriteLine("Media não-picos: " + textoMedia);
             Console.WriteLine("Porcentagem de picos: " + textoPorcentagem);
-
 
         }
     }
