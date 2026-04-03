@@ -103,7 +103,6 @@ namespace ConsoleApplication1
                     somaNaoPicos += input;
                 }
                 qtdNumeros++;
-                //Console.WriteLine(condicao);
 
             } while (input != 0);
 
