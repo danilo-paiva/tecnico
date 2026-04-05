@@ -42,6 +42,7 @@ namespace ConsoleApplication1
                 } while (input < 0);
 
                 numero = input;
+                maiorDigito = 0; //zerar  maior digito
 
                 if (input == 0)
                     break;
@@ -102,7 +103,6 @@ namespace ConsoleApplication1
                     somaNaoPicos += input;
                 }
                 qtdNumeros++;
-                //Console.WriteLine(condicao);
 
             } while (input != 0);
 
