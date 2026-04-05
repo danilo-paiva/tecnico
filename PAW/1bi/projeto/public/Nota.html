@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang ="pt-br">
+    <head>
+        <title>Projeto 1° bimestre/Nota</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    </head>
+    <body>
+        <div class="p-5 bg-primary text-white text-center">
+            <h1>Projeto 1° Bimestre</h1>
+            <p>Calcule a situação do aluno</p> 
+        </div>
+        <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+            <div class="container-fluid">
+                <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="pagInicial.html">Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="IMC.html">IMC</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="Produto.html">Produtos</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="Nota.html">Nota</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="Funcionario.html">Funcionário</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="Triangulo.html">Triângulo</a>
+                </li>
+                </ul>
+            </div>
+        </nav>
+
+        <h3 class="px-5 my-5">Situação Aluno</h3>
+        <div class="container p-5 my-5 bg-light border">
+            <form action="/Nota" method="get" class="was-validated">
+                <div class="input-group">
+                    <span class="input-group-text">Nome</span>
+                    <input type="text" class="form-control" placeholder="Insira o nome" name="nome" required>
+                </div>
+                <br>
+                <div class="input-group">
+                    <span class="input-group-text">1° Nota</span>
+                    <input type="number" step="0.01" class="form-control" placeholder="ex: 7,0" name="nota1" required>
+                </div>
+                <br>
+                <div class="input-group">
+                    <span class="input-group-text">2° Nota</span>
+                    <input type="number" step="0.01" class="form-control" placeholder="ex: 8,0" name="nota2" required>
+                </div>
+                <br>
+                <button type="submit" class="btn btn-primary">Calcular</button>
+            </form>
+        </div>
+
+        <div class="mt-5 p-4 bg-dark text-white text-center">
+            <p>Feito por Danilo Paiva, Kelwin Marinho e Ruan Zanini</p>
+        </div>
+        
+    </body>
+</html>

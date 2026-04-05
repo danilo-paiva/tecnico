@@ -13,7 +13,7 @@
 
 
 declare(strict_types=1);
-namespace src;
+namespace Src\classes;
 class Triangulo 
 {
     private float $lado1;
@@ -21,35 +21,35 @@ class Triangulo
     private float $lado3;
     public function __construct() {}
 
-    public function setLado1(float $novoLado) : void
+    public function setLado1(float $novoLado) : bool
     {
         if($novoLado <=0)
             {
                 // 0000 ainda bem que a 4° dimensão não existe
-                throw new \InvalidArgumentException(
-                'Lado não pode ser menor ou igual a zero.');
+                return false;
             }
         $this->lado1 = $novoLado;
+        return true;
     }
 
-    public function setLado2(float $novoLado) : void
+    public function setLado2(float $novoLado) : bool
     {
         if($novoLado <=0)
             {
-                throw new \InvalidArgumentException(
-                'Lado não pode ser menor ou igual a zero.');
+                return false;
             }
         $this->lado2 = $novoLado;
+        return true;
     }
 
-    public function setLado3(float $novoLado) : void
+    public function setLado3(float $novoLado) : bool
     {
         if($novoLado <=0)
             {
-                throw new \InvalidArgumentException(
-                'Lado não pode ser menor ou igual a zero.');
+                return false;
             }
         $this->lado3 = $novoLado;
+        return true;
     }
 
     public function getLado1() : float
@@ -67,11 +67,24 @@ class Triangulo
         return $this->lado3;
     }
 
+    public function ehTriangulo() : bool
+    {
+        $l1 = $this->getLado1();
+        $l2 = $this->getLado2();
+        $l3 = $this->getLado3();
+        if($l1+$l2>$l3 && $l1+$l3>$l2 && $l3+$l2>$l1)
+            return true;
+        else
+            return false;
+    }
+
     public function tipoTriangulo() : string
     {
-        $l1 = getLado1();
-        $l2 = getLado2();
-        $l3 = getLado3();
+        if(!$this->ehTriangulo())
+            return "<b class=\"text-danger\">Não É Um Triângulo!</b>";
+        $l1 = $this->getLado1();
+        $l2 = $this->getLado2();
+        $l3 = $this->getLado3();
         if($l1 == $l2 and $l1 == $l3)
             return "Equilátero";
         else
@@ -83,17 +96,21 @@ class Triangulo
 
     public function calcularPerimetro() : float
     {
-        $l1 = getLado1();
-        $l2 = getLado2();
-        $l3 = getLado3();
+        if(!$this->ehTriangulo())
+            return 0;
+        $l1 = $this->getLado1();
+        $l2 = $this->getLado2();
+        $l3 = $this->getLado3();
         return $l1+$l2+$l3;
     }
 
     public function calcularArea() : float
     {
-        $l1 = getLado1();
-        $l2 = getLado2();
-        $l3 = getLado3();
+        if(!$this->ehTriangulo())
+            return 0;
+        $l1 = $this->getLado1();
+        $l2 = $this->getLado2();
+        $l3 = $this->getLado3();
         // 0000 semiperimetro
         $p = ($l1+$l2+$l3)/2;
         // 0000 area = raiz(p*(p-a)*(p-b)*(p-c))         (qual meu problema de deixar as fórmulas aqui?)

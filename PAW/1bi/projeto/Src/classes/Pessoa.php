@@ -2,7 +2,7 @@
 // status : finalizado (sem ressalvas.)
 
 declare(strict_types=1); //ativa tipagem restrita
-namespace src;
+namespace Src\classes;
 class Pessoa
 {
     private string $nome;
@@ -10,42 +10,36 @@ class Pessoa
     private float $altura;
     public function __construct() {}
 
-    public function setNome(string $novoNome) : void
+    public function setNome(string $novoNome) : bool
     {
         if ($novoNome == '') 
             {
-                throw new \InvalidArgumentException(
-                'Nome não pode ser vazio.');
+                return false;
             }
         $novoNome = strip_tags($novoNome);
         $this->nome = $novoNome;
+        return true;
     }
 
-    public function setPeso(float $novoPeso) : void
+    public function setPeso(float $novoPeso) : bool
     {
         if ($novoPeso <= 0) 
             {
-                throw new \InvalidArgumentException(
-                'Peso não pode ser igual ou menor que zero.');
+                return false;
             }
         $this->peso = $novoPeso;
+        return true;
     }
 
-    public function setAltura(float $novaAltura) : void
+    public function setAltura(float $novaAltura) : bool
     {
         if ($novaAltura <= 0) 
             {
-                throw new \InvalidArgumentException(
-                'Altura não pode ser igual ou menor que zero');
+                return false;
             }
 
-        
-        if ($novaAltura > 2.5) 
-            {
-                throw new \InvalidArgumentException(
-                'Altura muito grande');
-            }
         $this->altura = $novaAltura;
+        return true;
     }
 
     public function getNome() : string
@@ -70,17 +64,17 @@ class Pessoa
 
     public function classificarIMC() : string 
     {
-        $IMC = calcularIMC();
+        $IMC = $this->calcularIMC();
         if($IMC<18.5)
-            return "Abaixo do peso";
+            return "<b>abaixo do peso</b>";
         else 
             if($IMC<25)
-                return "Peso normal";
+                return "com <b>peso normal</b>";
             else
                 if($IMC<30)
-                    return "Sobrepeso";
+                    return "com <b>sobrepeso</b>";
                 else
-                    return "Obesidade";
+                    return "com <b>obesidade</b>";
 
     }
     

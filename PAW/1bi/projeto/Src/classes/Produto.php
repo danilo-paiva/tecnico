@@ -6,7 +6,7 @@ remover itens do estoque e calcular o valor total do estoque.
  O formulário da aplicação deve permitir o envio de dados de 5 produtos, que deverão ser processados utilizando a classe Produto.
   Dica, criar um vetor de objetos Produtos */
   // me permita concluir rapaz (sem valor semântico, meme antigo)
-  // status : finalizado(necessario questionar atributo alteracao!)
+  // status : finalizado
 
 declare(strict_types=1); 
 namespace Src\classes;
@@ -18,70 +18,64 @@ class Produto
     
     public function __construct() {}
 
-    public function setNome(string $novoNome) : void
+    public function setNome(string $novoNome) : bool
     {
         
         if ($novoNome == '') 
             {
-                
-                throw new \InvalidArgumentException(
-                'Nome do produto não pode ser vazio.');
+                return false;
             }
         $novoNome = strip_tags($novoNome); 
         
         $this->nome = $novoNome;
+        return true;
     }
 
-    public function setPreco(float $novoPreco) : void 
+    public function setPreco(float $novoPreco) : bool 
     {
         if ($novoPreco <=0 )
             {
                 // 00000000000000 NOVA PROMOÇÃO: compre 1 e leve tudo de graça ou ainda ganhe $
-                //                                                                \/
-                
-                throw new \InvalidArgumentException(
-                'O valor do produto não pode ser vazio ou negativo.');
+                //                                                              
+                return false;
             }
             
             
         
         $this->preco = $novoPreco;
+        return true;
     }
 
-    public function addEstoque(int $quantidadeAdcionanda) : void
+    public function addEstoque(int $quantidadeAdcionanda) : bool
     {
         if ($quantidadeAdcionanda < 0) 
             {
-                
-                throw new \InvalidArgumentException(
-                'Quantidade adicionada não pode ser negativa.');
+                return false;
             }
                                                     
         
         $this->quantidade += $quantidadeAdcionanda;
+        return true;
     }
 
-    public function subEstoque(int $quantidadeSubtraida) : void
+    public function subEstoque(int $quantidadeSubtraida) : bool
     {
         if ($quantidadeSubtraida < 0) 
             {
                 // 0000000000000 ooooooooooooo cara (sem valor semântico)
-                
-                throw new \InvalidArgumentException(
-                'Quantidade removida não pode ser negativa.');
+                return false;
             }
 
         if ($this->quantidade - $quantidadeSubtraida < 0) 
             {
                 // 0000 tão achando que eh licitação essa bosta kkkkkkkkk
-                
-                throw new \InvalidArgumentException(
-                'Quantidade total do estoque não pode ser negativa.');
+                return false;
             }
        
     
         
         $this->quantidade -= $quantidadeSubtraida;
+        return true;
     }
 
     public function getNome() : string

@@ -15,47 +15,45 @@ class Nota
     private float $nota2;
     public function __construct() {}
 
-    public function setNome(string $novoNome) : void
+    public function setNome(string $novoNome) : bool
     {
         if ($novoNome == '') 
-            {
-                throw new \InvalidArgumentException(
-                'Nome não pode ser vazio.');
+            {  
+                return false;
             }
         $novoNome = strip_tags($novoNome);
         $this->nome = $novoNome;
+        return true;
     }
 
-    public function setNota1(float $novaNota) : void
+    public function setNota1(float $novaNota) : bool
     {
         if($novaNota < 0)
-            {
-                throw new \InvalidArgumentException(
-                'Nota não pode ser menor que zero.');
+            {   
+                return false;
             }
         if($novaNota > 10)
             {
-                throw new \InvalidArgumentException(
-                'Nota não pode ser maior que 10');
+                return false;
             }
 
         $this->nota1 = $novaNota;
+        return true;
     }
 
-    public function setNota2(float $novaNota) : void
+    public function setNota2(float $novaNota) : bool
     {
         if($novaNota < 0)
             {
-                throw new \InvalidArgumentException(
-                'Nota não pode ser menor que zero.');
+                return false;
             }
         if($novaNota > 10)
             {
-                throw new \InvalidArgumentException(
-                'Nota não pode ser maior que 10');
+                return false;
             }
 
         $this->nota2 = $novaNota;
+        return true;
     }
 
     public function getNome() : string
@@ -81,15 +79,15 @@ class Nota
 
     public function situacaoAluno() : string 
     {
-        $media = calcularMedia();
+        $media = $this->calcularMedia();
         if($media >= 6)
-            return "Aprovado";
+            return "<b class=\"text-success\">Aprovado<b>";
         else
             if($media >= 3)
-                return "Recuperação";
+                return "<b class=\"text-warning\">Recuperação</b>";
             else
                 // 0000 caso não entenda esse código, 
                 // 0000 provavelmente você vai ficar aqui
-                return "Reprovado";
+                return "<b class=\"text-danger\">Reprovado</b>";
     }
 }

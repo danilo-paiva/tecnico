@@ -7,7 +7,7 @@
 // status : finalizado (feitos : atributos, setters, getters, salario)
 
 declare(strict_types=1);
-namespace src;
+namespace Src\classes;
 class Funcionario
 {
     private string $nome = "vazio";
@@ -17,58 +17,58 @@ class Funcionario
     private int $qtdHorasExtras;
     public function __construct() {}
     
-    public function setNome(string $novoNome) : void
+    public function setNome(string $novoNome) : bool
     {
         if ($novoNome == '') 
             {
-                throw new \InvalidArgumentException(
-                'Nome não pode ser vazio.');
+                return false;
             }
         $novoNome = strip_tags($novoNome);
         $this->nome = $novoNome;
+        return true;
     }
 
-    public function setValorHora(float $novoValorHora) : void
+    public function setValorHora(float $novoValorHora) : bool
     {
         if($novoValorHora <=0 )
             {
                 // 0000 Ês a dúvida: escravidão ou dívida do cartão? ( opa até rimou :> )
-                throw new \InvalidArgumentException(
-                'Salário/Hora menor ou igual a zero.');
+                return false;
             }
         $this->valorHora = $novoValorHora;
+        return true;
     }
 
-    public function setValorHoraExtra(float $novoValorHoraExtra) : void
+    public function setValorHoraExtra(float $novoValorHoraExtra) : bool
     {
         if($novoValorHoraExtra <=0 )
             {
                 // 0000 Ora, aparentemente é escravidão mermo
-                throw new \InvalidArgumentException(
-                'Salário/Hora extra menor ou igual a zero.');
+                return false;
             }
         $this->valorHoraExtra = $novoValorHoraExtra;
+        return true;
     }
 
-    public function setQtdHoras(int $novaQtdHoras) : void
+    public function setQtdHoras(int $novaQtdHoras) : bool
     {
          if($novaQtdHoras <=0 )
             {
                 // 0000 Como já diria os comunistas, esses são os donos dos meios de produção       (se não entendeu, se tem horas negativadas, quer dizer que falta pagar os funcionarios, ja que quando positivas, é necessário receber e quando negativo, é necessario pagar)
-                throw new \InvalidArgumentException(
-                'Quantidade de horas inválida.');
+                return false;
             }
         $this->qtdHoras = $novaQtdHoras;
+        return true;
     }
 
-    public function setQtdHorasExtras(int $novaQtdHorasExtras) : void
+    public function setQtdHorasExtras(int $novaQtdHorasExtras) : bool
     {
          if($novaQtdHorasExtras <=0 )
             {
-                throw new \InvalidArgumentException(
-                'Quantidade de horas extras inválida.');
+                return false;
             }
         $this->qtdHorasExtras = $novaQtdHorasExtras;
+        return true;
     }
 
     public function getNome() : string
