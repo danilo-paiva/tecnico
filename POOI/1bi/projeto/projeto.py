@@ -21,7 +21,6 @@ maiorMedia = 0
 primeiroMedia = 0
 ultimoMedia = 0
 mediasIndividuais = 0.0
-multiplicador = 1
 
 for aluno in range(0,quantidadeAlunos):
 
@@ -54,24 +53,11 @@ for aluno in range(0,quantidadeAlunos):
     if aluno == quantidadeAlunos-1:
         ultimoMedia = mediaIndividual
 
-    mediaIndividual = int(mediaIndividual*100)
-    mediasIndividuais += mediaIndividual * multiplicador
-    multiplicador *= 1000
 
     print()
 
 
-mediaTurma = somaMedias/quantidadeAlunos
-quantidadeAcimaDaMedia = 0
-
-for aluno in range(0,quantidadeAlunos):
-    media = mediasIndividuais%1000
-    mediasIndividuais -= media
-    mediasIndividuais/=1000
-    media/=100
-    if media > mediaTurma:
-        quantidadeAcimaDaMedia+=1
-    #print(media)
+mediaTurma = somaMedias/quantidadeAlunos
 
 
 desempenhoTurma = ""
@@ -92,8 +78,7 @@ print(' ' * 8, end='')
 print('RESULTADOS E ESTATÍSTICAS DA TURMA')
 print('-'*50)
 
-print(f'Media Turma: {mediaTurma:.1f} \n'
-      f'Alunos acima da média: {quantidadeAcimaDaMedia} \n'
+print(f'Media Turma: {mediaTurma:.1f} \n'
       f'Maior media individual: {maiorMedia:.2f} \n'
       f'Menor media individual: {menorMedia:.2f} \n'
       f'Diagnostico da turma: desempenho {desempenhoTurma}')
