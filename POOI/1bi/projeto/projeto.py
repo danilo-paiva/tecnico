@@ -6,12 +6,14 @@ print('='*50)
 
 quantidadeAlunos = int(input('Digite a quantidade de alunos: '))
 while quantidadeAlunos <=0:
-    quantidadeAlunos = int(input('Número igual de alunos ou menor que zero \nDigite novamente a quantidade de alunos: '))
+    quantidadeAlunos = int(input('Número igual de alunos ou menor que zero \n'
+                                 'Digite novamente a quantidade de alunos: '))
 print()
 
 quantidadeDisciplinas = int(input('Digite a quantidade de disciplinas: '))
 while quantidadeDisciplinas <=0:
-    quantidadeDisciplinas = int(input('Número igual de disciplinas ou menor que zero \nDigite novamente a quantidade de disciplinas: '))
+    quantidadeDisciplinas = int(input('Número igual de disciplinas ou menor que zero \n'
+                                      'Digite novamente a quantidade de disciplinas: '))
 print()
 
 somaMedias = 0
@@ -53,13 +55,9 @@ for aluno in range(0,quantidadeAlunos):
     if aluno == quantidadeAlunos-1:
         ultimoMedia = mediaIndividual
 
-
     print()
 
-
-mediaTurma = somaMedias/quantidadeAlunos
-
-
+mediaTurma = somaMedias/quantidadeAlunos
 desempenhoTurma = ""
 if mediaTurma < 5 or menorMedia < 3:
     desempenhoTurma = "insuficiente"
@@ -78,7 +76,7 @@ print(' ' * 8, end='')
 print('RESULTADOS E ESTATÍSTICAS DA TURMA')
 print('-'*50)
 
-print(f'Media Turma: {mediaTurma:.1f} \n'
+print(f'Media Turma: {mediaTurma:.1f} \n'
       f'Maior media individual: {maiorMedia:.2f} \n'
       f'Menor media individual: {menorMedia:.2f} \n'
       f'Diagnostico da turma: desempenho {desempenhoTurma}')
