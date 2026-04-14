@@ -16,7 +16,7 @@ $app = AppFactory::create();
 // rota exemplo get
 
 
-
+//IMC
 $app->get('/IMC', function ($request, $response) {
     $queryParams = $request->getQueryParams();
 
@@ -103,55 +103,73 @@ $app->get('/IMC', function ($request, $response) {
     <!DOCTYPE html>
 <html lang =\"pt-br\">
     <head>
-        <title>Projeto 1° bimestre/IMC</title>
+        <title>Projeto 1° Bimestre/IMC</title>
         <meta charset=\"utf-8\">
         <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
-        <link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css\" rel=\"stylesheet\">
-        <script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js\"></script>
+        <link rel=\"stylesheet\" href=\"style.css\">
+        <link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css\" rel=\"stylesheet\">
+        <script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js\"></script>
+        <style>
+            :root { --bg-light: #f0f2f5; --primary-health: #2ecc71; --primary-health-hover: #58d68d; }
+            body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+            .hero-section { background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); padding: 4rem 0; color: white; text-align: center; margin-bottom: 3rem; }
+            .navbar { box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+            .result-card { background: white; border: none; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border-top: 8px solid var(--primary-health); }
+            .btn-calc { background-color: var(--primary-health); color: white !important; border: 2px solid var(--primary-health); font-weight: bold; padding: 0.8rem; transition: all 0.2s ease; border-radius: 50px; }
+            .btn-calc:hover { background-color: var(--primary-health-hover); border-color: var(--primary-health); transform: scale(1.02); color: white !important; }
+            .footer { background-color: #212529; color: #ced4da; padding: 2rem 0; margin-top: auto; }
+        </style>
     </head>
-    <body>
-        <div class=\"p-5 bg-primary text-white text-center\">
-            <h1>Projeto 1° Bimestre</h1>
-            <p>calculadora IMC</p> 
-        </div>
-        <nav class=\"navbar navbar-expand-sm bg-dark navbar-dark\">
-            <div class=\"container-fluid\">
-                <ul class=\"navbar-nav\">
-                <li class=\"nav-item\">
-                    <a class=\"nav-link\" href=\"pagInicial.html\">Inicio</a>
-                </li>
-                <li class=\"nav-item\">
-                    <a class=\"nav-link active\" href=\"IMC.html\">IMC</a>
-                </li>
-                <li class=\"nav-item\">
-                    <a class=\"nav-link\" href=\"Produto.html\">Produtos</a>
-                </li>
-                <li class=\"nav-item\">
-                    <a class=\"nav-link\" href=\"Nota.html\">Nota</a>
-                </li>
-                <li class=\"nav-item\">
-                    <a class=\"nav-link\" href=\"Funcionario.html\">Funcionário</a>
-                </li>
-                <li class=\"nav-item\">
-                    <a class=\"nav-link\" href=\"Triangulo.html\">Triângulo</a>
-                </li>
-                </ul>
+    <body class=\"d-flex flex-column min-vh-100\">
+        <nav class=\"navbar navbar-expand-sm navbar-dark bg-dark sticky-top\">
+            <div class=\"container\">
+                <a class=\"navbar-brand\" href=\"pagInicial.html\">Projeto 1°B</a>
+                <button class=\"navbar-toggler\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#navbarNav\">
+                    <span class=\"navbar-toggler-icon\"></span>
+                </button>
+                <div class=\"collapse navbar-collapse\" id=\"navbarNav\">
+                    <ul class=\"navbar-nav ms-auto\">
+                        <li class=\"nav-item\"><a class=\"nav-link\" href=\"pagInicial.html\">Início</a></li>
+                        <li class=\"nav-item\"><a class=\"nav-link active\" href=\"IMC.html\">IMC</a></li>
+                        <li class=\"nav-item\"><a class=\"nav-link\" href=\"Produto.html\">Produtos</a></li>
+                        <li class=\"nav-item\"><a class=\"nav-link\" href=\"Nota.html\">Nota</a></li>
+                        <li class=\"nav-item\"><a class=\"nav-link\" href=\"Funcionario.html\">Funcionário</a></li>
+                        <li class=\"nav-item\"><a class=\"nav-link\" href=\"Triangulo.html\">Triângulo</a></li>
+                    </ul>
+                </div>
             </div>
         </nav>
 
-        $resultado
-        
-        <div class=\"mt-5 p-4 bg-dark text-white text-center\">
-            <p>Feito por Danilo Paiva, Kelwin Marinho e Ruan Zanini</p>
-        </div>
-        
+        <header class=\"hero-section\">
+            <div class=\"container text-center\">
+                <h1 class=\"display-4 fw-bold\">Resultado do IMC</h1>
+                <p class=\"lead\">Confira a análise do seu Índice de Massa Corporal</p>
+            </div>
+        </header>
+
+        <main class=\"container mb-5\">
+            <div class=\"row justify-content-center\">
+                <div class=\"col-md-6 col-lg-5\">
+                    <div class=\"card result-card p-4 p-md-5 text-center\">
+                        $resultado
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class=\"footer text-center\">
+            <div class=\"container\">
+                <p class=\"mb-0\">Feito por</p>
+                <p class=\"fw-bold\">Danilo Paiva, Kelwin Marinho e Ruan Zanini</p>
+            </div>
+        </footer>
     </body>
 </html>");
     return $response;
 });
 
 
-// rota exemplo get
+// Produto
 $app->post('/Produto', function ($request, $response) {
     $queryParams = $request->getParsedBody();
 
@@ -240,54 +258,72 @@ $app->post('/Produto', function ($request, $response) {
     <!DOCTYPE html>
 <html lang =\"pt-br\">
     <head>
-        <title>Projeto 1° bimestre/IMC</title>
+        <title>Projeto 1° Bimestre/Produtos</title>
         <meta charset=\"utf-8\">
         <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
-        <link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css\" rel=\"stylesheet\">
-        <script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js\"></script>
+        <link rel=\"stylesheet\" href=\"style.css\">
+        <link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css\" rel=\"stylesheet\">
+        <script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js\"></script>
+        <style>
+            :root { --bg-light: #f0f2f5; --primary-inventory: #3498db; --primary-inventory-hover: #5dade2; }
+            body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+            .hero-section { background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); padding: 4rem 0; color: white; text-align: center; margin-bottom: 3rem; }
+            .navbar { box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+            .result-card { background: white; border: none; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border-top: 8px solid var(--primary-inventory); }
+            .btn-buy { background-color: var(--primary-inventory); color: white !important; border: 2px solid var(--primary-inventory); font-weight: bold; padding: 0.8rem; transition: all 0.2s ease; border-radius: 50px; }
+            .btn-buy:hover { background-color: var(--primary-inventory-hover); border-color: var(--primary-inventory); transform: scale(1.02); color: white !important; }
+            .footer { background-color: #212529; color: #ced4da; padding: 2rem 0; margin-top: auto; }
+        </style>
     </head>
-    <body>
-        <div class=\"p-5 bg-primary text-white text-center\">
-            <h1>Projeto 1° Bimestre</h1>
-            <p>compre, veja o estoque e o valor do estoque de nossos produtos para fazer strogonoff!</p> 
-        </div>
-        <nav class=\"navbar navbar-expand-sm bg-dark navbar-dark\">
-            <div class=\"container-fluid\">
-                <ul class=\"navbar-nav\">
-                <li class=\"nav-item\">
-                    <a class=\"nav-link\" href=\"pagInicial.html\">Inicio</a>
-                </li>
-                <li class=\"nav-item\">
-                    <a class=\"nav-link\" href=\"IMC.html\">IMC</a>
-                </li>
-                <li class=\"nav-item\">
-                    <a class=\"nav-link active\" href=\"Produto.html\">Produtos</a>
-                </li>
-                <li class=\"nav-item\">
-                    <a class=\"nav-link\" href=\"Nota.html\">Nota</a>
-                </li>
-                <li class=\"nav-item\">
-                    <a class=\"nav-link\" href=\"Funcionario.html\">Funcionário</a>
-                </li>
-                <li class=\"nav-item\">
-                    <a class=\"nav-link\" href=\"Triangulo.html\">Triângulo</a>
-                </li>
-                </ul>
+    <body class=\"d-flex flex-column min-vh-100\">
+        <nav class=\"navbar navbar-expand-sm navbar-dark bg-dark sticky-top\">
+            <div class=\"container\">
+                <a class=\"navbar-brand\" href=\"pagInicial.html\">Projeto 1°B</a>
+                <button class=\"navbar-toggler\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#navbarNav\">
+                    <span class=\"navbar-toggler-icon\"></span>
+                </button>
+                <div class=\"collapse navbar-collapse\" id=\"navbarNav\">
+                    <ul class=\"navbar-nav ms-auto\">
+                        <li class=\"nav-item\"><a class=\"nav-link\" href=\"pagInicial.html\">Início</a></li>
+                        <li class=\"nav-item\"><a class=\"nav-link\" href=\"IMC.html\">IMC</a></li>
+                        <li class=\"nav-item\"><a class=\"nav-link active\" href=\"Produto.html\">Produtos</a></li>
+                        <li class=\"nav-item\"><a class=\"nav-link\" href=\"Nota.html\">Nota</a></li>
+                        <li class=\"nav-item\"><a class=\"nav-link\" href=\"Funcionario.html\">Funcionário</a></li>
+                        <li class=\"nav-item\"><a class=\"nav-link\" href=\"Triangulo.html\">Triângulo</a></li>
+                    </ul>
+                </div>
             </div>
         </nav>
 
-        $resultado
-        
-        <div class=\"mt-5 p-4 bg-dark text-white text-center\">
-            <p>Feito por Danilo Paiva, Kelwin Marinho e Ruan Zanini</p>
-        </div>
-        
+        <header class=\"hero-section\">
+            <div class=\"container text-center\">
+                <h1 class=\"display-4 fw-bold\">Gestão de Estoque</h1>
+                <p class=\"lead\">Confira as atualizações de compra e o status atual dos produtos</p>
+            </div>
+        </header>
+
+        <main class=\"container mb-5\">
+            <div class=\"row justify-content-center\">
+                <div class=\"col-12\">
+                    <div class=\"card result-card p-4 p-md-5\">
+                        $resultado
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class=\"footer text-center\">
+            <div class=\"container\">
+                <p class=\"mb-0\">Feito por</p>
+                <p class=\"fw-bold\">Danilo Paiva, Kelwin Marinho e Ruan Zanini</p>
+            </div>
+        </footer>
     </body>
 </html>");
     
     return $response;
 });
-
+// Nota
 $app->get('/Nota', function ($request, $response) {
     $queryParams = $request->getQueryParams();
 
@@ -364,53 +400,71 @@ $app->get('/Nota', function ($request, $response) {
     <!DOCTYPE html>
 <html lang =\"pt-br\">
     <head>
-        <title>Projeto 1° bimestre/Nota</title>
+        <title>Projeto 1° Bimestre/Nota</title>
         <meta charset=\"utf-8\">
         <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
-        <link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css\" rel=\"stylesheet\">
-        <script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js\"></script>
+        <link rel=\"stylesheet\" href=\"style.css\">
+        <link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css\" rel=\"stylesheet\">
+        <script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js\"></script>
+        <style>
+            :root { --bg-light: #f0f2f5; --primary-edu: #f1c40f; --primary-edu-hover: #f3cf2f; }
+            body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+            .hero-section { background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); padding: 4rem 0; color: white; text-align: center; margin-bottom: 3rem; }
+            .navbar { box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+            .result-card { background: white; border: none; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border-top: 8px solid var(--primary-edu); }
+            .btn-calc { background-color: var(--primary-edu); color: #333 !important; border: 2px solid var(--primary-edu); font-weight: bold; padding: 0.8rem; transition: all 0.2s ease; border-radius: 50px; }
+            .btn-calc:hover { background-color: var(--primary-edu-hover); border-color: var(--primary-edu); transform: scale(1.02); color: #333 !important; }
+            .footer { background-color: #212529; color: #ced4da; padding: 2rem 0; margin-top: auto; }
+        </style>
     </head>
-    <body>
-        <div class=\"p-5 bg-primary text-white text-center\">
-            <h1>Projeto 1° Bimestre</h1>
-            <p>Calcule a situação do aluno</p> 
-        </div>
-        <nav class=\"navbar navbar-expand-sm bg-dark navbar-dark\">
-            <div class=\"container-fluid\">
-                <ul class=\"navbar-nav\">
-                <li class=\"nav-item\">
-                    <a class=\"nav-link\" href=\"pagInicial.html\">Inicio</a>
-                </li>
-                <li class=\"nav-item\">
-                    <a class=\"nav-link\" href=\"IMC.html\">IMC</a>
-                </li>
-                <li class=\"nav-item\">
-                    <a class=\"nav-link\" href=\"Produto.html\">Produtos</a>
-                </li>
-                <li class=\"nav-item\">
-                    <a class=\"nav-link active\" href=\"Nota.html\">Nota</a>
-                </li>
-                <li class=\"nav-item\">
-                    <a class=\"nav-link\" href=\"Funcionario.html\">Funcionário</a>
-                </li>
-                <li class=\"nav-item\">
-                    <a class=\"nav-link\" href=\"Triangulo.html\">Triângulo</a>
-                </li>
-                </ul>
+    <body class=\"d-flex flex-column min-vh-100\">
+        <nav class=\"navbar navbar-expand-sm navbar-dark bg-dark sticky-top\">
+            <div class=\"container\">
+                <a class=\"navbar-brand\" href=\"pagInicial.html\">Projeto 1°B</a>
+                <button class=\"navbar-toggler\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#navbarNav\">
+                    <span class=\"navbar-toggler-icon\"></span>
+                </button>
+                <div class=\"collapse navbar-collapse\" id=\"navbarNav\">
+                    <ul class=\"navbar-nav ms-auto\">
+                        <li class=\"nav-item\"><a class=\"nav-link\" href=\"pagInicial.html\">Início</a></li>
+                        <li class=\"nav-item\"><a class=\"nav-link\" href=\"IMC.html\">IMC</a></li>
+                        <li class=\"nav-item\"><a class=\"nav-link\" href=\"Produto.html\">Produtos</a></li>
+                        <li class=\"nav-item\"><a class=\"nav-link active\" href=\"Nota.html\">Nota</a></li>
+                        <li class=\"nav-item\"><a class=\"nav-link\" href=\"Funcionario.html\">Funcionário</a></li>
+                        <li class=\"nav-item\"><a class=\"nav-link\" href=\"Triangulo.html\">Triângulo</a></li>
+                    </ul>
+                </div>
             </div>
         </nav>
 
-        $resultado
-        
-        <div class=\"mt-5 p-4 bg-dark text-white text-center\">
-            <p>Feito por Danilo Paiva, Kelwin Marinho e Ruan Zanini</p>
-        </div>
-        
+        <header class=\"hero-section\">
+            <div class=\"container text-center\">
+                <h1 class=\"display-4 fw-bold\">Resultado Escolar</h1>
+                <p class=\"lead\">Confira a média e a situação final do aluno</p>
+            </div>
+        </header>
+
+        <main class=\"container mb-5\">
+            <div class=\"row justify-content-center\">
+                <div class=\"col-md-6 col-lg-5\">
+                    <div class=\"card result-card p-4 p-md-5 text-center\">
+                        $resultado
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class=\"footer text-center\">
+            <div class=\"container\">
+                <p class=\"mb-0\">Feito por</p>
+                <p class=\"fw-bold\">Danilo Paiva, Kelwin Marinho e Ruan Zanini</p>
+            </div>
+        </footer>
     </body>
 </html>");
     return $response;
 });
-
+// Funcionario
 $app->post('/Funcionario', function ($request, $response) {
     $queryParams = $request->getParsedBody();
 
@@ -511,50 +565,68 @@ $app->post('/Funcionario', function ($request, $response) {
         <title>Projeto 1° bimestre/Funcionario</title>
         <meta charset=\"utf-8\">
         <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
+        <link rel=\"stylesheet\" href=\"style.css\">
         <link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css\" rel=\"stylesheet\">
         <script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js\"></script>
+        <style>
+            :root { --bg-light: #f0f2f5; --primary-finance: #e67e22; --primary-finance-hover: #f39c12; }
+            body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+            .hero-section { background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); padding: 4rem 0; color: white; text-align: center; margin-bottom: 3rem; }
+            .navbar { box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+            .result-card { background: white; border: none; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border-top: 8px solid var(--primary-finance); }
+            .btn-calc { background-color: var(--primary-finance); color: white !important; border: 2px solid var(--primary-finance); font-weight: bold; padding: 0.8rem; transition: all 0.2s ease; border-radius: 50px; }
+            .btn-calc:hover { background-color: var(--primary-finance-hover); border-color: var(--primary-finance); transform: scale(1.02); color: white !important; }
+            .footer { background-color: #212529; color: #ced4da; padding: 2rem 0; margin-top: auto; }
+        </style>
     </head>
-    <body>
-        <div class=\"p-5 bg-primary text-white text-center\">
-            <h1>Projeto 1° Bimestre</h1>
-            <p>Calcule o salário final do funcionário</p> 
-        </div>
-        <nav class=\"navbar navbar-expand-sm bg-dark navbar-dark\">
-            <div class=\"container-fluid\">
-                <ul class=\"navbar-nav\">
-                <li class=\"nav-item\">
-                    <a class=\"nav-link\" href=\"pagInicial.html\">Inicio</a>
-                </li>
-                <li class=\"nav-item\">
-                    <a class=\"nav-link\" href=\"IMC.html\">IMC</a>
-                </li>
-                <li class=\"nav-item\">
-                    <a class=\"nav-link\" href=\"Produto.html\">Produtos</a>
-                </li>
-                <li class=\"nav-item\">
-                    <a class=\"nav-link\" href=\"Nota.html\">Nota</a>
-                </li>
-                <li class=\"nav-item\">
-                    <a class=\"nav-link active\" href=\"Funcionario.html\">Funcionário</a>
-                </li>
-                <li class=\"nav-item\">
-                    <a class=\"nav-link\" href=\"Triangulo.html\">Triângulo</a>
-                </li>
-                </ul>
+    <body class=\"d-flex flex-column min-vh-100\">
+        <nav class=\"navbar navbar-expand-sm navbar-dark bg-dark sticky-top\">
+            <div class=\"container\">
+                <a class=\"navbar-brand\" href=\"pagInicial.html\">Projeto 1°B</a>
+                <button class=\"navbar-toggler\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#navbarNav\">
+                    <span class=\"navbar-toggler-icon\"></span>
+                </button>
+                <div class=\"collapse navbar-collapse\" id=\"navbarNav\">
+                    <ul class=\"navbar-nav ms-auto\">
+                        <li class=\"nav-item\"><a class=\"nav-link\" href=\"pagInicial.html\">Início</a></li>
+                        <li class=\"nav-item\"><a class=\"nav-link\" href=\"IMC.html\">IMC</a></li>
+                        <li class=\"nav-item\"><a class=\"nav-link\" href=\"Produto.html\">Produtos</a></li>
+                        <li class=\"nav-item\"><a class=\"nav-link\" href=\"Nota.html\">Nota</a></li>
+                        <li class=\"nav-item\"><a class=\"nav-link active\" href=\"Funcionario.html\">Funcionário</a></li>
+                        <li class=\"nav-item\"><a class=\"nav-link\" href=\"Triangulo.html\">Triângulo</a></li>
+                    </ul>
+                </div>
             </div>
         </nav>
 
-        $resultado
-        
-        <div class=\"mt-5 p-4 bg-dark text-white text-center\">
-            <p>Feito por Danilo Paiva, Kelwin Marinho e Ruan Zanini</p>
-        </div>
-        
+        <header class=\"hero-section\">
+            <div class=\"container text-center\">
+                <h1 class=\"display-4 fw-bold\">Cálculo de Salário</h1>
+                <p class=\"lead\">Calcule o salário final com horas extras</p>
+            </div>
+        </header>
+
+        <main class=\"container mb-5\">
+            <div class=\"row justify-content-center\">
+                <div class=\"col-md-6 col-lg-5\">
+                    <div class=\"card result-card p-4 p-md-5 text-center\">
+                        $resultado
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class=\"footer text-center\">
+            <div class=\"container\">
+                <p class=\"mb-0\">Desenvolvido por</p>
+                <p class=\"fw-bold\">Danilo Paiva, Kelwin Marinho e Ruan Zanini</p>
+            </div>
+        </footer>
     </body>
 </html>");
     return $response;
 });
-
+// Triangulo
 $app->get('/Triangulo', function ($request, $response) {
     $queryParams = $request->getQueryParams();
 
@@ -635,45 +707,63 @@ $app->get('/Triangulo', function ($request, $response) {
         <title>Projeto 1° bimestre/Triangulo</title>
         <meta charset=\"utf-8\">
         <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
+        <link rel=\"stylesheet\" href=\"style.css\">
         <link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css\" rel=\"stylesheet\">
         <script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js\"></script>
+        <style>
+            :root { --bg-light: #f0f2f5; --primary-math: #9b59b6; --primary-math-hover: #af7ac5; }
+            body { background-color: var(--bg-light); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+            .hero-section { background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); padding: 4rem 0; color: white; text-align: center; margin-bottom: 3rem; }
+            .navbar { box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+            .result-card { background: white; border: none; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border-top: 8px solid var(--primary-math); }
+            .btn-calc { background-color: var(--primary-math); color: white !important; border: 2px solid var(--primary-math); font-weight: bold; padding: 0.8rem; transition: all 0.2s ease; border-radius: 50px; }
+            .btn-calc:hover { background-color: var(--primary-math-hover); border-color: var(--primary-math); transform: scale(1.02); color: white !important; }
+            .footer { background-color: #212529; color: #ced4da; padding: 2rem 0; margin-top: auto; }
+        </style>
     </head>
-    <body>
-        <div class=\"p-5 bg-primary text-white text-center\">
-            <h1>Projeto 1° Bimestre</h1>
-            <p>saiba o tipo, a área e perimetro de um triângulo</p> 
-        </div>
-        <nav class=\"navbar navbar-expand-sm bg-dark navbar-dark\">
-            <div class=\"container-fluid\">
-                <ul class=\"navbar-nav\">
-                <li class=\"nav-item\">
-                    <a class=\"nav-link\" href=\"pagInicial.html\">Inicio</a>
-                </li>
-                <li class=\"nav-item\">
-                    <a class=\"nav-link\" href=\"IMC.html\">IMC</a>
-                </li>
-                <li class=\"nav-item\">
-                    <a class=\"nav-link\" href=\"Produto.html\">Produtos</a>
-                </li>
-                <li class=\"nav-item\">
-                    <a class=\"nav-link\" href=\"Nota.html\">Nota</a>
-                </li>
-                <li class=\"nav-item\">
-                    <a class=\"nav-link\" href=\"Funcionario.html\">Funcionário</a>
-                </li>
-                <li class=\"nav-item\">
-                    <a class=\"nav-link active\" href=\"Triangulo.html\">Triângulo</a>
-                </li>
-                </ul>
+    <body class=\"d-flex flex-column min-vh-100\">
+        <nav class=\"navbar navbar-expand-sm navbar-dark bg-dark sticky-top\">
+            <div class=\"container\">
+                <a class=\"navbar-brand\" href=\"pagInicial.html\">Projeto 1°B</a>
+                <button class=\"navbar-toggler\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#navbarNav\">
+                    <span class=\"navbar-toggler-icon\"></span>
+                </button>
+                <div class=\"collapse navbar-collapse\" id=\"navbarNav\">
+                    <ul class=\"navbar-nav ms-auto\">
+                        <li class=\"nav-item\"><a class=\"nav-link\" href=\"pagInicial.html\">Início</a></li>
+                        <li class=\"nav-item\"><a class=\"nav-link\" href=\"IMC.html\">IMC</a></li>
+                        <li class=\"nav-item\"><a class=\"nav-link\" href=\"Produto.html\">Produtos</a></li>
+                        <li class=\"nav-item\"><a class=\"nav-link\" href=\"Nota.html\">Nota</a></li>
+                        <li class=\"nav-item\"><a class=\"nav-link\" href=\"Funcionario.html\">Funcionário</a></li>
+                        <li class=\"nav-item\"><a class=\"nav-link active\" href=\"Triangulo.html\">Triângulo</a></li>
+                    </ul>
+                </div>
             </div>
         </nav>
 
-        $resultado
-        
-        <div class=\"mt-5 p-4 bg-dark text-white text-center\">
-            <p>Feito por Danilo Paiva, Kelwin Marinho e Ruan Zanini</p>
-        </div>
-        
+        <header class=\"hero-section\">
+            <div class=\"container text-center\">
+                <h1 class=\"display-4 fw-bold\">Análise de Triângulos</h1>
+                <p class=\"lead\">Descubra o tipo, área e perímetro do triângulo</p>
+            </div>
+        </header>
+
+        <main class=\"container mb-5\">
+            <div class=\"row justify-content-center\">
+                <div class=\"col-md-6 col-lg-5\">
+                    <div class=\"card result-card p-4 p-md-5 text-center\">
+                        $resultado
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class=\"footer text-center\">
+            <div class=\"container\">
+                <p class=\"mb-0\">Desenvolvido por</p>
+                <p class=\"fw-bold\">Danilo Paiva, Kelwin Marinho e Ruan Zanini</p>
+            </div>
+        </footer>
     </body>
 </html>");
     return $response;

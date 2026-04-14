@@ -1,67 +1,165 @@
 <!DOCTYPE html>
-<html lang ="pt-br">
+<html lang="pt-br">
     <head>
-        <title>Projeto 1° bimestre/Nota</title>
+        <title>Projeto 1° Bimestre / Notas</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="style.css">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <style>
+            :root {
+                --bg-light: #f0f2f5;
+                --primary-edu: #f1c40f;
+                --primary-edu-hover: #f3cf2f;
+            }
+            body {
+                background-color: var(--bg-light);
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+            .hero-section {
+                background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+                padding: 3rem 0;
+                color: white;
+                text-align: center;
+                margin-bottom: 3rem;
+            }
+            .navbar {
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .form-card {
+                background: white;
+                border: none;
+                border-radius: 20px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+                border-top: 8px solid var(--primary-edu);
+                transition: transform 0.3s ease;
+            }
+            .form-card:hover {
+                transform: translateY(-5px);
+            }
+            .btn-calc {
+                background-color: var(--primary-edu);
+                color: #333 !important;
+                border: 2px solid var(--primary-edu);
+                font-weight: bold;
+                padding: 0.8rem;
+                transition: all 0.2s ease;
+            }
+            .btn-calc:hover {
+                background-color: var(--primary-edu-hover);
+                border-color: var(--primary-edu);
+                transform: scale(1.02);
+                color: #333 !important;
+            }
+            .btn-calc:active {
+                transform: scale(0.98);
+            }
+            .input-group-text {
+                background-color: #f8f9fa;
+                font-weight: 500;
+                color: #666;
+                border-right: none;
+            }
+            .form-control {
+                border-left: none;
+            }
+            .footer {
+                background-color: #212529;
+                color: #ced4da;
+                padding: 2rem 0;
+                margin-top: auto;
+            }
+        </style>
     </head>
     <body>
-        <div class="p-5 bg-primary text-white text-center">
-            <h1>Projeto 1° Bimestre</h1>
-            <p>Calcule a situação do aluno</p> 
-        </div>
-        <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
-            <div class="container-fluid">
-                <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link" href="pagInicial.html">Inicio</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="IMC.html">IMC</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="Produto.html">Produtos</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="Nota.html">Nota</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="Funcionario.html">Funcionário</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="Triangulo.html">Triângulo</a>
-                </li>
-                </ul>
+        <nav class="navbar navbar-expand-sm navbar-dark bg-dark sticky-top">
+            <div class="container">
+                <a class="navbar-brand" href="pagInicial.html">Projeto 1°B</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="pagInicial.html">Início</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="IMC.html">IMC</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="Produto.html">Produtos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="Nota.html">Nota</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="Funcionario.html">Funcionário</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="Triangulo.html">Triângulo</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </nav>
 
-        <h3 class="px-5 my-5">Situação Aluno</h3>
-        <div class="container p-5 my-5 bg-light border">
-            <form action="/Nota" method="get" class="was-validated">
-                <div class="input-group">
-                    <span class="input-group-text">Nome</span>
-                    <input type="text" class="form-control" placeholder="Insira o nome" name="nome" required>
-                </div>
-                <br>
-                <div class="input-group">
-                    <span class="input-group-text">1° Nota</span>
-                    <input type="number" step="0.01" class="form-control" placeholder="ex: 7,0" name="nota1" required>
-                </div>
-                <br>
-                <div class="input-group">
-                    <span class="input-group-text">2° Nota</span>
-                    <input type="number" step="0.01" class="form-control" placeholder="ex: 8,0" name="nota2" required>
-                </div>
-                <br>
-                <button type="submit" class="btn btn-primary">Calcular</button>
-            </form>
-        </div>
+        <header class="hero-section">
+            <div class="container">
+                <h1 class="display-5 fw-bold">Situação do Aluno</h1>
+                <p class="lead">Calcule a média e descubra a situação final do estudante</p>
+            </div>
+        </header>
 
-        <div class="mt-5 p-4 bg-dark text-white text-center">
-            <p>Feito por Danilo Paiva, Kelwin Marinho e Ruan Zanini</p>
-        </div>
-        
+        <main class="container mb-5">
+            <div class="row justify-content-center">
+                <div class="col-md-6 col-lg-5">
+                    <div class="card form-card p-4 p-md-5">
+                        <div class="text-center mb-4">
+                            <h4 class="fw-bold text-dark">Boletim Escolar</h4>
+                            <p class="text-muted small">Insira o nome e as notas para análise</p>
+                        </div>
+
+                        <form action="/Nota" method="get" class="was-validated">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Nome do Aluno</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">🧑‍🎓</span>
+                                    <input type="text" class="form-control" placeholder="Ex: Ana Paula" name="nome" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">1ª Nota</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">📝</span>
+                                    <input type="number" step="0.01" class="form-control" placeholder="Ex: 8.5" name="nota1" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">2ª Nota</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">📝</span>
+                                    <input type="number" step="0.01" class="form-control" placeholder="Ex: 7.0" name="nota2" required>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-calc w-100 rounded-pill">Verificar Situação</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer text-center">
+            <div class="container">
+                <p class="mb-0">Feito por</p>
+                <p class="fw-bold">Danilo Paiva, Kelwin Marinho e Ruan Zanini</p>
+            </div>
+        </footer>
     </body>
 </html>
