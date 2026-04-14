@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <title>Portal de Ferramentas - Versão Moderna</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <style>
+            :root {
+                --primary-dark: #1a1a2e;
+                --accent-color: #00d2ff;
+                --glass-bg: rgba(255, 255, 255, 0.1);
+                --text-light: #e0e0e0;
+            }
+            body {
+                background: radial-gradient(circle at top right, #1a1a2e, #16213e);
+                color: var(--text-light);
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+            .navbar {
+                background: rgba(26, 26, 46, 0.8) !important;
+                backdrop-filter: blur(10px);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            .navbar-brand {
+                font-weight: 800;
+                letter-spacing: -1px;
+                color: var(--accent-color) !important;
+            }
+            .hero-modern {
+                padding: 6rem 0 4rem;
+                text-align: center;
+            }
+            .hero-modern h1 {
+                font-size: 3.5rem;
+                font-weight: 900;
+                background: linear-gradient(to right, #fff, var(--accent-color));
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                margin-bottom: 1.5rem;
+            }
+            .glass-card {
+                background: var(--glass-bg);
+                backdrop-filter: blur(15px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 24px;
+                transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                cursor: pointer;
+                text-decoration: none;
+                color: inherit;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+            }
+            .glass-card:hover {
+                transform: translateY(-15px) scale(1.02);
+                background: rgba(255, 255, 255, 0.15);
+                border-color: var(--accent-color);
+                box-shadow: 0 20px 40px rgba(0, 210, 255, 0.2);
+            }
+            .icon-box {
+                width: 60px;
+                height: 60px;
+                background: linear-gradient(45deg, var(--accent-color), #3a7bd5);
+                border-radius: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+                margin-bottom: 1.5rem;
+                color: white;
+            }
+            .card-title {
+                font-size: 1.25rem;
+                font-weight: 700;
+                margin-bottom: 0.75rem;
+            }
+            .card-text {
+                color: #b0b0b0;
+                font-size: 0.95rem;
+            }
+            .footer-modern {
+                margin-top: auto;
+                padding: 3rem 0;
+                background: rgba(0, 0, 0, 0.2);
+                border-top: 1px solid rgba(255, 255, 255, 0.05);
+                text-align: center;
+            }
+            .footer-modern p {
+                font-size: 0.9rem;
+                opacity: 0.7;
+            }
+            .footer-modern .names {
+                font-weight: 600;
+                color: var(--accent-color);
+            }
+        </style>
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+            <div class="container">
+                <a class="navbar-brand" href="novapag.html">CORE_SYSTEM</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item"><a class="nav-link active" href="novapag.html">Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link" href="IMC.html">Saúde</a></li>
+                        <li class="nav-item"><a class="nav-link" href="Produto.html">Inventário</a></li>
+                        <li class="nav-item"><a class="nav-link" href="Nota.html">Acadêmico</a></li>
+                        <li class="nav-item"><a class="nav-link" href="Funcionario.html">Financeiro</a></li>
+                        <li class="nav-item"><a class="nav-link" href="Triangulo.html">Geometria</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <header class="hero-modern">
+            <div class="container">
+                <h1>Hub de Cálculos</h1>
+                <p class="lead opacity-75">Uma interface minimalista para processamento de dados e análises lógicas.</p>
+            </div>
+        </header>
+
+        <main class="container mb-5">
+            <div class="row g-4">
+                <!-- IMC -->
+                <div class="col-md-4 col-sm-6">
+                    <a href="IMC.html" class="glass-card p-4">
+                        <div class="icon-box"><i class="bi bi-heart-pulse"></i></div>
+                        <h5 class="card-title">Calculadora IMC</h5>
+                        <p class="card-text">Análise de índice de massa corporal e classificação de saúde.</p>
+                    </a>
+                </div>
+                <!-- Produtos -->
+                <div class="col-md-4 col-sm-6">
+                    <a href="Produto.html" class="glass-card p-4">
+                        <div class="icon-box"><i class="bi bi-box-seam"></i></div>
+                        <h5 class="card-title">Gestão de Produtos</h5>
+                        <p class="card-text">Controle de estoque, precificação e valoração total de ativos.</p>
+                    </a>
+                </div>
+                <!-- Notas -->
+                <div class="col-md-4 col-sm-6">
+                    <a href="Nota.html" class="glass-card p-4">
+                        <div class="icon-box"><i class="bi bi-mortarboard"></i></div>
+                        <h5 class="card-title">Situação Escolar</h5>
+                        <p class="card-text">Processamento de médias acadêmicas e status de aprovação.</p>
+                    </a>
+                </div>
+                <!-- Funcionário -->
+                <div class="col-md-4 col-sm-6">
+                    <a href="Funcionario.html" class="glass-card p-4">
+                        <div class="icon-box"><i class="bi bi-cash-coin"></i></div>
+                        <h5 class="card-title">Cálculo Salarial</h5>
+                        <p class="card-text">Cálculo de remuneração líquida com processamento de horas extras.</p>
+                    </a>
+                </div>
+                <!-- Triângulo -->
+                <div class="col-md-4 col-sm-6">
+                    <a href="Triangulo.html" class="glass-card p-4">
+                        <div class="icon-box"><i class="bi bi-triangle"></i></div>
+                        <h5 class="card-title">Análise Geométrica</h5>
+                        <p class="card-text">Classificação de triângulos e cálculos de área e perímetro.</p>
+                    </a>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer-modern">
+            <div class="container">
+                <p>Desenvolvido por</p>
+                <p class="names">Danilo Paiva, Kelwin Marinho e Ruan Zanini</p>
+                <p class="mt-2" style="font-size: 0.7rem;">&copy; 2026 CORE_SYSTEM Interface</p>
+            </div>
+        </footer>
+    </body>
+</html>

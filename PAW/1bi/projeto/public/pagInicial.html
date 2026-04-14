@@ -1,86 +1,225 @@
 <!DOCTYPE html>
-<html lang ="pt-br">
+<html lang="pt-br">
     <head>
-        <title>Projeto 1° bimestre</title>
+        <title>Projeto 1° Bimestre</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="style.css">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <style>
+            :root {
+                --bg-light: #f0f2f5;
+            }
+            body {
+                background-color: var(--bg-light);
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            }
+            .hero-section {
+                background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+                padding: 4rem 0;
+                color: white;
+                margin-bottom: 3rem;
+            }
+            .card-feature {
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+                border: none;
+                height: 100%;
+                border-radius: 15px;
+                overflow: hidden;
+            }
+            .card-feature:hover {
+                transform: translateY(-10px);
+                box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+            }
+            .navbar {
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .footer {
+                background-color: #212529;
+                color: #ced4da;
+                padding: 2rem 0;
+                margin-top: 4rem;
+            }
+            /* Cores customizadas por categoria */
+            .category-health { border-top: 8px solid #2ecc71; }
+            .category-inventory { border-top: 8px solid #3498db; }
+            .category-education { border-top: 8px solid #f1c40f; }
+            .category-finance { border-top: 8px solid #e67e22; }
+            .category-math { border-top: 8px solid #9b59b6; }
+
+            /* Botões Genéricos e Hover */
+            .btn-custom {
+                color: white !important;
+                border: 2px solid transparent;
+                transition: all 0.2s ease;
+                font-weight: bold;
+            }
+            .btn-custom:hover {
+                transform: scale(1.02);
+                color: white !important;
+            }
+            .btn-custom:active {
+                transform: scale(0.98);
+            }
+
+            /* Cores específicas de botões e seus hovers */
+            .btn-health {
+                background-color: #2ecc71;
+                border-color: #2ecc71;
+            }
+            .btn-health:hover {
+                background-color: #58d68d;
+                border-color: #2ecc71;
+            }
+
+            .btn-inventory {
+                background-color: #3498db;
+                border-color: #3498db;
+            }
+            .btn-inventory:hover {
+                background-color: #5dade2;
+                border-color: #3498db;
+            }
+
+            .btn-education {
+                background-color: #f1c40f;
+                border-color: #f1c40f;
+                color: #333 !important;
+            }
+            .btn-education:hover {
+                background-color: #f3cf2f;
+                border-color: #f1c40f;
+                color: #333 !important;
+            }
+
+            .btn-finance {
+                background-color: #e67e22;
+                border-color: #e67e22;
+            }
+            .btn-finance:hover {
+                background-color: #f39c12;
+                border-color: #e67e22;
+            }
+
+            .btn-math {
+                background-color: #9b59b6;
+                border-color: #9b59b6;
+            }
+            .btn-math:hover {
+                background-color: #af7ac5;
+                border-color: #9b59b6;
+            }
+        </style>
     </head>
     <body>
-        <div class="p-5 bg-primary text-white text-center">
-            <h1>Projeto 1° Bimestre</h1>
-            <p>página incial</p> 
-        </div>
-        <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
-            <div class="container-fluid">
-                <ul class="navbar-nav"> 
-                <li class="nav-item">
-                    <a class="nav-link active" href="pagInicial.html">Inicio</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="IMC.html">IMC</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="Produto.html">Produtos</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="Nota.html">Nota</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="Funcionario.html">Funcionário</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="Triangulo.html">Triângulo</a>
-                </li>
-                </ul>
+        <nav class="navbar navbar-expand-sm navbar-dark bg-dark sticky-top">
+            <div class="container">
+                <a class="navbar-brand" href="pagInicial.html">Projeto 1°B</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="pagInicial.html">Início</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="IMC.html">IMC</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="Produto.html">Produtos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="Nota.html">Nota</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="Funcionario.html">Funcionário</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="Triangulo.html">Triângulo</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </nav>
 
-        <div class="row m-4">
-            <div class="col container-fluid m-2 p-4 bg-light border rounded d-flex flex-column">
-                <h5>Calculadora IMC</h5>
-                <br>
-                <div class="mt-auto text-center">
-                    <a class="btn btn-outline-success" href="IMC.html">testar</a>
-                </div>
+        <header class="hero-section text-center">
+            <div class="container">
+                <h1 class="display-4 fw-bold">Projeto 1° Bimestre</h1>
+                <p class="lead">Explore nossas ferramentas especializadas de cálculo e análise.</p>
             </div>
-            
-            <div class="col container-fluid m-2 p-4 bg-light border rounded d-flex flex-column">
-                <h5>Veja Nossos Produtos</h5>
-                <br>
-                <div class="mt-auto text-center">
-                    <a class="btn btn-outline-success" href="Produto.html">testar</a>
-                </div>
-            </div>
+        </header>
 
-            <div class="col container-fluid m-2 p-4 bg-light border rounded d-flex flex-column">
-                <h5>Situação Aluno</h5>
-                <br>
-                <div class="mt-auto text-center">
-                    <a class="btn btn-outline-success" href="Nota.html">testar</a>
+        <main class="container">
+            <div class="row g-4">
+                <div class="col-md-4 col-sm-6">
+                    <div class="card card-feature category-health p-4 text-center shadow-sm">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold">Calculadora IMC</h5>
+                            <p class="card-text text-muted">Saúde e Bem-estar: Calcule seu IMC e verifique sua categoria.</p>
+                            <div class="mt-auto">
+                                <a class="btn btn-custom btn-health w-100 rounded-pill" href="IMC.html">Acessar Tool</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="col container-fluid m-2 p-4 bg-light border rounded d-flex flex-column">
-                <h5>Calcule Seu Salário Final</h5>
-                <br>
-                <div class="mt-auto text-center">
-                    <a class="btn btn-outline-success" href="Funcionario.html">testar</a>
+                <div class="col-md-4 col-sm-6">
+                    <div class="card card-feature category-inventory p-4 text-center shadow-sm">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold">Gestão de Produtos</h5>
+                            <p class="card-text text-muted">Logística: Gerencie seu estoque e visualize o valor total.</p>
+                            <div class="mt-auto">
+                                <a class="btn btn-custom btn-inventory w-100 rounded-pill" href="Produto.html">Acessar Tool</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="col container-fluid m-2 p-4 bg-light border rounded d-flex flex-column">
-                <h5>Tipo, Área e Perimetro de um Triangulo</h5>
-                <br>
-                <div class="mt-auto text-center">
-                    <a class="btn btn-outline-success" href="Triangulo.html">testar</a>
-                </div>
-            </div>
-        </div>
-        <br>
 
-        <div class="mt-5 p-4 bg-dark text-white text-center">
-            <p>Feito por Danilo Paiva, Kelwin Marinho e Ruan Zanini</p>
-        </div>
+                <div class="col-md-4 col-sm-6">
+                    <div class="card card-feature category-education p-4 text-center shadow-sm">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold">Situação do Aluno</h5>
+                            <p class="card-text text-muted">Educação: Processe notas e descubra a situação final.</p>
+                            <div class="mt-auto">
+                                <a class="btn btn-custom btn-education w-100 rounded-pill" href="Nota.html">Acessar Tool</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 col-sm-6">
+                    <div class="card card-feature category-finance p-4 text-center shadow-sm">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold">Cálculo Salarial</h5>
+                            <p class="card-text text-muted">Finanças: Calcule o salário final com horas extras.</p>
+                            <div class="mt-auto">
+                                <a class="btn btn-custom btn-finance w-100 rounded-pill" href="Funcionario.html">Acessar Tool</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 col-sm-6">
+                    <div class="card card-feature category-math p-4 text-center shadow-sm">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold">Análise de Triângulos</h5>
+                            <p class="card-text text-muted">Geometria: Classifique triângulos e calcule área e perímetro.</p>
+                            <div class="mt-auto">
+                                <a class="btn btn-custom btn-math w-100 rounded-pill" href="Triangulo.html">Acessar Tool</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer text-center">
+            <div class="container">
+                <p class="mb-0">Feito por</p>
+                <p class="fw-bold">Danilo Paiva, Kelwin Marinho e Ruan Zanini</p>
+            </div>
+        </footer>
     </body>
 </html>

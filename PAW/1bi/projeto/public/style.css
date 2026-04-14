@@ -1,0 +1,87 @@
+:root {
+    --bg-light: #f0f2f5;
+    --primary-health: #2ecc71;
+    --primary-health-hover: #58d68d;
+    --primary-inventory: #3498db;
+    --primary-inventory-hover: #5dade2;
+    --primary-edu: #f1c40f;
+    --primary-edu-hover: #f3cf2f;
+    --primary-finance: #e67e22;
+    --primary-finance-hover: #f39c12;
+    --primary-math: #9b59b6;
+    --primary-math-hover: #af7ac5;
+}
+
+body {
+    background-color: var(--bg-light);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.hero-section {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    padding: 3rem 0;
+    color: white;
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.form-card, .result-card {
+    background: white;
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease;
+}
+
+.form-card:hover, .result-card:hover {
+    transform: translateY(-5px);
+}
+
+.btn-calc {
+    color: white !important;
+    border: 2px solid transparent;
+    font-weight: bold;
+    padding: 0.8rem;
+    transition: all 0.2s ease;
+    border-radius: 50px;
+}
+
+.btn-calc:hover {
+    transform: scale(1.02);
+    color: white !important;
+}
+
+/* Temas de Cores */
+.theme-health { border-top: 8px solid var(--primary-health); }
+.theme-health .btn-calc { background-color: var(--primary-health); border-color: var(--primary-health); }
+.theme-health .btn-calc:hover { background-color: var(--primary-health-hover); }
+
+.theme-inventory { border-top: 8px solid var(--primary-inventory); }
+.theme-inventory .btn-calc { background-color: var(--primary-inventory); border-color: var(--primary-inventory); }
+.theme-inventory .btn-calc:hover { background-color: var(--primary-inventory-hover); }
+
+.theme-edu { border-top: 8px solid var(--primary-edu); }
+.theme-edu .btn-calc { background-color: var(--primary-edu); border-color: var(--primary-edu); color: #333 !important; }
+.theme-edu .btn-calc:hover { background-color: var(--primary-edu-hover); color: #333 !important; }
+
+.theme-finance { border-top: 8px solid var(--primary-finance); }
+.theme-finance .btn-calc { background-color: var(--primary-finance); border-color: var(--primary-finance); }
+.theme-finance .btn-calc:hover { background-color: var(--primary-finance-hover); }
+
+.theme-math { border-top: 8px solid var(--primary-math); }
+.theme-math .btn-calc { background-color: var(--primary-math); border-color: var(--primary-math); }
+.theme-math .btn-calc:hover { background-color: var(--primary-math-hover); }
+
+.footer {
+    background-color: #212529;
+    color: #ced4da;
+    padding: 2rem 0;
+    margin-top: auto;
+}

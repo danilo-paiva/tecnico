@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <title>Painel de Ferramentas - Projeto 1°B</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <style>
+            :root {
+                --primary-dark: #1a1a2e;
+                --accent-color: #e94560;
+                --glass-bg: rgba(255, 255, 255, 0.1);
+            }
+            body {
+                background: radial-gradient(circle at top right, #2d3436, #000000);
+                color: #ffffff;
+                font-family: 'Inter', system-ui, -apple-system, sans-serif;
+                min-height: 100vh;
+            }
+            .navbar-custom {
+                background: rgba(0, 0, 0, 0.8);
+                backdrop-filter: blur(10px);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            .glass-card {
+                background: var(--glass-bg);
+                backdrop-filter: blur(12px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 20px;
+                transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                color: white;
+            }
+            .glass-card:hover {
+                transform: scale(1.05);
+                background: rgba(255, 255, 255, 0.2);
+                box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+                border-color: var(--accent-color);
+            }
+            .hero-minimal {
+                padding: 6rem 0 3rem;
+                text-align: center;
+            }
+            .hero-minimal h1 {
+                font-weight: 800;
+                letter-spacing: -2px;
+                background: linear-gradient(to right, #fff, #888);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+            .btn-glass {
+                background: var(--accent-color);
+                color: white;
+                border: none;
+                border-radius: 12px;
+                font-weight: 600;
+                padding: 10px 20px;
+                transition: 0.3s;
+            }
+            .btn-glass:hover {
+                background: #ff5e78;
+                box-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
+                color: white;
+            }
+            .footer-dark {
+                background: rgba(0, 0, 0, 0.5);
+                padding: 3rem 0;
+                border-top: 1px solid rgba(255, 255, 255, 0.05);
+                margin-top: 5rem;
+            }
+            .icon-box {
+                font-size: 2.5rem;
+                margin-bottom: 1rem;
+                color: var(--accent-color);
+            }
+        </style>
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top">
+            <div class="container">
+                <a class="navbar-brand fw-bold" href="novapagE.html">PROJETO <span style="color: var(--accent-color);">1°B</span></a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item"><a class="nav-link" href="novapagE.html">Início</a></li>
+                        <li class="nav-item"><a class="nav-link" href="IMC.html">IMC</a></li>
+                        <li class="nav-item"><a class="nav-link" href="Produto.html">Produtos</a></li>
+                        <li class="nav-item"><a class="nav-link" href="Nota.html">Notas</a></li>
+                        <li class="nav-item"><a class="nav-link" href="Funcionario.html">Funcionário</a></li>
+                        <li class="nav-item"><a class="nav-link" href="Triangulo.html">Triângulo</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <header class="hero-minimal">
+            <div class="container">
+                <h1 class="display-3">Hub de Cálculos</h1>
+                <p class="lead text-secondary mx-auto" style="max-width: 600px;">
+                    Uma interface moderna e minimalista para acessar todas as ferramentas de análise do 1° Bimestre.
+                </p>
+            </div>
+        </header>
+
+        <main class="container">
+            <div class="row g-4 justify-content-center">
+                <!-- IMC -->
+                <div class="col-lg-3 col-md-6">
+                    <div class="card glass-card h-100 p-4 text-center">
+                        <div class="card-body">
+                            <div class="icon-box"><i class="bi bi-heart-pulse"></i></div>
+                            <h5 class="fw-bold">IMC</h5>
+                            <p class="text-secondary small">Análise de saúde e classificação de massa corporal.</p>
+                            <a href="IMC.html" class="btn btn-glass w-100">Abrir</a>
+                        </div>
+                    </div>
+                </div>
+                <!-- Produtos -->
+                <div class="col-lg-3 col-md-6">
+                    <div class="card glass-card h-100 p-4 text-center">
+                        <div class="card-body">
+                            <div class="icon-box"><i class="bi bi-box-seam"></i></div>
+                            <h5 class="fw-bold">Produtos</h5>
+                            <p class="text-secondary small">Controle de estoque e gestão de valor total.</p>
+                            <a href="Produto.html" class="btn btn-glass w-100">Abrir</a>
+                        </div>
+                    </div>
+                </div>
+                <!-- Notas -->
+                <div class="col-lg-3 col-md-6">
+                    <div class="card glass-card h-100 p-4 text-center">
+                        <div class="card-body">
+                            <div class="icon-box"><i class="bi bi-journal-check"></i></div>
+                            <h5 class="fw-bold">Notas</h5>
+                            <p class="text-secondary small">Processamento de médias e situação acadêmica.</p>
+                            <a href="Nota.html" class="btn btn-glass w-100">Abrir</a>
+                        </div>
+                    </div>
+                </div>
+                <!-- Funcionário -->
+                <div class="col-lg-3 col-md-6">
+                    <div class="card glass-card h-100 p-4 text-center">
+                        <div class="card-body">
+                            <div class="icon-box"><i class="bi bi-cash-stack"></i></div>
+                            <h5 class="fw-bold">Salarial</h5>
+                            <p class="text-secondary small">Cálculo de proventos com horas extras.</p>
+                            <a href="Funcionario.html" class="btn btn-glass w-100">Abrir</a>
+                        </div>
+                    </div>
+                </div>
+                <!-- Triângulo -->
+                <div class="col-lg-3 col-md-6">
+                    <div class="card glass-card h-100 p-4 text-center">
+                        <div class="card-body">
+                            <div class="icon-box"><i class="bi bi-triangle"></i></div>
+                            <h5 class="fw-bold">Triângulo</h5>
+                            <p class="text-secondary small">Geometria: áreas, perímetros e tipos.</p>
+                            <a href="Triangulo.html" class="btn btn-glass w-100">Abrir</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer-dark text-center">
+            <div class="container">
+                <p class="text-secondary mb-1">Desenvolvido por</p>
+                <p class="fw-bold">Danilo Paiva, Kelwin Marinho & Ruan Zanini</p>
+            </div>
+        </footer>
+    </body>
+</html>

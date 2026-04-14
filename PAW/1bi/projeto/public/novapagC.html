@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <title>Nova Página - Projeto 1° Bimestre</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="style.css">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <style>
+            :root {
+                --primary-color: #2c3e50;
+                --accent-color: #e74c3c;
+                --bg-gradient: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
+                --card-bg: rgba(255, 255, 255, 0.9);
+            }
+            body {
+                background: var(--bg-gradient);
+                font-family: 'Poppins', sans-serif;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+            .navbar-custom {
+                background-color: var(--primary-color) !important;
+                padding: 1rem 2rem;
+                transition: all 0.3s ease;
+            }
+            .hero-minimal {
+                padding: 5rem 0;
+                text-align: center;
+                color: var(--primary-color);
+            }
+            .hero-minimal h1 {
+                font-weight: 800;
+                letter-spacing: -1px;
+                margin-bottom: 1.5rem;
+                position: relative;
+                display: inline-block;
+            }
+            .hero-minimal h1::after {
+                content: '';
+                position: absolute;
+                bottom: -10px;
+                left: 25%;
+                width: 50%;
+                height: 4px;
+                background: var(--accent-color);
+                border-radius: 2px;
+            }
+            .tool-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 2rem;
+                padding: 2rem 0;
+            }
+            .glass-card {
+                background: var(--card-bg);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                border-radius: 24px;
+                padding: 2rem;
+                text-align: center;
+                transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                height: 100%;
+            }
+            .glass-card:hover {
+                transform: translateY(-15px) scale(1.03);
+                box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+                border-color: var(--accent-color);
+            }
+            .icon-circle {
+                width: 60px;
+                height: 60px;
+                background: var(--primary-color);
+                color: white;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto 1.5rem;
+                font-weight: bold;
+                font-size: 1.5rem;
+            }
+            .btn-modern {
+                background-color: var(--primary-color);
+                color: white !important;
+                border-radius: 12px;
+                padding: 0.8rem 2rem;
+                font-weight: 600;
+                text-decoration: none;
+                transition: all 0.3s ease;
+                display: inline-block;
+                border: none;
+            }
+            .btn-modern:hover {
+                background-color: var(--accent-color);
+                transform: translateX(5px);
+                box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+            }
+            .footer-modern {
+                margin-top: auto;
+                background: var(--primary-color);
+                color: #bdc3c7;
+                padding: 3rem 0;
+                text-align: center;
+            }
+            .footer-modern strong {
+                color: white;
+            }
+        </style>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-sm navbar-dark navbar-custom sticky-top">
+            <div class="container">
+                <a class="navbar-brand fw-bold" href="pagInicial.html">✨ Projeto 1°B</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item"><a class="nav-link text-white" href="pagInicial.html">Início</a></li>
+                        <li class="nav-item"><a class="nav-link text-white" href="IMC.html">IMC</a></li>
+                        <li class="nav-item"><a class="nav-link text-white" href="Produto.html">Produtos</a></li>
+                        <li class="nav-item"><a class="nav-link text-white" href="Nota.html">Nota</a></li>
+                        <li class="nav-item"><a class="nav-link text-white" href="Funcionario.html">Funcionário</a></li>
+                        <li class="nav-item"><a class="nav-link text-white" href="Triangulo.html">Triângulo</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <header class="hero-minimal">
+            <div class="container">
+                <h1>Laboratório de Cálculos</h1>
+                <p class="lead text-muted">Uma abordagem moderna para ferramentas de análise matemática e lógica.</p>
+            </div>
+        </header>
+
+        <main class="container">
+            <div class="tool-grid">
+                <!-- IMC -->
+                <div class="glass-card">
+                    <div>
+                        <div class="icon-circle">❤️</div>
+                        <h4 class="fw-bold mb-3">Análise de IMC</h4>
+                        <p class="text-muted mb-4">Avalie sua saúde corporal através do Índice de Massa Corporal com precisão.</p>
+                    </div>
+                    <a class="btn-modern" href="IMC.html">Calcular Agora</a>
+                </div>
+
+                <!-- Produtos -->
+                <div class="glass-card">
+                    <div>
+                        <div class="icon-circle">📦</div>
+                        <h4 class="fw-bold mb-3">Estoque Inteligente</h4>
+                        <p class="text-muted mb-4">Gestão simplificada de produtos, quantidades e valorização de inventário.</p>
+                    </div>
+                    <a class="btn-modern" href="Produto.html">Gerenciar Estoque</a>
+                </div>
+
+                <!-- Nota -->
+                <div class="glass-card">
+                    <div>
+                        <div class="icon-circle">🎓</div>
+                        <h4 class="fw-bold mb-3">Desempenho Acadêmico</h4>
+                        <p class="text-muted mb-4">Cálculo automático de médias escolares e verificação de situação final.</p>
+                    </div>
+                    <a class="btn-modern" href="Nota.html">Analisar Notas</a>
+                </div>
+
+                <!-- Funcionario -->
+                <div class="glass-card">
+                    <div>
+                        <div class="icon-circle">💰</div>
+                        <h4 class="fw-bold mb-3">Folha de Pagamento</h4>
+                        <p class="text-muted mb-4">Cálculos precisos de salários base e compensações de horas extras.</p>
+                    </div>
+                    <a class="btn-modern" href="Funcionario.html">Calcular Salário</a>
+                </div>
+
+                <!-- Triangulo -->
+                <div class="glass-card">
+                    <div>
+                        <div class="icon-circle">📐</div>
+                        <h4 class="fw-bold mb-3">Geometria Aplicada</h4>
+                        <p class="text-muted mb-4">Classificação de triângulos, perímetro e área calculados instantaneamente.</p>
+                    </div>
+                    <a class="btn-modern" href="Triangulo.html">Analisar Forma</a>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer-modern">
+            <div class="container">
+                <p class="mb-1">Desenvolvido por</p>
+                <p class="fw-bold mb-0">Danilo Paiva, Kelwin Marinho e Ruan Zanini</p>
+                <small class="opacity-50">&copy; 2026 Projeto Acadêmico</small>
+            </div>
+        </footer>
+    </body>
+</html>
