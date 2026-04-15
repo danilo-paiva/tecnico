@@ -37,7 +37,7 @@ namespace ConsoleApplication1
                 input = int.Parse(Console.ReadLine());
 
                 numero = input;
-                maiorDigito = 0;
+                maiorDigito = numero % 10;
 
                 if (input == 0)
                     continue;
