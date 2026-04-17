@@ -1,0 +1,16 @@
+C:\Users\Danilo\Desktop\GitHub\tecnico\PVB\1bi\projeto\obj\Debug\net5.0\projeto.csproj.AssemblyReference.cache
+C:\Users\Danilo\Desktop\GitHub\tecnico\PVB\1bi\projeto\obj\Debug\net5.0\projeto.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Danilo\Desktop\GitHub\tecnico\PVB\1bi\projeto\obj\Debug\net5.0\projeto.AssemblyInfoInputs.cache
+C:\Users\Danilo\Desktop\GitHub\tecnico\PVB\1bi\projeto\obj\Debug\net5.0\projeto.AssemblyInfo.cs
+C:\Users\Danilo\Desktop\GitHub\tecnico\PVB\1bi\projeto\obj\Debug\net5.0\projeto.csproj.CoreCompileInputs.cache
+C:\Users\Danilo\Desktop\GitHub\tecnico\PVB\1bi\projeto\bin\Debug\net5.0\projeto.exe
+C:\Users\Danilo\Desktop\GitHub\tecnico\PVB\1bi\projeto\bin\Debug\net5.0\projeto.deps.json
+C:\Users\Danilo\Desktop\GitHub\tecnico\PVB\1bi\projeto\bin\Debug\net5.0\projeto.runtimeconfig.json
+C:\Users\Danilo\Desktop\GitHub\tecnico\PVB\1bi\projeto\bin\Debug\net5.0\projeto.runtimeconfig.dev.json
+C:\Users\Danilo\Desktop\GitHub\tecnico\PVB\1bi\projeto\bin\Debug\net5.0\projeto.dll
+C:\Users\Danilo\Desktop\GitHub\tecnico\PVB\1bi\projeto\bin\Debug\net5.0\ref\projeto.dll
+C:\Users\Danilo\Desktop\GitHub\tecnico\PVB\1bi\projeto\bin\Debug\net5.0\projeto.pdb
+C:\Users\Danilo\Desktop\GitHub\tecnico\PVB\1bi\projeto\obj\Debug\net5.0\projeto.dll
+C:\Users\Danilo\Desktop\GitHub\tecnico\PVB\1bi\projeto\obj\Debug\net5.0\ref\projeto.dll
+C:\Users\Danilo\Desktop\GitHub\tecnico\PVB\1bi\projeto\obj\Debug\net5.0\projeto.pdb
+C:\Users\Danilo\Desktop\GitHub\tecnico\PVB\1bi\projeto\obj\Debug\net5.0\projeto.genruntimeconfig.cache

@@ -16,7 +16,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ConsoleApplication1
+namespace projeto
 {
     class Program
     {
@@ -91,9 +91,10 @@ namespace ConsoleApplication1
 
             float media = (qtdNaoPicos > 0) ? (somaNaoPicos) / (qtdNaoPicos * 1.0F) : 0;
             float porcentagemPicos = (qtdNumeros > 0) ? (qtdPicos / (qtdNumeros * 1.0F)) * 100 : 0;
+            string textoMaiorPico = (qtdPicos > 0) ? maiorDigitoPico.ToString("0") : "N/A";
 
             Console.WriteLine("Total de numeros picos: " + qtdPicos);
-            Console.WriteLine("Maior digito em picos: " + maiorDigitoPico);
+            Console.WriteLine("Maior digito em picos: " + textoMaiorPico);
             Console.WriteLine("Media não-picos: " + media.ToString("0.00"));
             Console.WriteLine("Porcentagem de picos: " + porcentagemPicos.ToString("0.00") + '%');
 
