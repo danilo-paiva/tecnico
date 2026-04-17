@@ -1,6 +1,6 @@
 /* *******************************************************************
 * Colegio Técnico Antônio Teixeira Fernandes (Univap)
-* Curso Técnico em Informática - Data de Entrega: 15/04/2026
+* Curso Técnico em Informática - Data de Entrega: 14/04/2026
 * Autores do Projeto: Danilo Paiva
 *                     Kelwin Mrinho
 * Turma: 2H
@@ -25,12 +25,7 @@ namespace ConsoleApplication1
             int qtdPicos = 0, qtdNaoPicos = 0, qtdNumeros = 0, maiorDigitoPico = 0, maiorDigito = 0, somaNaoPicos = 0;
             int input, numero;
             char condicao;
-            // flag ou variavel onde é guardado o estado do teste para descobrir se é numero pico, podendo assumir 
-            // 4 valores diferentes:
-            // 'c' - significa 'começo' que é o primeiro teste a ser feito no laço;
-            // 'n' - quer dizer que já foi enquadrado como não pico;
-            // '>' numeros crescendo, da direita à esquerda;
-            // '<' numeros diminuindo, da direita à esquerda.
+          
             do
             {
                 
@@ -48,19 +43,11 @@ namespace ConsoleApplication1
                     int digito = numero % 10;
                     int proxDigito = (numero / 10) % 10;
 
-                    // teste do maior digito do numero digitado
-                    // erro ingnorado : 120 nesse numero por exemplo o digito 1 foi ingnorado a partir do código existente
-                    // já que é levado em consideração o 'digito' e não o 'proxDigito', no entanto, esse erro não faz diferença 
-                    // no resultado final pois é impossível o digito mais à esquerda ser maior do que os outros à direita num número pico.
-
                     if (digito > maiorDigito)
                     {
                         maiorDigito = digito;
                     }
                     
-                    // a entrada aqui acontece de duas formas: seja por ter iniciado o laço (onde a flag = 'c') ou por estar 
-                    // em ordem crescente os números da direita à esquerda (onde flag = '>')
-                    // em caso de estar incializando e não entrar nesse if, o número automaticamente já é considerado não pico 
                     if (proxDigito > digito && condicao == 'c')
                     {
                         numero /= 10;
@@ -70,7 +57,6 @@ namespace ConsoleApplication1
                     {
                         numero /= 10;
                     }
-                    // Ocorre mudança de direção, antes crescente, para decrescente
                     else if (proxDigito < digito && condicao == '>')
                     {
                         numero /= 10;
@@ -89,7 +75,6 @@ namespace ConsoleApplication1
                 if (condicao == '<')
                 {
                     qtdPicos++;
-                    // teste que compara o maior digito do numero pico com o maior digito do numero atual, agora sabendo que ele é pico
                     if (maiorDigito > maiorDigitoPico)
                     {
                         maiorDigitoPico = maiorDigito;
@@ -104,7 +89,6 @@ namespace ConsoleApplication1
 
             } while (input != 0);
 
-            // Saídas
             float media = (qtdNaoPicos > 0) ? (somaNaoPicos) / (qtdNaoPicos * 1.0F) : 0;
             float porcentagemPicos = (qtdNumeros > 0) ? (qtdPicos / (qtdNumeros * 1.0F)) * 100 : 0;
 

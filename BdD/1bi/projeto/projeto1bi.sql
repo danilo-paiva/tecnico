@@ -1,30 +1,33 @@
 create database sistemaCondominio;
-
 use sistemaCondominio;
 
-#pd usar?
-#autoincrement
-# tem que colocar o funcionario na ocorrencia?
 
 create table unidades(
 id_unidade int primary key,
-id_responsavel int not null,
-status_unidade varchar(255) not null,
-foreign key (id_responsavel) references moradores (id_morador)
+status_unidade varchar(255) not null
 );
 
 create table moradores(
 id_morador int primary key,
 nome_morador varchar(255) not null,
+cpf_morador int not null,
 id_unidade int not null,
 tipo varchar(255) not null,
 ativo boolean,
 foreign key (id_unidade) references unidades (id_unidade)
 );
 
+create table responsavel_unidade(
+id_morador int not null,
+id_unidade int not null,
+foreign key(id_morador) references moradores (id_morador),
+foreign key(id_unidade) references unidades (id_unidade)
+);
+
 create table funcionarios(
 id_funcionario int primary key,
 nome_funcionario varchar(255) not null,
+cpf_funcionario int not null,
 funcao_funcionario varchar(255) not null
 );
 
