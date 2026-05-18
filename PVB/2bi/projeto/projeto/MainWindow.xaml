@@ -1,0 +1,16 @@
+﻿<Window x:Class="projeto.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:projeto"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Label Content="&#xA;Digite os valores, &#xA;um por linha:" HorizontalAlignment="Center" Margin="0,10,0,0" VerticalAlignment="Top"/>
+        <Button Content=" Calcular Estatísticas " HorizontalAlignment="Left" Margin="338,178,0,0" VerticalAlignment="Top" Click="Button_Click"/>
+        <Label x:Name="resultados" Content="Resultados Estatísticos" HorizontalAlignment="Center" Margin="0,217,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="input" HorizontalAlignment="Left" Margin="334,73,0,0" Text="TextBox" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" AcceptsReturn="True"/>
+
+    </Grid>
+</Window>
