@@ -1,0 +1,5 @@
+php -S localhost:8080 -t public/
+
+ou 
+
+c:\xampp\php\php.exe -S localhost:8080 -t Public/

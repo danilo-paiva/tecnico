@@ -1,0 +1,17 @@
+{
+    "name": "projeto-rh-2bi",
+    "description": "API REST para Gestão de RH - Projeto 2º Bimestre",
+    "type": "project",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Api\\": "src/api/"
+        }
+    },
+    "require": {
+        "slim/slim": "^4.15",
+        "slim/psr7": "^1.8",
+        "firebase/php-jwt": "^6.10",
+        "php-di/php-di": "^7.1"
+    }
+}
