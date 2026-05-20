@@ -44,10 +44,11 @@ namespace projeto
 
             for (int i = 0; i < n; i++)
             {
-                soma_quadrados += Math.Pow(double.Parse(input.GetLineText(i)) - media,2);
+                double valor = double.Parse(input.GetLineText(i));
+                soma_quadrados += (valor - media,2)*(valor - media,2);
             }
 
-            double varianca_amostral = (somatoria_quadrado_x - (Math.Pow(somatoria_x,2)) / n) / (n - 1);
+            double varianca_amostral = (somatoria_quadrado_x - ((somatoria_x*somatoria_x) / n) / (n - 1);
             double desvio_padrao = Math.Sqrt(soma_quadrados / (n - 1));
 
             resultados.Content = "Quantidade de elementos: " + n.ToString("0")
