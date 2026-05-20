@@ -29,6 +29,7 @@ namespace projeto
             int n = input.LineCount;
             double somatoria_x = 0,somatoria_quadrado_x = 0, soma_quadrados = 0;
             double max = double.Parse(input.GetLineText(0)), min = double.Parse(input.GetLineText(0));
+            
             for (int i = 0; i < n; i++)
             {
                 double valor = double.Parse(input.GetLineText(i));
@@ -41,15 +42,8 @@ namespace projeto
             }
 
             double media = somatoria_x / n;
-
-            for (int i = 0; i < n; i++)
-            {
-                double valor = double.Parse(input.GetLineText(i));
-                soma_quadrados += (valor - media,2)*(valor - media,2);
-            }
-
             double varianca_amostral = (somatoria_quadrado_x - ((somatoria_x*somatoria_x) / n) / (n - 1);
-            double desvio_padrao = Math.Sqrt(soma_quadrados / (n - 1));
+            double desvio_padrao = Math.Sqrt(varianca_amostral);
 
             resultados.Content = "Quantidade de elementos: " + n.ToString("0")
                 + "\nValor Mínimo: " + min.ToString("0.00") 
