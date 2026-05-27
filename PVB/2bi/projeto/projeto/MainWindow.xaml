@@ -7,10 +7,16 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        <Label Content="&#xA;Digite os valores, &#xA;um por linha:" HorizontalAlignment="Center" Margin="0,10,0,0" VerticalAlignment="Top"/>
-        <Button Content=" Calcular Estatísticas " HorizontalAlignment="Left" Margin="338,178,0,0" VerticalAlignment="Top" Click="Button_Click"/>
-        <Label x:Name="resultados" Content="Resultados Estatísticos" HorizontalAlignment="Center" Margin="0,217,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="input" HorizontalAlignment="Left" Margin="334,73,0,0" Text="TextBox" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" AcceptsReturn="True"/>
+        <Label Content="&#xA;Digite os valores, &#xA;um por linha:" HorizontalAlignment="Left" Margin="43,5,0,0" VerticalAlignment="Top"/>
+        <Button Content=" Calcular Estatísticas " HorizontalAlignment="Left" Margin="33,210,0,0" VerticalAlignment="Top" Click="Button_Click"/>
+        <Label x:Name="resultados" Content="Resultados Estatísticos" HorizontalAlignment="Left" Margin="323,33,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.658,0.587"/>
+        <TextBox x:Name="input" HorizontalAlignment="Left" Margin="29,68,0,0" Text="TextBox" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" AcceptsReturn="True"/>
+        <Label x:Name="val_min" Content="" HorizontalAlignment="Left" Margin="318,90,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="val_max" Content="" HorizontalAlignment="Left" Margin="318,121,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="media_aritimetica" Content="" HorizontalAlignment="Left" Margin="318,152,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.039,0.466"/>
+        <Label x:Name="varianca" Content="" HorizontalAlignment="Left" Margin="318,183,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="desvio" Content="" HorizontalAlignment="Left" Margin="318,214,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="elementos" Content="" HorizontalAlignment="Left" Margin="318,64,0,0" VerticalAlignment="Top"/>
 
     </Grid>
 </Window>

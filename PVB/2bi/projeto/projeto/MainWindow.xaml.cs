@@ -27,30 +27,29 @@ namespace projeto
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             int n = input.LineCount;
-            double somatoria_x = 0,somatoria_quadrado_x = 0, soma_quadrados = 0;
-            double max = double.Parse(input.GetLineText(0)), min = double.Parse(input.GetLineText(0));
-            
+            double somatoria_x = 0, somatoria_quadrado_x = 0;
+            double max = 0, min = 0;
             for (int i = 0; i < n; i++)
             {
                 double valor = double.Parse(input.GetLineText(i));
-                somatoria_x += valor;
-                somatoria_quadrado_x += valor * valor;
                 if (valor > max)
                     max = valor;
                 if (valor < min)
                     min = valor;
+                somatoria_x += valor;
+                somatoria_quadrado_x += valor * valor;
             }
 
             double media = somatoria_x / n;
-            double varianca_amostral = (somatoria_quadrado_x - ((somatoria_x*somatoria_x) / n) / (n - 1);
+            double varianca_amostral = (somatoria_quadrado_x - somatoria_x*somatoria_x / n) / (n - 1);
             double desvio_padrao = Math.Sqrt(varianca_amostral);
 
-            resultados.Content = "Quantidade de elementos: " + n.ToString("0")
-                + "\nValor Mínimo: " + min.ToString("0.00") 
-                + "\nValor Máximo: " + max.ToString("0.00")
-                + "\nMédia Aritmética: " + media.ToString("0.00")
-                + "\nVariância Amostral: " + varianca_amostral.ToString("0.00")
-                + "\nDesvio Padrão Amostral: " + desvio_padrao.ToString("0.00");
+            elementos.Content = "Quantidade de elementos: " + n.ToString("0");
+            val_min.Content = "Valor Mínimo: " + min.ToString("0.00");
+            val_max.Content = "Valor Máximo: " + max.ToString("0.00");
+            media_aritimetica.Content = "Média Aritmética: " + media.ToString("0.00");
+            varianca.Content = "Variância Amostral: " + varianca_amostral.ToString("0.00");
+            desvio.Content = "Desvio Padrão Amostral: " + desvio_padrao.ToString("0.00");
 
        }
     }

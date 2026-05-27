@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Danilo\\Desktop\\projetos\\2ano\\PVB\\2bi\\projeto\\projeto\\projeto.csproj": {}
+    "C:\\Users\\Danilo\\Desktop\\GitHub\\tecnico\\PVB\\2bi\\projeto\\projeto\\projeto.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Danilo\\Desktop\\projetos\\2ano\\PVB\\2bi\\projeto\\projeto\\projeto.csproj": {
+    "C:\\Users\\Danilo\\Desktop\\GitHub\\tecnico\\PVB\\2bi\\projeto\\projeto\\projeto.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Danilo\\Desktop\\projetos\\2ano\\PVB\\2bi\\projeto\\projeto\\projeto.csproj",
+        "projectUniqueName": "C:\\Users\\Danilo\\Desktop\\GitHub\\tecnico\\PVB\\2bi\\projeto\\projeto\\projeto.csproj",
         "projectName": "projeto",
-        "projectPath": "C:\\Users\\Danilo\\Desktop\\projetos\\2ano\\PVB\\2bi\\projeto\\projeto\\projeto.csproj",
+        "projectPath": "C:\\Users\\Danilo\\Desktop\\GitHub\\tecnico\\PVB\\2bi\\projeto\\projeto\\projeto.csproj",
         "packagesPath": "C:\\Users\\Danilo\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Danilo\\Desktop\\projetos\\2ano\\PVB\\2bi\\projeto\\projeto\\obj\\",
+        "outputPath": "C:\\Users\\Danilo\\Desktop\\GitHub\\tecnico\\PVB\\2bi\\projeto\\projeto\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Danilo\\AppData\\Roaming\\NuGet\\NuGet.Config",
