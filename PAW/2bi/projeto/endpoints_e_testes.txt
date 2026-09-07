@@ -1,0 +1,132 @@
+# Endpoints da API - Gestão de RH
+
+ Autenticação
+- POST /funcionarios/login
+  JSON:
+  {
+    "funcionario": {
+      "email": "joao@email.com",
+      "senha": "Senha@123"
+    }
+  }
+
+ Departamentos
+- GET /departamentos
+- GET /departamentos/count
+- GET /departamentos/{id}
+- POST /departamentos
+  JSON:
+  {
+    "departamento": {
+      "nomeDepartamento": "Tecnologia"
+    }
+  }
+- PUT /departamentos/{id}
+  JSON:
+  {
+    "departamento": {
+      "nomeDepartamento": "Tecnologia"
+    }
+  }
+- DELETE /departamentos/{id}
+
+ Cargos
+- GET /cargos
+- GET /cargos/count
+- GET /cargos/{id}
+- POST /cargos
+  JSON:
+  {
+    "cargo": {
+      "nomeCargo": "Desenvolvedor Sênior",
+      "idDepartamento": 1
+    }
+  }
+- PUT /cargos/{id}
+  JSON:
+  {
+    "cargo": {
+      "nomeCargo": "Desenvolvedor Sênior",
+      "idDepartamento": 1
+    }
+  }
+- DELETE /cargos/{id}
+
+ Funcionários
+- GET /funcionarios
+- GET /funcionarios/count
+- GET /funcionarios/{id}
+- POST /funcionarios
+  JSON:
+  {
+    "funcionario": {
+      "nomeFuncionario": "João Silva",
+      "email": "joao@email.com",
+      "senha": "Senha@123",
+      "recebeValeTransporte": 1,
+      "cargo": {
+        "idCargo": 1
+      }
+    }
+  }
+- PUT /funcionarios/{id}
+  JSON:
+  {
+    "funcionario": {
+      "nomeFuncionario": "João Silva",
+      "email": "joao@email.com",
+      "recebeValeTransporte": 1,
+      "cargo": {
+        "idCargo": 1
+      }
+    }
+  }
+- DELETE /funcionarios/{id}
+
+ Dependentes
+- GET /dependentes
+- GET /dependentes/funcionario/{id}
+- GET /dependentes/{id}
+- POST /dependentes
+  JSON:
+  {
+    "dependente": {
+      "nomeDependente": "Junior Silva",
+      "parentesco": "Filho",
+      "idFuncionario": 1
+    }
+  }
+- PUT /dependentes/{id}
+  JSON:
+  {
+    "dependente": {
+      "nomeDependente": "Junior Souza",
+      "parentesco": "Filho",
+      "idFuncionario": 1
+    }
+  }
+- DELETE /dependentes/{id}
+
+ Folha de Pagamento
+- GET /folhas
+- GET /folhas/funcionario/{id}
+- GET /folhas/{id}
+- POST /folhas
+  JSON:
+  {
+    "folha": {
+      "dataPagamento": "2026-05-01",
+      "valorLiquido": 5000.00,
+      "idFuncionario": 1
+    }
+  }
+- PUT /folhas/{id}
+  JSON:
+  {
+    "folha": {
+      "dataPagamento": "2026-05-01",
+      "valorLiquido": 5000.00,
+      "idFuncionario": 1
+    }
+  }
+- DELETE /folhas/{id}

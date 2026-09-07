@@ -62,9 +62,9 @@ class MysqlDatabase
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                     PDO::ATTR_PERSISTENT => true, // mantém a conexão persistente
                 ]);
-                error_log("⬆️  Conectado ao MySQL com sucesso!");
+                error_log("Conectado ao MySQL com sucesso!");
             } catch (PDOException $e) {
-                error_log("❌ Falha ao conectar ao MySQL: " . $e->getMessage());
+                error_log("Falha ao conectar ao MySQL: " . $e->getMessage());
                 throw new Exception("Falha ao conectar ao MySQL: " . $e->getMessage());
             }
         }

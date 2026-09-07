@@ -6,6 +6,10 @@ use Api\Http\ErrorResponse;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
+/**
+ * CargoController
+ * Gerencia as requisições HTTP relacionadas aos cargos.
+ */
 class CargoController
 {
     private CargoService $cargoService;
@@ -14,6 +18,9 @@ class CargoController
         $this->cargoService = $cargoServiceDependency;
     }
 
+    /**
+     * Cria um novo cargo.
+     */
     public function createController(Request $request, Response $response, array $args): Response {
         $body = json_decode($request->getBody()->getContents());
         $novoCargo = $this->cargoService->createService($body);
@@ -22,6 +29,9 @@ class CargoController
         return $response->withHeader('Content-Type', 'application/json')->withStatus(201);
     }
 
+    /**
+     * Retorna a lista de todos os cargos.
+     */
     public function findAllController(Request $request, Response $response, array $args): Response {
         $cargos = $this->cargoService->findAllService();
         $resposta = ['success' => true, 'message' => 'Busca realizada com sucesso', 'data' => ['cargos' => $cargos]];
@@ -29,6 +39,9 @@ class CargoController
         return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
     }
 
+    /**
+     * Busca um cargo por ID.
+     */
     public function findByIdController(Request $request, Response $response, array $args): Response {
         $idCargo = (int) $args['idCargo'];
         $cargo = $this->cargoService->findByIdService($idCargo);
@@ -37,6 +50,9 @@ class CargoController
         return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
     }
 
+    /**
+     * Atualiza os dados de um cargo.
+     */
     public function updateController(Request $request, Response $response, array $args): Response {
         $idCargo = (int) $args['idCargo'];
         $body = json_decode($request->getBody()->getContents());
@@ -46,14 +62,18 @@ class CargoController
         return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
     }
 
+    /**
+     * Remove um cargo do sistema.
+     */
     public function deleteController(Request $request, Response $response, array $args): Response {
         $idCargo = (int) $args['idCargo'];
         $this->cargoService->deleteService($idCargo);
-        $resposta = ['success' => true, 'message' => 'Excluído com sucesso', 'data' => ['cargos' => [['idCargo' => $idCargo]]]];
-        $response->getBody()->write(json_encode($resposta));
-        return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
+        return $response->withStatus(204);
     }
 
+    /**
+     * Retorna a contagem total de cargos.
+     */
     public function countController(Request $request, Response $response, array $args): Response {
         $total = $this->cargoService->countService();
         $resposta = ['success' => true, 'message' => 'Executado com sucesso', 'data' => ['count' => $total]];

@@ -2,6 +2,10 @@
 namespace Api\Models;
 use JsonSerializable;
 
+/**
+ * Modelo de Dependente
+ * Representa pessoas vinculadas a um funcionário para fins de benefícios.
+ */
 class Dependente implements JsonSerializable
 {
     private int $idDependente;
@@ -13,6 +17,9 @@ class Dependente implements JsonSerializable
 
     public function getIdDependente(): int { return $this->idDependente; }
 
+    /**
+     * Define o ID do dependente. Deve ser positivo.
+     */
     public function setIdDependente(int $value): void {
         if ($value <= 0) throw new \Exception("idDependente deve ser positivo.");
         $this->idDependente = $value;
@@ -34,11 +41,17 @@ class Dependente implements JsonSerializable
 
     public function getIdFuncionario(): int { return $this->idFuncionario; }
 
+    /**
+     * Define o ID do funcionário responsável por este dependente.
+     */
     public function setIdFuncionario(int $value): void {
         if ($value <= 0) throw new \Exception("idFuncionario deve ser positivo.");
         $this->idFuncionario = $value;
     }
 
+    /**
+     * Define a representação JSON do objeto para respostas da API.
+     */
     public function jsonSerialize(): array {
         return [
             'idDependente' => $this->getIdDependente(),

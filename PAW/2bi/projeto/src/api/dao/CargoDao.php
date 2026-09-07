@@ -33,7 +33,7 @@ class CargoDAO
     {
         $this->database = $databaseInstance;
 
-        error_log("⬆️ CargoDAO::__construct()");
+        error_log("CargoDAO::__construct()");
     }
 
     /**
@@ -45,21 +45,22 @@ class CargoDAO
      */
     public function create(Cargo $objCargo): Cargo
     {
-        error_log("🟢 CargoDAO::create()");
+        error_log("CargoDAO::create()");
 
         /**
          * SQL de inserção.
          */
         $sql = "
-            INSERT INTO cargos (nomeCargo)
-            VALUES (:nomeCargo)
+            INSERT INTO cargos (nomeCargo, idDepartamento)
+            VALUES (:nomeCargo, :idDepartamento)
         ";
 
         /**
          * Valores da query.
          */
         $parametros = [
-            ':nomeCargo' => $objCargo->getNomeCargo()
+            ':nomeCargo' => $objCargo->getNomeCargo(),
+            ':idDepartamento' => $objCargo->getIdDepartamento()
         ];
 
         /**
@@ -87,7 +88,7 @@ class CargoDAO
      */
     public function delete(Cargo $objCargoModel): bool
     {
-        error_log("🟢 CargoDAO::delete()");
+        error_log("CargoDAO::delete()");
 
         /**
          * SQL de exclusão.
@@ -124,14 +125,14 @@ class CargoDAO
      */
     public function update(Cargo $objCargoModel): bool
     {
-        error_log("🟢 CargoDAO::update()");
+        error_log("CargoDAO::update()");
 
         /**
          * SQL de atualização.
          */
         $sql = "
             UPDATE cargos
-            SET nomeCargo = :nomeCargo
+            SET nomeCargo = :nomeCargo, idDepartamento = :idDepartamento
             WHERE idCargo = :idCargo
         ";
 
@@ -140,6 +141,7 @@ class CargoDAO
          */
         $parametros = [
             ':nomeCargo' => $objCargoModel->getNomeCargo(),
+            ':idDepartamento' => $objCargoModel->getIdDepartamento(),
             ':idCargo' => $objCargoModel->getIdCargo()
         ];
 
@@ -162,7 +164,7 @@ class CargoDAO
      */
     public function findAll(): array
     {
-        error_log("🟢 CargoDAO::findAll()");
+        error_log("CargoDAO::findAll()");
 
         /**
          * Consulta todos os registros.
@@ -210,7 +212,7 @@ class CargoDAO
      */
     public function count(): int
     {
-        error_log("🟢 CargoDAO::count()");
+        error_log("CargoDAO::count()");
 
         /**
          * SQL de contagem.
@@ -241,7 +243,7 @@ class CargoDAO
      */
     public function findById(int $idCargo): ?Cargo
     {
-        error_log("🟢 CargoDAO::findById()");
+        error_log("CargoDAO::findById()");
 
         /**
          * Busca reutilizando método genérico.
@@ -271,7 +273,7 @@ class CargoDAO
      */
     public function findByField(string $field, $value): array
     {
-        error_log("🟢 CargoDAO::findByField()");
+        error_log("CargoDAO::findByField()");
 
         /**
          * Campos permitidos.

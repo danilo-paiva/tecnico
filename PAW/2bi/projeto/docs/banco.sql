@@ -4,47 +4,47 @@ CREATE DATABASE IF NOT EXISTS rh_db;
 USE rh_db;
 
 -- 1. Departamentos
-CREATE TABLE IF NOT EXISTS departamentos (
+CREATE TABLE departamentos (
     idDepartamento INT AUTO_INCREMENT PRIMARY KEY,
     nomeDepartamento VARCHAR(100) NOT NULL UNIQUE
-) ENGINE = InnoDB;
+) 
 
 -- 2. Cargos
-CREATE TABLE IF NOT EXISTS cargos (
+CREATE TABLE  cargos (
     idCargo INT AUTO_INCREMENT PRIMARY KEY,
     nomeCargo VARCHAR(100) NOT NULL UNIQUE,
     idDepartamento INT NOT NULL,
-    CONSTRAINT fk_cargo_departamento FOREIGN KEY (idDepartamento) REFERENCES departamentos(idDepartamento) ON DELETE CASCADE
-) ENGINE = InnoDB;
+    fk_cargo_departamento FOREIGN KEY (idDepartamento) REFERENCES departamentos(idDepartamento) ON DELETE CASCADE
+) 
 
 -- 3. Funcionários
-CREATE TABLE IF NOT EXISTS funcionarios (
+CREATE TABLE funcionarios (
     idFuncionario INT AUTO_INCREMENT PRIMARY KEY,
     nomeFuncionario VARCHAR(150) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     senha VARCHAR(255) NOT NULL,
     recebeValeTransporte BOOLEAN DEFAULT FALSE,
     idCargo INT NOT NULL,
-    CONSTRAINT fk_func_cargo FOREIGN KEY (idCargo) REFERENCES cargos(idCargo) ON DELETE RESTRICT
-) ENGINE = InnoDB;
+    fk_func_cargo FOREIGN KEY (idCargo) REFERENCES cargos(idCargo) ON DELETE RESTRICT
+) 
 
 -- 4. Dependentes
-CREATE TABLE IF NOT EXISTS dependentes (
+CREATE TABLE dependentes (
     idDependente INT AUTO_INCREMENT PRIMARY KEY,
     nomeDependente VARCHAR(150) NOT NULL,
     parentesco VARCHAR(50),
     idFuncionario INT NOT NULL,
-    CONSTRAINT fk_dep_func FOREIGN KEY (idFuncionario) REFERENCES funcionarios(idFuncionario) ON DELETE CASCADE
-) ENGINE = InnoDB;
+    fk_dep_func FOREIGN KEY (idFuncionario) REFERENCES funcionarios(idFuncionario) ON DELETE CASCADE
+) 
 
 -- 5. Folha de Pagamento
-CREATE TABLE IF NOT EXISTS folha_pagamento (
+CREATE TABLE folha_pagamento (
     idFolha INT AUTO_INCREMENT PRIMARY KEY,
     dataPagamento DATE NOT NULL,
     valorLiquido DECIMAL(10, 2) NOT NULL,
     idFuncionario INT NOT NULL,
-    CONSTRAINT fk_folha_func FOREIGN KEY (idFuncionario) REFERENCES funcionarios(idFuncionario) ON DELETE CASCADE
-) ENGINE = InnoDB;
+    fk_folha_func FOREIGN KEY (idFuncionario) REFERENCES funcionarios(idFuncionario) ON DELETE CASCADE
+) 
 
 -- Dados Iniciais para Testes
 INSERT INTO departamentos (nomeDepartamento) VALUES ('Tecnologia'), ('Recursos Humanos'), ('Financeiro');

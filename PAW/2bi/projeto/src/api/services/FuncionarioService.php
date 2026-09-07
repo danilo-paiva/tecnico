@@ -8,6 +8,10 @@ use Api\Models\Cargo;
 use Api\Http\ErrorResponse;
 use stdClass;
 
+/**
+ * FuncionarioService
+ * Orquestra as regras de negócio para a gestão de funcionários, incluindo autenticação.
+ */
 class FuncionarioService
 {
     private FuncionarioDAO $funcionarioDAO;
@@ -18,11 +22,15 @@ class FuncionarioService
         $this->cargoDAO = $cargoDAODependency;
     }
 
+    /**
+     * Cria um novo funcionário. Valida a existência do cargo e a unicidade do e-mail.
+     */
     public function createService(stdClass $jsonFuncionario): Funcionario {
         $cargo = new Cargo();
         $cargo->setIdCargo($jsonFuncionario->funcionario->cargo->idCargo);
         $cargoExiste = $this->cargoDAO->findById($cargo->getIdCargo());
         if (!$cargoExiste) {
+            error_log("Falha ao criar funcionário: Cargo ID {$cargo->getIdCargo()} não existe.");
             throw new ErrorResponse(404, "Cargo não encontrado", ["message" => "Cargo informado não existe"]);
         }
 
@@ -33,8 +41,10 @@ class FuncionarioService
         $funcionario->setRecebeValeTransporte($jsonFuncionario->funcionario->recebeValeTransporte);
         $funcionario->setCargo($cargoExiste);
 
+        // Validação de unicidade de e-mail para evitar contas duplicadas
         $emailExiste = $this->funcionarioDAO->findByField('email', $funcionario->getEmail());
         if (count($emailExiste) > 0) {
+            error_log("Tentativa de cadastro com e-mail já existente: {$funcionario->getEmail()}");
             throw new ErrorResponse(400, "Email já cadastrado", ["message" => "O email {$funcionario->getEmail()} já existe"]);
         }
 
@@ -43,12 +53,16 @@ class FuncionarioService
         return $funcionario;
     }
 
+    /**
+     * Autentica o usuário verificando e-mail e senha (hash).
+     */
     public function loginService(array $jsonFuncionario): array {
         $funcionario = new Funcionario();
         $funcionario->setEmail($jsonFuncionario['funcionario']['email']);
         $funcionario->setSenha($jsonFuncionario['funcionario']['senha']);
         $encontrado = $this->funcionarioDAO->login($funcionario);
         if (!$encontrado) {
+            error_log("Falha de login para o e-mail: " . $jsonFuncionario['funcionario']['email']);
             throw new ErrorResponse(401, "Usuário ou senha inválidos", ["message" => "Não foi possível autenticar"]);
         }
         return [
@@ -63,23 +77,38 @@ class FuncionarioService
         ];
     }
 
+    /**
+     * Retorna a lista completa de funcionários.
+     */
     public function findAll(): array {
         return $this->funcionarioDAO->findAll();
     }
 
+    /**
+     * Busca um funcionário por ID.
+     */
     public function findByIdService(int $idFuncionario): Funcionario {
         $funcionario = $this->funcionarioDAO->findById($idFuncionario);
         if (!$funcionario) throw new ErrorResponse(404, "Funcionário não encontrado", ["message" => "Não existe funcionário com id {$idFuncionario}"]);
         return $funcionario;
     }
 
+    /**
+     * Atualiza os dados de um funcionário. Valida existência do funcionário e do cargo.
+     */
     public function updateService(int $idFuncionario, array $requestBody): bool {
         $funcionarioExiste = $this->funcionarioDAO->findById($idFuncionario);
-        if (!$funcionarioExiste) throw new ErrorResponse(404, "Funcionário não encontrado", ["message" => "Não existe funcionário com id {$idFuncionario}"]);
+        if (!$funcionarioExiste) {
+            error_log("Erro ao atualizar funcionário: ID {$idFuncionario} não encontrado.");
+            throw new ErrorResponse(404, "Funcionário não encontrado", ["message" => "Não existe funcionário com id {$idFuncionario}"]);
+        }
 
         $jsonFuncionario = $requestBody['funcionario'];
         $cargo = $this->cargoDAO->findById($jsonFuncionario['cargo']['idCargo']);
-        if (!$cargo) throw new ErrorResponse(404, "Cargo não encontrado", ["message" => "Cargo informado não existe"]);
+        if (!$cargo) {
+            error_log("Erro ao atualizar funcionário: Cargo ID {$jsonFuncionario['cargo']['idCargo']} não existe.");
+            throw new ErrorResponse(404, "Cargo não encontrado", ["message" => "Cargo informado não existe"]);
+        }
 
         $funcionario = new Funcionario();
         $funcionario->setIdFuncionario($idFuncionario);
@@ -92,6 +121,9 @@ class FuncionarioService
         return $this->funcionarioDAO->update($funcionario);
     }
 
+    /**
+     * Remove um funcionário do sistema.
+     */
     public function deleteService(int $idFuncionario): bool {
         $funcionarioExiste = $this->funcionarioDAO->findById($idFuncionario);
         if (!$funcionarioExiste) throw new ErrorResponse(404, "Funcionário não encontrado", ["message" => "Não existe funcionário com id {$idFuncionario}"]);

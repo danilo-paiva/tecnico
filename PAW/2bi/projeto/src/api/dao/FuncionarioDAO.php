@@ -28,21 +28,33 @@ class FuncionarioDAO
         ];
         $pdo = $this->database->getConnection();
         $stmt = $pdo->prepare($sql);
-        $stmt->execute($params);
+        if (!$stmt->execute($params)) {
+            error_log("Falha crítica ao inserir funcionário no banco: " . $funcionario->getEmail());
+            throw new Exception("Erro interno ao processar cadastro de funcionário.");
+        }
         $insertId = $pdo->lastInsertId();
-        if (!$insertId) throw new Exception("Falha ao inserir funcionário");
+        if (!$insertId) throw new Exception("Falha ao recuperar ID do funcionário inserido");
         return (int) $insertId;
     }
 
+    /**
+     * Remove um funcionário do banco.
+     */
     public function delete(Funcionario $funcionario): bool
     {
         $sql = "DELETE FROM funcionarios WHERE idFuncionario = ?";
         $pdo = $this->database->getConnection();
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$funcionario->getIdFuncionario()]);
+        if (!$stmt->execute([$funcionario->getIdFuncionario()])) {
+            error_log("Erro ao deletar funcionário ID: " . $funcionario->getIdFuncionario());
+            return false;
+        }
         return $stmt->rowCount() > 0;
     }
 
+    /**
+     * Atualiza dados do funcionário. Trata a senha separadamente para evitar sobrescrever com vazio.
+     */
     public function update(Funcionario $funcionario): bool
     {
         $pdo = $this->database->getConnection();
@@ -68,7 +80,10 @@ class FuncionarioDAO
             ];
         }
         $stmt = $pdo->prepare($sql);
-        $stmt->execute($params);
+        if (!$stmt->execute($params)) {
+            error_log("Erro ao atualizar funcionário ID: " . $funcionario->getIdFuncionario());
+            return false;
+        }
         return $stmt->rowCount() > 0;
     }
 

@@ -10,6 +10,11 @@ use Api\Routes\DepartamentoRouter;
 use Api\Routes\DependenteRouter;
 use Api\Routes\FolhaPagamentoRouter;
 
+/**
+ * Server
+ * Classe central responsável por configurar e iniciar o servidor Slim 4.
+ * Orquestra a configuração de middlewares, rotas e o tratamento global de erros.
+ */
 class Server
 {
     private App $app;
@@ -39,6 +44,10 @@ class Server
         $this->setupErrorHandling();
     }
 
+    /**
+     * Configura middlewares globais da aplicação.
+     * Inclui o parsing de corpos de requisição e cabeçalhos de CORS.
+     */
     private function setupMiddlewares(): void
     {
         $this->app->addBodyParsingMiddleware();
@@ -47,10 +56,13 @@ class Server
             return $response
                 ->withHeader('Access-Control-Allow-Origin', '*')
                 ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-                ->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+                ->withHeader('Access-Control-Allow-Headers', 'Content-Type', 'Authorization');
         });
     }
 
+    /**
+     * Registra as rotas de cada entidade no aplicativo Slim.
+     */
     private function setupRoutes(): void
     {
         $this->departamentoRouter->routes($this->app);
@@ -59,11 +71,16 @@ class Server
         $this->dependenteRouter->routes($this->app);
         $this->folhaPagamentoRouter->routes($this->app);
 
+        // Redirecionamento da raiz para a página de login
         $this->app->get('/', function ($request, $response) {
             return $response->withHeader('Location', '/login.html')->withStatus(302);
         });
     }
 
+    /**
+     * Configura o Middleware de Erros do Slim para capturar todas as exceções
+     * e transformá-las em respostas JSON padronizadas.
+     */
     private function setupErrorHandling(): void
     {
         $errorMiddleware = $this->app->addErrorMiddleware(true, true, true);
@@ -71,6 +88,7 @@ class Server
             function (ServerRequestInterface $request, \Throwable $exception)  {
                 $response = new \Slim\Psr7\Response();
                 $status = 500;
+                // Se for um erro controlado da aplicação, usa o código HTTP definido
                 if ($exception instanceof ErrorResponse) {
                     $payload = [
                         'success' => false,
@@ -79,6 +97,7 @@ class Server
                     ];
                     $status = $exception->getHttpCode();
                 } else {
+                    // Para erros inesperados, retorna detalhes do arquivo e linha
                     $payload = [
                         'success' => false,
                         'message' => $exception->getMessage(),
@@ -95,6 +114,9 @@ class Server
         );
     }
 
+    /**
+     * Inicia a execução do servidor.
+     */
     public function run(): void
     {
         $this->app->run();
