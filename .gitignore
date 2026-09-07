@@ -1,7 +1,5 @@
-PAW/2bi/aulas/
-PAW/aulas
-POOI/aulas
-PVB/aulas
+# Aulas (todos os cursos e bimestres)
+**/aulas/
 
 # Dependências
 PAW/3bi/projeto/vendor/
