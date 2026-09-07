@@ -2,24 +2,49 @@
 **/aulas/
 
 # Dependências
-PAW/3bi/projeto/vendor/
 **/vendor/
+**/node_modules/
 
 # Build .NET / Visual Studio
-.vs/
+**/.vs/
 **/bin/
 **/obj/
 *.suo
 *.user
-*.dtbcache.v2
+**/.dtbcache.v2
+**/slnx.sqlite
+*.dll
+*.exe
+*.pdb
+*.cache
+*.baml
+*.lref
 
 # Python
 **/__pycache__/
 *.pyc
+**/venv/
+**/.venv/
 
-# IDEs JetBrains
-.idea/workspace.xml
-**/.idea/workspace.xml
+# IDEs
+**/.idea/
+**/.vscode/
+
+# SO / editores
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*~
+
+# Segredos / ambiente
+.env
+.env.*
+*.key
+*.pem
+
+# Logs
+*.log
 
 # Temporários
 *.tmp-*
