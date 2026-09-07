@@ -47,8 +47,10 @@ Routes → AuthMiddleware (JWT) → ValidateBody/Id → Controllers → Services
 - **Models** validam nos setters
 - **Server** (`src/api/Server/Server.php`) configura Slim 4, CORS, `addBodyParsing`, `addRouting`, `addErrorMiddleware`
 
-**Config JWT** (`src/api/Config/JwtConfig.php`):
-- `SECRET = evento_secret_3bi_2026...`, `ALGO = HS256`, `EXPIRATION = 7200s`, `ISSUER = eventos-api-3bi`
+**Config JWT** (`src/api/Config/JwtConfig.php` + `src/api/Http/MeuTokenJWT.php` padrão da aula):
+- `SECRET = evento_secret_3bi_2026...`, `ALGO = HS256`, `EXPIRATION = 7200s`, `ISSUER/AUDIENCE = eventos-api-3bi`, `SUBJECT = acesso_sistema`
+- Claims: `iss/aud/sub/iat/nbf/exp/jti` + bloco `participante{name,email,role,idParticipante}` (+ plano `idParticipante/name/email/role` para compat)
+- Middlewares: `AuthMiddleware` global (= `ValidateFuncionarioToken` da aula) + `ValidateParticipanteToken` / `ValidateAdministrador` por rota
 
 ## 4. Como Rodar
 
@@ -146,6 +148,7 @@ ingressos.html   — CRUD Ingressos (select eventos)
 compras.html     — CRUD Compras (select participantes/ingressos, cálculo valor)
 css/style.css    — design system (≈33 KB, responsivo)
 js/api.js        — apiFetch com JWT, helpers por entidade, Api.get alias
+js/ApiService.js — classe ES6 padrão da Aula 4 (simpleGet/get/getById/post/put/delete + #token)
 js/auth.js       — login, register, checkAuth, logout, displayUser, Auth alias
 index.html       — redirect inteligente para login ou dashboard
 ```

@@ -1,6 +1,6 @@
 {
     "name": "tecnico/eventos-api-3bi",
-    "description": "REST API para Gestão de Eventos e Ingressos - Projeto 2º Bimestre (nova base para 3º BI)",
+    "description": "REST API para Gestão de Eventos e Ingressos - Projeto 3º BIM (JWT + Front HTML/JS)",
     "type": "project",
     "license": "MIT",
     "require": {

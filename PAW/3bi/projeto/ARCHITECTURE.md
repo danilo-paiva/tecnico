@@ -43,5 +43,10 @@ Configura Slim 4: `addBodyParsingMiddleware`, CORS, `addRoutingMiddleware`, regi
 - Código reescrito do zero, nomes e mensagens diferentes, validações ajustadas (ex: ingresso tipo livre, evento status ampliado).
 - Mesma organização garante familiaridade para avaliação, mas sem cópia.
 
-## Pronto para 3º BIM
-Para o requisito JWT do 3º BIM, basta adicionar `firebase/php-jwt`, criar `AuthService`, `AuthMiddleware` (verifica `Authorization: Bearer <token>`), e proteger rotas adicionando middleware de autenticação nas rotas que exigem token.
+## Pronto para 3º BIM (JWT implementado)
+JWT implementado no padrão da Aula 1: `firebase/php-jwt` + `Config/JwtConfig`
+(SECRET, HS256, iss/aud/sub, expiração) + `Http/MeuTokenJWT` (`gerarToken`,
+`validateToken`, `getPayload`) + `Middlewares/AuthMiddleware` global
+(equivale ao `ValidateFuncionarioToken`) + `Middlewares/ValidateParticipanteToken`
+e `ValidateAdministrador` por rota (ordem da aula: Body → Administrador → Token).
+Front usa `js/api.js` (`apiFetch` com Bearer) e `js/ApiService.js` (classe ES6 da Aula 4).
