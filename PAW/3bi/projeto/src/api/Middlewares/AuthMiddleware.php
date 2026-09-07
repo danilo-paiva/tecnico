@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace Api\Middlewares;
 
 use Api\Http\ErrorResponse;
-use Api\Config\JwtConfig;
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
+use Api\Http\MeuTokenJWT;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -85,20 +83,28 @@ class AuthMiddleware implements MiddlewareInterface
         }
 
         try {
-            $decoded = JWT::decode($token, new Key(JwtConfig::SECRET, JwtConfig::ALGO));
-            // Injeta payload no request para uso nos controllers
+            // Padrão da aula: valida via MeuTokenJWT (formato + iss/aud/sub + assinatura/exp)
+            $jwt = new MeuTokenJWT();
+            if (!$jwt->validateToken($token)) {
+                throw new ErrorResponse('Token inválido ou expirado.', 401);
+            }
+            $decoded = $jwt->getPayload();
+            if ($decoded === null) {
+                throw new ErrorResponse('Token inválido ou expirado.', 401);
+            }
+            // Injeta payload no request (alias jwtPayload = padrão da aula)
+            $request = $request->withAttribute('jwtPayload', $decoded);
             $request = $request->withAttribute('jwt', $decoded);
+            $id = $decoded->participante->idParticipante ?? $decoded->idParticipante ?? $decoded->sub ?? null;
+            $email = $decoded->participante->email ?? $decoded->email ?? null;
+            $nome = $decoded->participante->name ?? $decoded->name ?? $decoded->nome ?? null;
             $request = $request->withAttribute('usuario', [
-                'id' => $decoded->sub ?? null,
-                'email' => $decoded->email ?? null,
-                'nome' => $decoded->nome ?? null,
+                'id' => is_numeric($id) ? (int) $id : $id,
+                'email' => $email,
+                'nome' => $nome,
             ]);
-        } catch (\Firebase\JWT\ExpiredException $e) {
-            throw new ErrorResponse('Token expirado. Faça login novamente.', 401);
-        } catch (\Firebase\JWT\SignatureInvalidException $e) {
-            throw new ErrorResponse('Assinatura do token inválida.', 401);
-        } catch (\Throwable $e) {
-            throw new ErrorResponse('Token inválido: ' . $e->getMessage(), 401);
+        } catch (ErrorResponse $e) {
+            throw $e;
         }
 
         return $handler->handle($request);

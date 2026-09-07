@@ -6,9 +6,7 @@ namespace Api\Services;
 
 use Api\Dao\ParticipanteDAO;
 use Api\Http\ErrorResponse;
-use Api\Config\JwtConfig;
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
+use Api\Http\MeuTokenJWT;
 
 class AuthService
 {
@@ -49,20 +47,18 @@ class AuthService
         }
 
         $now = time();
-        $payload = [
-            'iss' => JwtConfig::ISSUER,
-            'iat' => $now,
-            'exp' => $now + JwtConfig::EXPIRATION_SECONDS,
-            'sub' => $participante->getIdParticipante(),
-            'email' => $participante->getEmail(),
-            'nome' => $participante->getNome(),
-        ];
-
-        $token = JWT::encode($payload, JwtConfig::SECRET, JwtConfig::ALGO);
+        // Padrão da aula: delega geração ao MeuTokenJWT (header.payload.signature)
+        $jwt = new MeuTokenJWT();
+        $claims = new \stdClass();
+        $claims->idParticipante = $participante->getIdParticipante();
+        $claims->name = $participante->getNome();
+        $claims->email = $participante->getEmail();
+        $claims->role = 'participante';
+        $token = $jwt->gerarToken($claims);
 
         return [
             'token' => $token,
-            'expiresIn' => JwtConfig::EXPIRATION_SECONDS,
+            'expiresIn' => \Api\Config\JwtConfig::EXPIRATION_SECONDS,
             'usuario' => [
                 'idParticipante' => $participante->getIdParticipante(),
                 'nome' => $participante->getNome(),
@@ -72,18 +68,28 @@ class AuthService
     }
 
     /**
-     * Valida token e retorna payload
+     * Valida token e retorna payload (delega ao MeuTokenJWT).
      */
     public function validateToken(string $token): object
     {
-        try {
-            $decoded = JWT::decode($token, new Key(JwtConfig::SECRET, JwtConfig::ALGO));
-            return $decoded;
-        } catch (\Firebase\JWT\ExpiredException $e) {
-            throw new ErrorResponse('Token expirado. Faça login novamente.', 401);
-        } catch (\Throwable $e) {
+        $jwt = new MeuTokenJWT();
+        // Remove prefixo Bearer se presente para reaproveitar validateToken
+        if (!$jwt->validateToken($token)) {
+            // Distingue expirado/inválido via decode direto para mensagem fiel
+            try {
+                $decoded = \Firebase\JWT\JWT::decode($token, new \Firebase\JWT\Key(\Api\Config\JwtConfig::SECRET, \Api\Config\JwtConfig::ALGO));
+                return $decoded;
+            } catch (\Firebase\JWT\ExpiredException $e) {
+                throw new ErrorResponse('Token expirado. Faça login novamente.', 401);
+            } catch (\Throwable $e) {
+                throw new ErrorResponse('Token inválido.', 401);
+            }
+        }
+        $payload = $jwt->getPayload();
+        if ($payload === null) {
             throw new ErrorResponse('Token inválido.', 401);
         }
+        return $payload;
     }
 
     /**
@@ -110,17 +116,7 @@ class AuthService
             throw new ErrorResponse('CPF já cadastrado.', 409);
         }
 
-        // Cria via Model
-        $participante = \Api\Models\Participante::fromArray([
-            'nome' => $data['nome'],
-            'email' => $data['email'],
-            'cpf' => $data['cpf'],
-            'telefone' => $data['telefone'],
-            'senha' => $data['senha'],
-        ]);
-        // fromArray usa setSenhaHash para senha, então precisamos setar senha corretamente com hash
-        // fromArray trata senha como hash, então precisamos criar manualmente
-        // Vamos criar novo objeto e usar setSenha que faz hash
+        // Cria via Model com hash (setSenha hasheia texto puro)
         $p = new \Api\Models\Participante();
         $p->setNome($data['nome']);
         $p->setEmail($data['email']);

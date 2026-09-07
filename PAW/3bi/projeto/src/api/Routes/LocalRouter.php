@@ -11,6 +11,14 @@ use Slim\App;
 
 class LocalRouter
 {
+    /**
+     * Proteção JWT: global via AuthMiddleware (Server.php) — equivale ao
+     * ValidateParticipanteToken (aula: ValidateFuncionarioToken) em todas as rotas.
+     * Para exigir perfil admin em escrita (aula slide 55), wire por rota:
+     *   ->add(ValidateLocalBody::class)
+     *   ->add(ValidateAdministrador::class)
+     *   ->add(ValidateParticipanteToken::class);
+     */
     public static function routes(App $app): void
     {
         $app->get('/locais', [LocalController::class, 'findAll']);

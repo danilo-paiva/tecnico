@@ -79,20 +79,28 @@ class AuthController
     public function me(Request $request, Response $response, array $args): Response
     {
         try {
-            // O AuthMiddleware já validou e injetou o payload no atributo 'jwt'
-            $jwt = $request->getAttribute('jwt');
+            // O AuthMiddleware/ValidateParticipanteToken já validou e injetou o payload
+            $jwt = $request->getAttribute('jwtPayload') ?? $request->getAttribute('jwt');
             if (!$jwt) {
                 throw new ErrorResponse('Não autenticado.', 401);
             }
+            // Suporta payload novo (participante{name,email,role,id}) e legado (nome/email/sub)
+            $part = is_object($jwt) ? ($jwt->participante ?? null) : null;
+            $id = $part->idParticipante ?? (is_object($jwt) ? ($jwt->idParticipante ?? null) : null);
+            if ($id === null && is_object($jwt)) {
+                $id = is_numeric($jwt->sub ?? null) ? (int) $jwt->sub : ($jwt->sub ?? null);
+            }
+            $email = $part->email ?? (is_object($jwt) ? ($jwt->email ?? null) : null);
+            $nome = $part->name ?? (is_object($jwt) ? ($jwt->name ?? $jwt->nome ?? null) : null);
             $payload = json_encode([
                 'success' => true,
                 'message' => 'Usuário autenticado.',
                 'data' => [
-                    'id' => $jwt->sub ?? null,
-                    'email' => $jwt->email ?? null,
-                    'nome' => $jwt->nome ?? null,
-                    'iat' => $jwt->iat ?? null,
-                    'exp' => $jwt->exp ?? null,
+                    'id' => $id,
+                    'email' => $email,
+                    'nome' => $nome,
+                    'iat' => is_object($jwt) ? ($jwt->iat ?? null) : null,
+                    'exp' => is_object($jwt) ? ($jwt->exp ?? null) : null,
                 ],
             ], JSON_UNESCAPED_UNICODE);
             $response->getBody()->write($payload !== false ? $payload : '{}');
