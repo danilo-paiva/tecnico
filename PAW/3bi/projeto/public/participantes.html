@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Gestão de Participantes — Cadastro, listagem, edição e exclusão. Protegido por JWT.">
+  <title>Participantes — Gestão de Eventos</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-protected>
+<header class="header" role="banner">
+  <div class="container">
+    <a href="dashboard.html" class="brand" aria-label="Dashboard">
+      <span class="brand-icon">E</span>
+      Eventos <span style="color:var(--color-text-muted);font-weight:400">· PAW 3BI</span>
+    </a>
+    <nav class="nav" aria-label="Navegação principal" id="mainNav">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="locais.html">Locais</a>
+      <a href="eventos.html">Eventos</a>
+      <a href="participantes.html" class="active" aria-current="page">Participantes</a>
+      <a href="ingressos.html">Ingressos</a>
+      <a href="compras.html">Compras</a>
+      <a href="login.html" id="navLogin">Login</a>
+      <a href="register.html" id="navRegister">Cadastro</a>
+    </nav>
+    <div class="header-actions">
+      <span id="userName" class="badge badge-neutral" style="display:none"></span>
+      <button type="button" id="btnLogout" class="btn btn-ghost btn-sm" style="display:none">Sair</button>
+      <button type="button" class="menu-toggle" aria-label="Abrir menu" aria-expanded="false" onclick="var n=document.getElementById('mainNav');n.classList.toggle('is-open');this.setAttribute('aria-expanded',n.classList.contains('is-open'))">☰</button>
+    </div>
+  </div>
+</header>
+
+<main class="main-content container" role="main">
+  <div class="page-header">
+    <div>
+      <h1>Participantes</h1>
+      <p>Pessoas que compram ingressos. E-mail e CPF únicos. Senha com hash seguro.</p>
+    </div>
+    <div class="btn-group">
+      <span id="contador" class="badge badge-primary" aria-live="polite">— participantes</span>
+      <button type="button" id="btnRecarregar" class="btn btn-secondary btn-sm">↻ Atualizar</button>
+    </div>
+  </div>
+
+  <div id="alertGlobal" class="alert" role="alert" style="display:none"></div>
+
+  <!-- Cadastro -->
+  <section class="card" aria-labelledby="titulo-cadastro">
+    <div class="card-header">
+      <h2 id="titulo-cadastro">Cadastrar participante</h2>
+      <span class="badge badge-neutral">POST /participantes</span>
+    </div>
+    <div class="card-body">
+      <form id="formCadastro" novalidate>
+        <div class="form-group">
+          <label for="nome">Nome completo <span class="required">*</span></label>
+          <input type="text" id="nome" name="nome" class="input" placeholder="Ex.: Ana Souza" required minlength="2" autocomplete="name">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="email">E-mail <span class="required">*</span></label>
+            <input type="email" id="email" name="email" class="input" placeholder="ana@exemplo.com" required autocomplete="email">
+          </div>
+          <div class="form-group">
+            <label for="telefone">Telefone <span class="required">*</span></label>
+            <input type="tel" id="telefone" name="telefone" class="input" placeholder="(47) 99999-8888" required autocomplete="tel">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="cpf">CPF <span class="required">*</span></label>
+            <input type="text" id="cpf" name="cpf" class="input" placeholder="000.000.000-00" required inputmode="numeric" maxlength="14">
+            <p class="form-hint">Apenas números — validação de CPF no servidor.</p>
+          </div>
+          <div class="form-group">
+            <label for="senha">Senha <span class="required">*</span></label>
+            <input type="password" id="senha" name="senha" class="input" placeholder="Mín. 6 caracteres" required minlength="6" autocomplete="new-password">
+          </div>
+        </div>
+        <div class="flex" style="justify-content:flex-end;gap:8px;margin-top:8px">
+          <button type="reset" class="btn btn-secondary">Limpar</button>
+          <button type="submit" id="btnCadastrar" class="btn btn-primary">Cadastrar participante</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- Listagem -->
+  <section class="card" aria-labelledby="titulo-listagem" style="margin-top:var(--space-xl)">
+    <div class="card-header">
+      <h2 id="titulo-listagem">Participantes cadastrados</h2>
+      <span class="badge badge-neutral">GET /participantes</span>
+    </div>
+    <div class="card-body" style="padding:0">
+      <div id="loading" class="empty-state" role="status" aria-live="polite">
+        <div class="empty-state-icon">⏳</div>
+        <p>Carregando participantes...</p>
+      </div>
+      <div class="table-wrapper" id="tableWrapper" style="display:none">
+        <table class="table" aria-label="Tabela de participantes">
+          <thead>
+            <tr>
+              <th style="width:60px">ID</th>
+              <th>Nome</th>
+              <th>E-mail</th>
+              <th>CPF</th>
+              <th>Telefone</th>
+              <th style="width:170px;text-align:right">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div id="empty" class="empty-state" style="display:none">
+        <div class="empty-state-icon">👥</div>
+        <h3>Nenhum participante encontrado</h3>
+        <p>Cadastre o primeiro participante acima.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Modal Editar -->
+<div id="modalEditar" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitulo">Editar participante</h3>
+      <button type="button" class="modal-close" aria-label="Fechar" onclick="fecharModal()">×</button>
+    </div>
+    <form id="formEditar" novalidate>
+      <div class="modal-body">
+        <input type="hidden" id="editId">
+        <div class="form-group">
+          <label for="editNome">Nome <span class="required">*</span></label>
+          <input type="text" id="editNome" class="input" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="editEmail">E-mail <span class="required">*</span></label>
+            <input type="email" id="editEmail" class="input" required>
+          </div>
+          <div class="form-group">
+            <label for="editTelefone">Telefone <span class="required">*</span></label>
+            <input type="tel" id="editTelefone" class="input" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="editCpf">CPF <span class="required">*</span></label>
+            <input type="text" id="editCpf" class="input" required maxlength="14">
+          </div>
+          <div class="form-group">
+            <label for="editSenha">Nova senha <small class="text-muted">(deixe em branco para manter)</small></label>
+            <input type="password" id="editSenha" class="input" placeholder="Opcional — mínimo 6" minlength="6" autocomplete="new-password">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
+        <button type="submit" id="btnSalvarEdicao" class="btn btn-primary">Salvar alterações</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<footer class="footer" role="contentinfo">
+  <p>PAW 3BI · <a href="dashboard.html">Dashboard</a> · <a href="login.html">Login</a> · <a href="#" onclick="logout();return false">Logout</a></p>
+</footer>
+
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script>
+(function(){
+  'use strict';
+  (function guard(){
+    var t=(typeof getToken==='function'?getToken():localStorage.getItem('token'));
+    if(!t){ location.href='login.html'; return; }
+    if(typeof checkAuth==='function') checkAuth({redirectTo:'login.html', verifyServer:true});
+    setTimeout(function(){
+      if(typeof displayUser==='function') displayUser();
+      var has=t&&String(t).trim()!=='';
+      var a=document.getElementById('navLogin'), b=document.getElementById('navRegister'), c=document.getElementById('btnLogout'), d=document.getElementById('userName');
+      if(a) a.style.display=has?'none':''; if(b) b.style.display=has?'none':''; if(c) c.style.display=has?'inline-flex':'none';
+      if(d&&has){ try{var u=getUser?getUser():null; if(u){d.textContent=(u.nome||u.email||'Logado'); d.style.display='inline-flex';}}catch(e){}}
+    },120);
+  })();
+  document.getElementById('btnLogout').addEventListener('click',function(e){e.preventDefault(); if(typeof logout==='function') logout('login.html'); else{localStorage.removeItem('token');location.href='login.html';}});
+
+  var alertEl=document.getElementById('alertGlobal'), loadingEl=document.getElementById('loading'), tableWrapper=document.getElementById('tableWrapper'), emptyEl=document.getElementById('empty'), tbody=document.getElementById('tbody'), contadorEl=document.getElementById('contador');
+
+  function showAlert(msg,type){ type=type||'info'; alertEl.className='alert alert-'+(type==='error'?'danger':type); alertEl.textContent=msg; alertEl.style.display='flex'; alertEl.hidden=false; alertEl.scrollIntoView({behavior:'smooth',block:'nearest'}); if(type==='success') setTimeout(hideAlert,3800); }
+  function hideAlert(){ alertEl.style.display='none'; alertEl.hidden=true; alertEl.textContent=''; }
+  window.hideAlert=hideAlert; window.showAlert=showAlert;
+  function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function extractList(res){
+    if(Array.isArray(res)) return res;
+    if(res && Array.isArray(res.data)) return res.data;
+    if(res && res.data && Array.isArray(res.data.data)) return res.data.data;
+    if(res && Array.isArray(res.participantes)) return res.participantes;
+    if(res && res.data && Array.isArray(res.data.participantes)) return res.data.participantes;
+    return [];
+  }
+  function atualizarContador(n){ contadorEl.textContent=n+(n===1?' participante':' participantes'); }
+  function setLoading(v){ loadingEl.style.display=v?'':'none'; if(v){tableWrapper.style.display='none'; emptyEl.style.display='none';} }
+  function maskCpfRealtime(input){
+    input.addEventListener('input', function(){
+      var v=this.value.replace(/\D/g,'').slice(0,11);
+      if(v.length>9) v=v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/,'$1.$2.$3-$4');
+      else if(v.length>6) v=v.replace(/(\d{3})(\d{3})(\d{1,3})/,'$1.$2.$3');
+      else if(v.length>3) v=v.replace(/(\d{3})(\d{1,3})/,'$1.$2');
+      this.value=v;
+    });
+  }
+  maskCpfRealtime(document.getElementById('cpf'));
+  maskCpfRealtime(document.getElementById('editCpf'));
+
+  var modal=document.getElementById('modalEditar');
+  window.abrirModal=function(item){
+    document.getElementById('editId').value=item.idParticipante||item.id||'';
+    document.getElementById('editNome').value=item.nome||'';
+    document.getElementById('editEmail').value=item.email||'';
+    document.getElementById('editTelefone').value=item.telefone||'';
+    document.getElementById('editCpf').value=item.cpf||'';
+    document.getElementById('editSenha').value='';
+    modal.classList.add('is-open'); document.body.style.overflow='hidden';
+  };
+  window.fecharModal=function(){ modal.classList.remove('is-open'); document.body.style.overflow=''; };
+  modal.addEventListener('click',function(e){ if(e.target===modal) fecharModal(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&modal.classList.contains('is-open')) fecharModal(); });
+
+  function maskCpfDisplay(cpf){ if(!cpf) return '—'; var d=String(cpf).replace(/\D/g,''); if(d.length===11) return d.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4'); return cpf; }
+
+  function renderTabela(lista){
+    tbody.innerHTML='';
+    if(!lista.length){ tableWrapper.style.display='none'; emptyEl.style.display=''; atualizarContador(0); return; }
+    emptyEl.style.display='none'; tableWrapper.style.display=''; atualizarContador(lista.length);
+    var frag=document.createDocumentFragment();
+    lista.forEach(function(p){
+      var id=p.idParticipante||p.id;
+      var tr=document.createElement('tr');
+      tr.innerHTML=
+        '<td><span class="badge badge-neutral">#'+escapeHtml(id)+'</span></td>'+
+        '<td><strong>'+escapeHtml(p.nome)+'</strong></td>'+
+        '<td>'+escapeHtml(p.email)+'</td>'+
+        '<td><span class="badge badge-neutral">'+escapeHtml(maskCpfDisplay(p.cpf))+'</span></td>'+
+        '<td>'+escapeHtml(p.telefone||'—')+'</td>'+
+        '<td><div class="table-actions"><button type="button" class="btn btn-secondary btn-sm" data-edit="'+escapeHtml(id)+'">✎ Editar</button><button type="button" class="btn btn-danger btn-sm" data-delete="'+escapeHtml(id)+'">🗑 Excluir</button></div></td>';
+      frag.appendChild(tr);
+    });
+    tbody.appendChild(frag);
+    tbody.querySelectorAll('[data-edit]').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        var id=btn.getAttribute('data-edit');
+        var item=lista.find(function(x){ return String(x.idParticipante||x.id)===String(id); });
+        if(item) abrirModal(item);
+      });
+    });
+    tbody.querySelectorAll('[data-delete]').forEach(function(btn){
+      btn.addEventListener('click',async function(){
+        var id=btn.getAttribute('data-delete');
+        var nome=btn.closest('tr').querySelector('strong')?.textContent||('#'+id);
+        if(!confirm('Excluir participante "'+nome+'" (ID '+id+')?')) return;
+        btn.disabled=true; btn.textContent='Excluindo...';
+        try{ await Api.deleteParticipante(id); showAlert('Participante excluído com sucesso.','success'); await carregar(); }catch(err){ showAlert(err.message||'Erro ao excluir participante.','error'); btn.disabled=false; btn.textContent='🗑 Excluir'; }
+      });
+    });
+  }
+
+  async function carregar(){
+    setLoading(true); hideAlert();
+    try{
+      var res=await Api.getParticipantes();
+      var lista=extractList(res);
+      renderTabela(lista);
+    }catch(err){
+      showAlert(err.message||'Erro ao carregar participantes.','error'); tableWrapper.style.display='none'; emptyEl.style.display='none'; atualizarContador(0);
+    }finally{ setLoading(false); }
+  }
+
+  document.getElementById('formCadastro').addEventListener('submit', async function(e){
+    e.preventDefault(); hideAlert();
+    var nome=document.getElementById('nome').value.trim();
+    var email=document.getElementById('email').value.trim();
+    var telefone=document.getElementById('telefone').value.trim();
+    var cpf=document.getElementById('cpf').value.trim();
+    var senha=document.getElementById('senha').value;
+    if(!nome||!email||!telefone||!cpf||!senha){ showAlert('Preencha todos os campos.','error'); return; }
+    if(senha.length<6){ showAlert('Senha deve ter no mínimo 6 caracteres.','error'); return; }
+    var btn=document.getElementById('btnCadastrar'); btn.disabled=true; var old=btn.textContent; btn.textContent='Cadastrando...';
+    try{
+      await Api.createParticipante({ nome:nome, email:email, cpf:cpf, telefone:telefone, senha:senha });
+      showAlert('Participante "'+nome+'" cadastrado com sucesso!','success'); e.target.reset(); await carregar();
+    }catch(err){ showAlert(err.message||'Erro ao cadastrar participante.','error'); }finally{ btn.disabled=false; btn.textContent=old; }
+  });
+
+  document.getElementById('formEditar').addEventListener('submit', async function(e){
+    e.preventDefault(); hideAlert();
+    var id=document.getElementById('editId').value;
+    var nome=document.getElementById('editNome').value.trim();
+    var email=document.getElementById('editEmail').value.trim();
+    var telefone=document.getElementById('editTelefone').value.trim();
+    var cpf=document.getElementById('editCpf').value.trim();
+    var senha=document.getElementById('editSenha').value;
+    if(!id||!nome||!email||!telefone||!cpf){ showAlert('Preencha nome, e-mail, telefone e CPF.','error'); return; }
+    var payload={ nome:nome, email:email, telefone:telefone, cpf:cpf };
+    if(senha && senha.trim()!==''){ if(senha.length<6){ showAlert('Senha deve ter no mínimo 6 caracteres.','error'); return; } payload.senha=senha; }
+    var btn=document.getElementById('btnSalvarEdicao'); btn.disabled=true; var old=btn.textContent; btn.textContent='Salvando...';
+    try{
+      await Api.updateParticipante(id, payload);
+      showAlert('Participante atualizado com sucesso!','success'); fecharModal(); await carregar();
+    }catch(err){ showAlert(err.message||'Erro ao atualizar participante.','error'); }finally{ btn.disabled=false; btn.textContent=old; }
+  });
+
+  document.getElementById('btnRecarregar').addEventListener('click', carregar);
+  carregar();
+})();
+</script>
+</body>
+</html>

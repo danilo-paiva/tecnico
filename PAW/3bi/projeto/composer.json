@@ -1,0 +1,20 @@
+{
+    "name": "tecnico/eventos-api-3bi",
+    "description": "REST API para Gestão de Eventos e Ingressos - Projeto 2º Bimestre (nova base para 3º BI)",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "slim/slim": "^4.15",
+        "slim/psr7": "^1.8",
+        "php-di/php-di": "^7.1",
+        "firebase/php-jwt": "^7.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Api\\": "src/api/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true
+    }
+}

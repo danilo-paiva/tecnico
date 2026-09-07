@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Gestão de Eventos — Cadastro, listagem, edição e exclusão. Protegido por JWT.">
+  <title>Eventos — Gestão de Eventos</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-protected>
+<header class="header" role="banner">
+  <div class="container">
+    <a href="dashboard.html" class="brand" aria-label="Dashboard">
+      <span class="brand-icon">E</span>
+      Eventos <span style="color:var(--color-text-muted);font-weight:400">· PAW 3BI</span>
+    </a>
+    <nav class="nav" aria-label="Navegação principal" id="mainNav">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="locais.html">Locais</a>
+      <a href="eventos.html" class="active" aria-current="page">Eventos</a>
+      <a href="participantes.html">Participantes</a>
+      <a href="ingressos.html">Ingressos</a>
+      <a href="compras.html">Compras</a>
+      <a href="login.html" id="navLogin">Login</a>
+      <a href="register.html" id="navRegister">Cadastro</a>
+    </nav>
+    <div class="header-actions">
+      <span id="userName" class="badge badge-neutral" style="display:none"></span>
+      <button type="button" id="btnLogout" class="btn btn-ghost btn-sm" style="display:none">Sair</button>
+      <button type="button" class="menu-toggle" aria-label="Abrir menu" aria-expanded="false" onclick="var n=document.getElementById('mainNav');n.classList.toggle('is-open');this.setAttribute('aria-expanded',n.classList.contains('is-open'))">☰</button>
+    </div>
+  </div>
+</header>
+
+<main class="main-content container" role="main">
+  <div class="page-header">
+    <div>
+      <h1>Eventos</h1>
+      <p>Gerencie eventos vinculados a locais. Status e datas são validados pela API.</p>
+    </div>
+    <div class="btn-group">
+      <span id="contador" class="badge badge-primary" aria-live="polite">— eventos</span>
+      <button type="button" id="btnRecarregar" class="btn btn-secondary btn-sm">↻ Atualizar</button>
+    </div>
+  </div>
+
+  <div id="alertGlobal" class="alert" role="alert" style="display:none"></div>
+
+  <!-- Formulário de Cadastro -->
+  <section class="card" aria-labelledby="titulo-cadastro">
+    <div class="card-header">
+      <h2 id="titulo-cadastro">Cadastrar novo evento</h2>
+      <span class="badge badge-neutral">POST /eventos</span>
+    </div>
+    <div class="card-body">
+      <form id="formCadastro" novalidate>
+        <div class="form-group">
+          <label for="titulo">Título <span class="required">*</span></label>
+          <input type="text" id="titulo" name="titulo" class="input" placeholder="Ex.: Workshop PAW Avançado" required minlength="2" maxlength="150">
+        </div>
+        <div class="form-group">
+          <label for="descricao">Descrição</label>
+          <textarea id="descricao" name="descricao" class="textarea" placeholder="Descreva o evento (opcional)" rows="3"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="dataEvento">Data do evento <span class="required">*</span></label>
+            <input type="datetime-local" id="dataEvento" name="dataEvento" class="input" required>
+          </div>
+          <div class="form-group">
+            <label for="status">Status <span class="required">*</span></label>
+            <select id="status" name="status" class="select" required>
+              <option value="planejado" selected>Planejado</option>
+              <option value="confirmado">Confirmado</option>
+              <option value="cancelado">Cancelado</option>
+              <option value="concluido">Concluído</option>
+              <option value="adiado">Adiado</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="idLocal">Local <span class="required">*</span></label>
+          <select id="idLocal" name="idLocal" class="select" required>
+            <option value="">Carregando locais...</option>
+          </select>
+          <p class="form-hint">Selecione o local onde o evento ocorrerá. <a href="locais.html">Gerenciar locais</a></p>
+        </div>
+        <div class="flex" style="justify-content:flex-end;gap:8px;margin-top:8px">
+          <button type="reset" class="btn btn-secondary">Limpar</button>
+          <button type="submit" id="btnCadastrar" class="btn btn-primary">Cadastrar evento</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- Listagem -->
+  <section class="card" aria-labelledby="titulo-listagem" style="margin-top:var(--space-xl)">
+    <div class="card-header">
+      <h2 id="titulo-listagem">Eventos cadastrados</h2>
+      <span class="badge badge-neutral">GET /eventos</span>
+    </div>
+    <div class="card-body" style="padding:0">
+      <div id="loading" class="empty-state" role="status" aria-live="polite">
+        <div class="empty-state-icon">⏳</div>
+        <p>Carregando eventos e locais...</p>
+      </div>
+      <div class="table-wrapper" id="tableWrapper" style="display:none">
+        <table class="table" aria-label="Tabela de eventos">
+          <thead>
+            <tr>
+              <th style="width:60px">ID</th>
+              <th>Título</th>
+              <th>Data</th>
+              <th>Status</th>
+              <th>Local</th>
+              <th style="width:170px;text-align:right">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div id="empty" class="empty-state" style="display:none">
+        <div class="empty-state-icon">🎫</div>
+        <h3>Nenhum evento encontrado</h3>
+        <p>Cadastre o primeiro evento usando o formulário acima.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Modal Editar -->
+<div id="modalEditar" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitulo">Editar evento</h3>
+      <button type="button" class="modal-close" aria-label="Fechar" onclick="fecharModal()">×</button>
+    </div>
+    <form id="formEditar" novalidate>
+      <div class="modal-body">
+        <input type="hidden" id="editId">
+        <div class="form-group">
+          <label for="editTitulo">Título <span class="required">*</span></label>
+          <input type="text" id="editTitulo" class="input" required>
+        </div>
+        <div class="form-group">
+          <label for="editDescricao">Descrição</label>
+          <textarea id="editDescricao" class="textarea" rows="3"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="editDataEvento">Data <span class="required">*</span></label>
+            <input type="datetime-local" id="editDataEvento" class="input" required>
+          </div>
+          <div class="form-group">
+            <label for="editStatus">Status <span class="required">*</span></label>
+            <select id="editStatus" class="select" required>
+              <option value="planejado">Planejado</option>
+              <option value="confirmado">Confirmado</option>
+              <option value="cancelado">Cancelado</option>
+              <option value="concluido">Concluído</option>
+              <option value="adiado">Adiado</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="editIdLocal">Local <span class="required">*</span></label>
+          <select id="editIdLocal" class="select" required></select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
+        <button type="submit" id="btnSalvarEdicao" class="btn btn-primary">Salvar alterações</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<footer class="footer" role="contentinfo">
+  <p>PAW 3BI · <a href="dashboard.html">Dashboard</a> · <a href="login.html">Login</a> · <a href="#" onclick="logout();return false">Logout</a></p>
+</footer>
+
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script>
+(function(){
+  'use strict';
+  (function guard(){
+    var token=(typeof getToken==='function'?getToken():localStorage.getItem('token'));
+    if(!token){ location.href='login.html'; return; }
+    if(typeof checkAuth==='function') checkAuth({redirectTo:'login.html', verifyServer:true});
+    setTimeout(function(){
+      if(typeof displayUser==='function') displayUser();
+      var has=token&&String(token).trim()!=='';
+      var a=document.getElementById('navLogin'), b=document.getElementById('navRegister'), c=document.getElementById('btnLogout'), d=document.getElementById('userName');
+      if(a) a.style.display=has?'none':''; if(b) b.style.display=has?'none':''; if(c) c.style.display=has?'inline-flex':'none';
+      if(d&&has){ try{var u=getUser?getUser():null; if(u){d.textContent=(u.nome||u.email||'Logado'); d.style.display='inline-flex';}}catch(e){} }
+    },120);
+  })();
+  document.getElementById('btnLogout').addEventListener('click',function(e){e.preventDefault(); if(typeof logout==='function') logout('login.html'); else{localStorage.removeItem('token');location.href='login.html';}});
+
+  var alertEl=document.getElementById('alertGlobal'), loadingEl=document.getElementById('loading'), tableWrapper=document.getElementById('tableWrapper'), emptyEl=document.getElementById('empty'), tbody=document.getElementById('tbody'), contadorEl=document.getElementById('contador');
+  var selectLocal=document.getElementById('idLocal'), selectEditLocal=document.getElementById('editIdLocal');
+  var locaisCache=[];
+
+  function showAlert(msg,type){ type=type||'info'; alertEl.className='alert alert-'+(type==='error'?'danger':type); alertEl.textContent=msg; alertEl.style.display='flex'; alertEl.hidden=false; alertEl.scrollIntoView({behavior:'smooth',block:'nearest'}); if(type==='success') setTimeout(hideAlert,3800); }
+  function hideAlert(){ alertEl.style.display='none'; alertEl.hidden=true; alertEl.textContent=''; }
+  window.hideAlert=hideAlert; window.showAlert=showAlert;
+  function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function extractList(res){
+    if(Array.isArray(res)) return res;
+    if(res && Array.isArray(res.data)) return res.data;
+    if(res && res.data && Array.isArray(res.data.data)) return res.data.data;
+    if(res && Array.isArray(res.eventos)) return res.eventos;
+    if(res && res.data && Array.isArray(res.data.eventos)) return res.data.eventos;
+    return [];
+  }
+  function formatDateBR(dt){
+    if(!dt) return '—';
+    // tenta converter "YYYY-MM-DD HH:MM:SS" para locale
+    var s=String(dt).replace(' ', 'T');
+    var d=new Date(s);
+    if(isNaN(d.getTime())) return escapeHtml(dt);
+    return d.toLocaleString('pt-BR', {dateStyle:'short', timeStyle:'short'});
+  }
+  function toApiDateTime(localDT){
+    if(!localDT) return null;
+    // input datetime-local => "2026-12-10T14:00" -> "2026-12-10 14:00:00"
+    return localDT.replace('T',' ') + (localDT.length===16 ? ':00' : '');
+  }
+  function toInputDateTime(apiDT){
+    if(!apiDT) return '';
+    var s=String(apiDT).replace(' ','T');
+    // corta segundos se necessário para input
+    return s.slice(0,16);
+  }
+  function statusBadge(status){
+    var map={planejado:'badge-neutral', confirmado:'badge-success', cancelado:'badge-danger', concluido:'badge-primary', adiado:'badge-warning'};
+    var cls=map[String(status).toLowerCase()]||'badge-neutral';
+    return '<span class="badge '+cls+'">'+escapeHtml(status||'—')+'</span>';
+  }
+  function atualizarContador(n){ contadorEl.textContent=n+(n===1?' evento':' eventos'); }
+  function setLoading(v){ loadingEl.style.display=v?'':'none'; if(v){tableWrapper.style.display='none'; emptyEl.style.display='none';} }
+
+  // Modal
+  var modal=document.getElementById('modalEditar');
+  window.abrirModal=function(item){
+    document.getElementById('editId').value=item.idEvento || item.id || '';
+    document.getElementById('editTitulo').value=item.titulo || '';
+    document.getElementById('editDescricao').value=item.descricao || '';
+    document.getElementById('editDataEvento').value=toInputDateTime(item.dataEvento || item.data_evento);
+    document.getElementById('editStatus').value=(item.status||'planejado').toLowerCase();
+    // garante opções de locais carregadas
+    preencherSelectLocais(selectEditLocal, item.idLocal || item.id_local || '');
+    modal.classList.add('is-open'); document.body.style.overflow='hidden';
+  };
+  window.fecharModal=function(){ modal.classList.remove('is-open'); document.body.style.overflow=''; };
+  modal.addEventListener('click',function(e){ if(e.target===modal) fecharModal(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&modal.classList.contains('is-open')) fecharModal(); });
+
+  function preencherSelectLocais(selectEl, selectedId){
+    selectEl.innerHTML='';
+    if(!locaisCache.length){
+      var opt=document.createElement('option'); opt.value=''; opt.textContent='Nenhum local disponível — cadastre em Locais'; opt.disabled=true; opt.selected=true;
+      selectEl.appendChild(opt); selectEl.disabled=true; return;
+    }
+    selectEl.disabled=false;
+    var placeholder=document.createElement('option'); placeholder.value=''; placeholder.textContent='Selecione um local...'; placeholder.disabled=true;
+    if(!selectedId) placeholder.selected=true;
+    selectEl.appendChild(placeholder);
+    locaisCache.forEach(function(l){
+      var id=l.idLocal||l.id;
+      var opt=document.createElement('option'); opt.value=id; opt.textContent=l.nome+' — '+l.endereco+' (cap: '+l.capacidade+')';
+      if(String(id)===String(selectedId)) opt.selected=true;
+      selectEl.appendChild(opt);
+    });
+  }
+
+  async function carregarLocais(){
+    try{
+      var res=await Api.getLocais();
+      var lista=extractList(res);
+      // normaliza locais para cache
+      if(!lista.length && res && res.data && res.data.locais) lista=res.data.locais;
+      locaisCache=lista;
+      preencherSelectLocais(selectLocal, '');
+      preencherSelectLocais(selectEditLocal, '');
+    }catch(err){
+      locaisCache=[];
+      selectLocal.innerHTML='<option value="">Erro ao carregar locais</option>';
+      selectEditLocal.innerHTML='<option value="">Erro ao carregar locais</option>';
+    }
+  }
+
+  function nomeLocalPorId(id){
+    var found=locaisCache.find(function(l){ return String(l.idLocal||l.id)===String(id); });
+    return found ? found.nome : ('Local #'+id);
+  }
+
+  function renderTabela(lista){
+    tbody.innerHTML='';
+    if(!lista.length){ tableWrapper.style.display='none'; emptyEl.style.display=''; atualizarContador(0); return; }
+    emptyEl.style.display='none'; tableWrapper.style.display=''; atualizarContador(lista.length);
+    var frag=document.createDocumentFragment();
+    lista.forEach(function(ev){
+      var id=ev.idEvento||ev.id;
+      var idLocal=ev.idLocal||ev.id_local;
+      var tr=document.createElement('tr');
+      tr.innerHTML=
+        '<td><span class="badge badge-neutral">#'+escapeHtml(id)+'</span></td>'+
+        '<td><strong>'+escapeHtml(ev.titulo)+'</strong><br><small class="text-muted">'+escapeHtml(ev.descricao||'—')+'</small></td>'+
+        '<td>'+formatDateBR(ev.dataEvento||ev.data_evento)+'</td>'+
+        '<td>'+statusBadge(ev.status)+'</td>'+
+        '<td>'+escapeHtml(nomeLocalPorId(idLocal))+'<br><small class="text-muted">ID '+escapeHtml(idLocal||'—')+'</small></td>'+
+        '<td><div class="table-actions"><button type="button" class="btn btn-secondary btn-sm" data-edit="'+escapeHtml(id)+'">✎ Editar</button><button type="button" class="btn btn-danger btn-sm" data-delete="'+escapeHtml(id)+'">🗑 Excluir</button></div></td>';
+      frag.appendChild(tr);
+    });
+    tbody.appendChild(frag);
+    tbody.querySelectorAll('[data-edit]').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        var id=btn.getAttribute('data-edit');
+        var item=lista.find(function(x){ return String(x.idEvento||x.id)===String(id); });
+        if(item) abrirModal(item);
+      });
+    });
+    tbody.querySelectorAll('[data-delete]').forEach(function(btn){
+      btn.addEventListener('click', async function(){
+        var id=btn.getAttribute('data-delete');
+        var rowTitle=btn.closest('tr').querySelector('strong')?.textContent || ('#'+id);
+        if(!confirm('Excluir o evento "'+rowTitle+'" (ID '+id+')?')) return;
+        btn.disabled=true; btn.textContent='Excluindo...';
+        try{ await Api.deleteEvento(id); showAlert('Evento excluído com sucesso.','success'); await carregar(); }catch(err){ showAlert(err.message||'Erro ao excluir evento.','error'); btn.disabled=false; btn.textContent='🗑 Excluir'; }
+      });
+    });
+  }
+
+  async function carregar(){
+    setLoading(true); hideAlert();
+    try{
+      // carrega locais primeiro para resolver nomes
+      if(!locaisCache.length) await carregarLocais();
+      var res=await Api.getEventos();
+      var lista=extractList(res);
+      renderTabela(lista);
+    }catch(err){
+      showAlert(err.message||'Erro ao carregar eventos.','error');
+      tableWrapper.style.display='none'; emptyEl.style.display='none'; atualizarContador(0);
+    }finally{ setLoading(false); }
+  }
+
+  // Cadastro
+  document.getElementById('formCadastro').addEventListener('submit', async function(e){
+    e.preventDefault(); hideAlert();
+    var titulo=document.getElementById('titulo').value.trim();
+    var descricao=document.getElementById('descricao').value.trim();
+    var dataEventoRaw=document.getElementById('dataEvento').value;
+    var status=document.getElementById('status').value;
+    var idLocal=document.getElementById('idLocal').value;
+    if(!titulo || !dataEventoRaw || !status || !idLocal){ showAlert('Preencha título, data, status e local.','error'); return; }
+    var dataEvento=toApiDateTime(dataEventoRaw);
+    var btn=document.getElementById('btnCadastrar'); btn.disabled=true; var old=btn.textContent; btn.textContent='Cadastrando...';
+    try{
+      await Api.createEvento({ titulo:titulo, descricao:descricao||null, dataEvento:dataEvento, status:status, idLocal:parseInt(idLocal,10) });
+      showAlert('Evento "'+titulo+'" cadastrado com sucesso!','success'); e.target.reset(); await carregar();
+    }catch(err){ showAlert(err.message||'Erro ao cadastrar evento.','error'); }finally{ btn.disabled=false; btn.textContent=old; }
+  });
+
+  // Edição
+  document.getElementById('formEditar').addEventListener('submit', async function(e){
+    e.preventDefault(); hideAlert();
+    var id=document.getElementById('editId').value;
+    var titulo=document.getElementById('editTitulo').value.trim();
+    var descricao=document.getElementById('editDescricao').value.trim();
+    var dataEventoRaw=document.getElementById('editDataEvento').value;
+    var status=document.getElementById('editStatus').value;
+    var idLocal=document.getElementById('editIdLocal').value;
+    if(!id||!titulo||!dataEventoRaw||!status||!idLocal){ showAlert('Preencha todos os campos obrigatórios.','error'); return; }
+    var dataEvento=toApiDateTime(dataEventoRaw);
+    var btn=document.getElementById('btnSalvarEdicao'); btn.disabled=true; var old=btn.textContent; btn.textContent='Salvando...';
+    try{
+      await Api.updateEvento(id, { titulo:titulo, descricao:descricao||null, dataEvento:dataEvento, status:status, idLocal:parseInt(idLocal,10) });
+      showAlert('Evento atualizado com sucesso!','success'); fecharModal(); await carregar();
+    }catch(err){ showAlert(err.message||'Erro ao atualizar evento.','error'); }finally{ btn.disabled=false; btn.textContent=old; }
+  });
+
+  document.getElementById('btnRecarregar').addEventListener('click', async function(){ await carregarLocais(); await carregar(); });
+
+  // init
+  (async function init(){ await carregarLocais(); await carregar(); })();
+})();
+</script>
+</body>
+</html>

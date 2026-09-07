@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Gestão de Compras — Cadastro, listagem, edição e exclusão. Protegido por JWT.">
+  <title>Compras — Gestão de Eventos</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-protected>
+<header class="header" role="banner">
+  <div class="container">
+    <a href="dashboard.html" class="brand" aria-label="Dashboard">
+      <span class="brand-icon">E</span>
+      Eventos <span style="color:var(--color-text-muted);font-weight:400">· PAW 3BI</span>
+    </a>
+    <nav class="nav" aria-label="Navegação principal" id="mainNav">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="locais.html">Locais</a>
+      <a href="eventos.html">Eventos</a>
+      <a href="participantes.html">Participantes</a>
+      <a href="ingressos.html">Ingressos</a>
+      <a href="compras.html" class="active" aria-current="page">Compras</a>
+      <a href="login.html" id="navLogin">Login</a>
+      <a href="register.html" id="navRegister">Cadastro</a>
+    </nav>
+    <div class="header-actions">
+      <span id="userName" class="badge badge-neutral" style="display:none"></span>
+      <button type="button" id="btnLogout" class="btn btn-ghost btn-sm" style="display:none">Sair</button>
+      <button type="button" class="menu-toggle" aria-label="Abrir menu" aria-expanded="false" onclick="var n=document.getElementById('mainNav');n.classList.toggle('is-open');this.setAttribute('aria-expanded',n.classList.contains('is-open'))">☰</button>
+    </div>
+  </div>
+</header>
+
+<main class="main-content container" role="main">
+  <div class="page-header">
+    <div>
+      <h1>Compras</h1>
+      <p>Participante compra ingresso — controla estoque em transação e calcula valor total automaticamente.</p>
+    </div>
+    <div class="btn-group">
+      <span id="contador" class="badge badge-primary" aria-live="polite">— compras</span>
+      <button type="button" id="btnRecarregar" class="btn btn-secondary btn-sm">↻ Atualizar</button>
+    </div>
+  </div>
+
+  <div id="alertGlobal" class="alert" role="alert" style="display:none"></div>
+
+  <!-- Cadastro -->
+  <section class="card" aria-labelledby="titulo-cadastro">
+    <div class="card-header">
+      <h2 id="titulo-cadastro">Registrar compra</h2>
+      <span class="badge badge-neutral">POST /compras</span>
+    </div>
+    <div class="card-body">
+      <form id="formCadastro" novalidate>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="idParticipante">Participante <span class="required">*</span></label>
+            <select id="idParticipante" name="idParticipante" class="select" required>
+              <option value="">Carregando participantes...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="idIngresso">Ingresso <span class="required">*</span></label>
+            <select id="idIngresso" name="idIngresso" class="select" required>
+              <option value="">Carregando ingressos...</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="quantidade">Quantidade <span class="required">*</span></label>
+            <input type="number" id="quantidade" name="quantidade" class="input" placeholder="Ex.: 2" required min="1" step="1">
+            <p class="form-hint">Estoque será validado no servidor (409 se sem estoque).</p>
+          </div>
+          <div class="form-group">
+            <label>Valor total</label>
+            <div class="input" id="previewValor" style="background:var(--color-bg-alt);display:flex;align-items:center;min-height:42px">— calcule automático</div>
+            <p class="form-hint">Calculado como <code>quantidade × preço do ingresso</code>.</p>
+          </div>
+        </div>
+        <div class="flex" style="justify-content:flex-end;gap:8px;margin-top:8px">
+          <button type="reset" class="btn btn-secondary">Limpar</button>
+          <button type="submit" id="btnCadastrar" class="btn btn-primary">Comprar</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- Listagem -->
+  <section class="card" aria-labelledby="titulo-listagem" style="margin-top:var(--space-xl)">
+    <div class="card-header">
+      <h2 id="titulo-listagem">Compras registradas</h2>
+      <span class="badge badge-neutral">GET /compras</span>
+    </div>
+    <div class="card-body" style="padding:0">
+      <div id="loading" class="empty-state" role="status" aria-live="polite">
+        <div class="empty-state-icon">⏳</div>
+        <p>Carregando compras, participantes e ingressos...</p>
+      </div>
+      <div class="table-wrapper" id="tableWrapper" style="display:none">
+        <table class="table" aria-label="Tabela de compras">
+          <thead>
+            <tr>
+              <th style="width:60px">ID</th>
+              <th>Participante</th>
+              <th>Ingresso</th>
+              <th style="width:90px">Qtd</th>
+              <th>Valor total</th>
+              <th>Data</th>
+              <th style="width:170px;text-align:right">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div id="empty" class="empty-state" style="display:none">
+        <div class="empty-state-icon">🛒</div>
+        <h3>Nenhuma compra registrada</h3>
+        <p>Use o formulário acima para registrar a primeira compra.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Modal Editar -->
+<div id="modalEditar" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitulo">Editar compra</h3>
+      <button type="button" class="modal-close" aria-label="Fechar" onclick="fecharModal()">×</button>
+    </div>
+    <form id="formEditar" novalidate>
+      <div class="modal-body">
+        <input type="hidden" id="editId">
+        <div class="form-group">
+          <label for="editIdParticipante">Participante <span class="required">*</span></label>
+          <select id="editIdParticipante" class="select" required></select>
+        </div>
+        <div class="form-group">
+          <label for="editIdIngresso">Ingresso <span class="required">*</span></label>
+          <select id="editIdIngresso" class="select" required></select>
+        </div>
+        <div class="form-group">
+          <label for="editQuantidade">Quantidade <span class="required">*</span></label>
+          <input type="number" id="editQuantidade" class="input" required min="1" step="1">
+        </div>
+        <div id="editPreviewValor" class="alert alert-info" style="display:none"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
+        <button type="submit" id="btnSalvarEdicao" class="btn btn-primary">Salvar alterações</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<footer class="footer" role="contentinfo">
+  <p>PAW 3BI · <a href="dashboard.html">Dashboard</a> · <a href="login.html">Login</a> · <a href="#" onclick="logout();return false">Logout</a></p>
+</footer>
+
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script>
+(function(){
+  'use strict';
+  (function guard(){
+    var t=(typeof getToken==='function'?getToken():localStorage.getItem('token'));
+    if(!t){ location.href='login.html'; return; }
+    if(typeof checkAuth==='function') checkAuth({redirectTo:'login.html', verifyServer:true});
+    setTimeout(function(){
+      if(typeof displayUser==='function') displayUser();
+      var has=t&&String(t).trim()!=='';
+      var a=document.getElementById('navLogin'), b=document.getElementById('navRegister'), c=document.getElementById('btnLogout'), d=document.getElementById('userName');
+      if(a) a.style.display=has?'none':''; if(b) b.style.display=has?'none':''; if(c) c.style.display=has?'inline-flex':'none';
+      if(d&&has){ try{var u=getUser?getUser():null; if(u){d.textContent=(u.nome||u.email||'Logado'); d.style.display='inline-flex';}}catch(e){}}
+    },120);
+  })();
+  document.getElementById('btnLogout').addEventListener('click',function(e){e.preventDefault(); if(typeof logout==='function') logout('login.html'); else{localStorage.removeItem('token');location.href='login.html';}});
+
+  var alertEl=document.getElementById('alertGlobal'), loadingEl=document.getElementById('loading'), tableWrapper=document.getElementById('tableWrapper'), emptyEl=document.getElementById('empty'), tbody=document.getElementById('tbody'), contadorEl=document.getElementById('contador');
+  var selPart=document.getElementById('idParticipante'), selIng=document.getElementById('idIngresso');
+  var selEditPart=document.getElementById('editIdParticipante'), selEditIng=document.getElementById('editIdIngresso');
+  var participantesCache=[], ingressosCache=[];
+
+  function showAlert(msg,type){ type=type||'info'; alertEl.className='alert alert-'+(type==='error'?'danger':type); alertEl.textContent=msg; alertEl.style.display='flex'; alertEl.hidden=false; alertEl.scrollIntoView({behavior:'smooth',block:'nearest'}); if(type==='success') setTimeout(hideAlert,3800); }
+  function hideAlert(){ alertEl.style.display='none'; alertEl.hidden=true; alertEl.textContent=''; }
+  window.hideAlert=hideAlert; window.showAlert=showAlert;
+  function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function extractList(res){
+    if(Array.isArray(res)) return res;
+    if(res && Array.isArray(res.data)) return res.data;
+    if(res && res.data && Array.isArray(res.data.data)) return res.data.data;
+    if(res && Array.isArray(res.compras)) return res.compras;
+    if(res && res.data && Array.isArray(res.data.compras)) return res.data.compras;
+    return [];
+  }
+  function formatPreco(v){ var n=Number(v); if(isNaN(n)) return escapeHtml(v==null?'—':v); return n.toLocaleString('pt-BR',{style:'currency', currency:'BRL'}); }
+  function formatDateBR(dt){ if(!dt) return '—'; var s=String(dt).replace(' ','T'); var d=new Date(s); if(isNaN(d.getTime())) return escapeHtml(dt); return d.toLocaleString('pt-BR',{dateStyle:'short', timeStyle:'short'}); }
+  function atualizarContador(n){ contadorEl.textContent=n+(n===1?' compra':' compras'); }
+  function setLoading(v){ loadingEl.style.display=v?'':'none'; if(v){tableWrapper.style.display='none'; emptyEl.style.display='none';} }
+
+  var modal=document.getElementById('modalEditar');
+  window.abrirModal=function(item){
+    document.getElementById('editId').value=item.idCompra||item.id||'';
+    preencherSelect(selEditPart, participantesCache, item.idParticipante||item.id_participante||'', 'participante');
+    preencherSelect(selEditIng, ingressosCache, item.idIngresso||item.id_ingresso||'', 'ingresso');
+    document.getElementById('editQuantidade').value=item.quantidade||'';
+    atualizarEditPreview();
+    modal.classList.add('is-open'); document.body.style.overflow='hidden';
+  };
+  window.fecharModal=function(){ modal.classList.remove('is-open'); document.body.style.overflow=''; };
+  modal.addEventListener('click',function(e){ if(e.target===modal) fecharModal(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&modal.classList.contains('is-open')) fecharModal(); });
+
+  function preencherSelect(selectEl, cache, selectedId, tipo){
+    selectEl.innerHTML='';
+    if(!cache.length){
+      var opt=document.createElement('option'); opt.value=''; opt.textContent=(tipo==='participante'?'Nenhum participante — cadastre em Participantes':'Nenhum ingresso — cadastre em Ingressos'); opt.disabled=true; opt.selected=true;
+      selectEl.appendChild(opt); selectEl.disabled=true; return;
+    }
+    selectEl.disabled=false;
+    var ph=document.createElement('option'); ph.value=''; ph.textContent='Selecione...'; ph.disabled=true; if(!selectedId) ph.selected=true;
+    selectEl.appendChild(ph);
+    cache.forEach(function(item){
+      var id = item.idParticipante||item.idIngresso||item.id;
+      var label;
+      if(tipo==='participante') label = item.nome+' — '+item.email+' (ID '+id+')';
+      else label = (item.tipo||'ingresso')+' — '+formatPreco(item.preco)+' (disp: '+(item.quantidadeDisponivel||item.quantidade_disponivel||'?')+') ID '+id;
+      var opt=document.createElement('option'); opt.value=id; opt.textContent=label;
+      if(String(id)===String(selectedId)) opt.selected=true;
+      selectEl.appendChild(opt);
+    });
+  }
+
+  async function carregarDependencias(){
+    try{
+      var pRes=await Api.getParticipantes();
+      participantesCache=extractList(pRes);
+    }catch(e){ participantesCache=[]; }
+    try{
+      var iRes=await Api.getIngressos();
+      ingressosCache=extractList(iRes);
+    }catch(e){ ingressosCache=[]; }
+    preencherSelect(selPart, participantesCache, '', 'participante');
+    preencherSelect(selIng, ingressosCache, '', 'ingresso');
+    preencherSelect(selEditPart, participantesCache, '', 'participante');
+    preencherSelect(selEditIng, ingressosCache, '', 'ingresso');
+    atualizarPreview();
+  }
+
+  function nomeParticipante(id){
+    var f=participantesCache.find(function(p){ return String(p.idParticipante||p.id)===String(id); });
+    return f ? f.nome : ('Participante #'+id);
+  }
+  function infoIngresso(id){
+    var f=ingressosCache.find(function(i){ return String(i.idIngresso||i.id)===String(id); });
+    if(!f) return 'Ingresso #'+id;
+    return (f.tipo||'ingresso')+' — '+formatPreco(f.preco);
+  }
+  function precoIngresso(id){
+    var f=ingressosCache.find(function(i){ return String(i.idIngresso||i.id)===String(id); });
+    return f ? Number(f.preco) : null;
+  }
+
+  function atualizarPreview(){
+    var qtd=parseInt(document.getElementById('quantidade').value,10);
+    var idIng=selIng.value;
+    var preview=document.getElementById('previewValor');
+    if(!qtd || !idIng || isNaN(qtd)){ preview.textContent='— selecione ingresso e quantidade'; return; }
+    var preco=precoIngresso(idIng);
+    if(preco==null){ preview.textContent='— preço não encontrado'; return; }
+    var total = qtd*preco;
+    preview.textContent = qtd+' × '+formatPreco(preco)+' = '+formatPreco(total);
+  }
+  function atualizarEditPreview(){
+    var qtd=parseInt(document.getElementById('editQuantidade').value,10);
+    var idIng=selEditIng.value;
+    var el=document.getElementById('editPreviewValor');
+    if(!qtd || !idIng || isNaN(qtd)){ el.style.display='none'; return; }
+    var preco=precoIngresso(idIng);
+    if(preco==null){ el.style.display='none'; return; }
+    var total=qtd*preco;
+    el.textContent='Valor total estimado: '+formatPreco(total)+' ('+qtd+' × '+formatPreco(preco)+')';
+    el.style.display='block';
+  }
+
+  document.getElementById('quantidade').addEventListener('input', atualizarPreview);
+  selIng.addEventListener('change', atualizarPreview);
+  document.getElementById('editQuantidade').addEventListener('input', atualizarEditPreview);
+  selEditIng.addEventListener('change', atualizarEditPreview);
+
+  function renderTabela(lista){
+    tbody.innerHTML='';
+    if(!lista.length){ tableWrapper.style.display='none'; emptyEl.style.display=''; atualizarContador(0); return; }
+    emptyEl.style.display='none'; tableWrapper.style.display=''; atualizarContador(lista.length);
+    var frag=document.createDocumentFragment();
+    lista.forEach(function(c){
+      var id=c.idCompra||c.id;
+      var idPart=c.idParticipante||c.id_participante;
+      var idIng=c.idIngresso||c.id_ingresso;
+      var qtd=c.quantidade;
+      var total=c.valorTotal||c.valor_total||c.valorTotalCalculado;
+      // fallback calcula se não veio
+      if(total==null){
+        var preco=precoIngresso(idIng);
+        if(preco!=null && qtd) total = preco*qtd;
+      }
+      var data=c.dataCompra||c.data_compra||c.createdAt||c.created_at;
+      var tr=document.createElement('tr');
+      tr.innerHTML=
+        '<td><span class="badge badge-neutral">#'+escapeHtml(id)+'</span></td>'+
+        '<td>'+escapeHtml(nomeParticipante(idPart))+'<br><small class="text-muted">ID '+escapeHtml(idPart||'—')+'</small></td>'+
+        '<td>'+escapeHtml(infoIngresso(idIng))+'<br><small class="text-muted">ID '+escapeHtml(idIng||'—')+'</small></td>'+
+        '<td><span class="badge badge-primary">'+escapeHtml(qtd)+'</span></td>'+
+        '<td><strong>'+formatPreco(total)+'</strong></td>'+
+        '<td>'+formatDateBR(data)+'</td>'+
+        '<td><div class="table-actions"><button type="button" class="btn btn-secondary btn-sm" data-edit="'+escapeHtml(id)+'">✎ Editar</button><button type="button" class="btn btn-danger btn-sm" data-delete="'+escapeHtml(id)+'">🗑 Excluir</button></div></td>';
+      frag.appendChild(tr);
+    });
+    tbody.appendChild(frag);
+    tbody.querySelectorAll('[data-edit]').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        var id=btn.getAttribute('data-edit');
+        var item=lista.find(function(x){ return String(x.idCompra||x.id)===String(id); });
+        if(item) abrirModal(item);
+      });
+    });
+    tbody.querySelectorAll('[data-delete]').forEach(function(btn){
+      btn.addEventListener('click', async function(){
+        var id=btn.getAttribute('data-delete');
+        if(!confirm('Excluir compra #'+id+'? O estoque será estornado.')) return;
+        btn.disabled=true; btn.textContent='Excluindo...';
+        try{ await Api.deleteCompra(id); showAlert('Compra excluída com sucesso.','success'); await carregar(); }catch(err){ showAlert(err.message||'Erro ao excluir compra.','error'); btn.disabled=false; btn.textContent='🗑 Excluir'; }
+      });
+    });
+  }
+
+  async function carregar(){
+    setLoading(true); hideAlert();
+    try{
+      if(!participantesCache.length || !ingressosCache.length) await carregarDependencias();
+      var res=await Api.getCompras();
+      var lista=extractList(res);
+      renderTabela(lista);
+    }catch(err){ showAlert(err.message||'Erro ao carregar compras.','error'); tableWrapper.style.display='none'; emptyEl.style.display='none'; atualizarContador(0); }
+    finally{ setLoading(false); }
+  }
+
+  document.getElementById('formCadastro').addEventListener('submit', async function(e){
+    e.preventDefault(); hideAlert();
+    var idPart=selPart.value;
+    var idIng=selIng.value;
+    var qtd=parseInt(document.getElementById('quantidade').value,10);
+    if(!idPart||!idIng||!qtd||qtd<1){ showAlert('Selecione participante, ingresso e informe quantidade válida.','error'); return; }
+    var btn=document.getElementById('btnCadastrar'); btn.disabled=true; var old=btn.textContent; btn.textContent='Registrando...';
+    try{
+      await Api.createCompra({ idParticipante:parseInt(idPart,10), idIngresso:parseInt(idIng,10), quantidade:qtd });
+      showAlert('Compra registrada com sucesso!','success'); e.target.reset(); document.getElementById('previewValor').textContent='— calcule automático'; await carregar();
+    }catch(err){ showAlert(err.message||'Erro ao registrar compra.','error'); }finally{ btn.disabled=false; btn.textContent=old; }
+  });
+
+  document.getElementById('formEditar').addEventListener('submit', async function(e){
+    e.preventDefault(); hideAlert();
+    var id=document.getElementById('editId').value;
+    var idPart=selEditPart.value;
+    var idIng=selEditIng.value;
+    var qtd=parseInt(document.getElementById('editQuantidade').value,10);
+    if(!id||!idPart||!idIng||!qtd||qtd<1){ showAlert('Preencha todos os campos para editar.','error'); return; }
+    var btn=document.getElementById('btnSalvarEdicao'); btn.disabled=true; var old=btn.textContent; btn.textContent='Salvando...';
+    try{
+      await Api.updateCompra(id, { idParticipante:parseInt(idPart,10), idIngresso:parseInt(idIng,10), quantidade:qtd });
+      showAlert('Compra atualizada com sucesso!','success'); fecharModal(); await carregar();
+    }catch(err){ showAlert(err.message||'Erro ao atualizar compra.','error'); }finally{ btn.disabled=false; btn.textContent=old; }
+  });
+
+  document.getElementById('btnRecarregar').addEventListener('click', async function(){ await carregarDependencias(); await carregar(); });
+
+  (async function init(){ await carregarDependencias(); await carregar(); })();
+})();
+</script>
+</body>
+</html>

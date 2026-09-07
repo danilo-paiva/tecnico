@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="refresh" content="0; url=login.html">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirecionando...</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="auth-wrapper">
+    <p class="muted">Redirecionando para <a href="login.html">login.html</a>...</p>
+  </main>
+  <script>
+    var t = localStorage.getItem('token');
+    if (t) {
+      fetch('/auth/me', { headers: { 'Authorization': 'Bearer ' + t } })
+        .then(function(r){ return r.ok ? window.location.replace('dashboard.html') : window.location.replace('login.html'); })
+        .catch(function(){ window.location.replace('login.html'); });
+    } else {
+      window.location.replace('login.html');
+    }
+  </script>
+</body>
+</html>

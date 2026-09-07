@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Cadastro — Gestão de Eventos & Ingressos">
+  <title>Cadastro — Gestão de Eventos</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="header" role="banner">
+  <div class="container">
+    <a href="dashboard.html" class="brand" aria-label="Dashboard">
+      <span class="brand-icon">E</span>
+      Eventos <span style="color:var(--color-text-muted);font-weight:400">· PAW 3BI</span>
+    </a>
+    <nav class="nav" aria-label="Navegação principal" id="mainNav">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="locais.html">Locais</a>
+      <a href="eventos.html">Eventos</a>
+      <a href="participantes.html">Participantes</a>
+      <a href="ingressos.html">Ingressos</a>
+      <a href="compras.html">Compras</a>
+      <a href="login.html">Login</a>
+      <a href="register.html" class="active" aria-current="page">Cadastro</a>
+    </nav>
+    <div class="header-actions">
+      <span id="userName" class="badge badge-neutral" style="display:none"></span>
+      <button type="button" id="btnLogout" class="btn btn-ghost btn-sm" style="display:none">Sair</button>
+      <button type="button" class="menu-toggle" aria-label="Abrir menu" aria-expanded="false" onclick="var n=document.getElementById('mainNav');n.classList.toggle('is-open');this.setAttribute('aria-expanded',n.classList.contains('is-open'))">☰</button>
+    </div>
+  </div>
+</header>
+
+<main class="main-content container" role="main" style="display:flex;justify-content:center;align-items:flex-start;padding-top:40px;padding-bottom:40px">
+  <section class="card" aria-labelledby="titulo-cadastro" style="width:100%;max-width:560px">
+    <div class="card-header">
+      <h1 id="titulo-cadastro" style="font-size:1.35rem">Criar conta</h1>
+      <span class="badge badge-neutral">Participante</span>
+    </div>
+    <div class="card-body">
+      <p class="form-hint" style="margin-top:0;margin-bottom:16px">Cadastre-se como participante para comprar ingressos e acessar o sistema.</p>
+
+      <div id="alert" class="alert" role="alert" style="display:none"></div>
+
+      <form id="registerForm" novalidate>
+        <div class="form-group">
+          <label for="nome">Nome completo <span class="required">*</span></label>
+          <input type="text" id="nome" name="nome" class="input" placeholder="Ex.: Maria Silva" required autocomplete="name" minlength="2">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="email">E-mail <span class="required">*</span></label>
+            <input type="email" id="email" name="email" class="input" placeholder="maria@exemplo.com" required autocomplete="email">
+          </div>
+          <div class="form-group">
+            <label for="telefone">Telefone <span class="required">*</span></label>
+            <input type="tel" id="telefone" name="telefone" class="input" placeholder="(47) 99999-8888" required autocomplete="tel">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="cpf">CPF <span class="required">*</span></label>
+            <input type="text" id="cpf" name="cpf" class="input" placeholder="000.000.000-00" required inputmode="numeric" maxlength="14">
+          </div>
+          <div class="form-group">
+            <label for="senha">Senha <span class="required">*</span></label>
+            <input type="password" id="senha" name="senha" class="input" placeholder="Mín. 6 caracteres" required autocomplete="new-password" minlength="6">
+          </div>
+        </div>
+        <p class="small muted" style="margin-top:-6px">A senha será armazenada com hash seguro (password_hash).</p>
+        <button type="submit" id="btnSubmit" class="btn btn-primary btn-block" style="margin-top:16px">
+          <span id="btnText">Cadastrar</span>
+        </button>
+      </form>
+
+      <div class="divider" role="separator" style="margin:20px 0"></div>
+      <p class="auth-footer" style="text-align:center;margin:0">Já tem conta? <a href="login.html"><strong>Faça login</strong></a></p>
+    </div>
+  </section>
+</main>
+
+<footer class="footer" role="contentinfo">
+  <p>PAW 3BI · <a href="dashboard.html">Dashboard</a> · <a href="login.html">Login</a> · <a href="locais.html">Locais</a> · Gerenciado com JWT</p>
+</footer>
+
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script>
+(function () {
+  var form = document.getElementById('registerForm');
+  var alertEl = document.getElementById('alert');
+  var btn = document.getElementById('btnSubmit');
+  var btnText = document.getElementById('btnText');
+  var cpfInput = document.getElementById('cpf');
+
+  Auth.redirectIfAuthenticated('/dashboard.html');
+
+  // Mostra usuário se já logado (header)
+  setTimeout(function(){
+    if(typeof displayUser==='function') displayUser();
+    var token = (typeof getToken==='function' ? getToken() : localStorage.getItem('token'));
+    var hasToken = token && String(token).trim()!=='';
+    var elOut=document.getElementById('btnLogout'), elName=document.getElementById('userName');
+    if(hasToken && elName){
+      try{ var u=getUser?getUser():null; if(u){ elName.textContent=(u.nome||u.email||'Logado'); elName.style.display='inline-flex'; } }catch(e){}
+      if(elOut) elOut.style.display='inline-flex';
+    }
+    if(elOut) elOut.addEventListener('click', function(e){ e.preventDefault(); if(typeof logout==='function') logout('login.html'); else { localStorage.removeItem('token'); location.href='login.html'; } });
+  },120);
+
+  cpfInput.addEventListener('input', function () {
+    var v = this.value.replace(/\D/g, '').slice(0, 11);
+    if (v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4');
+    else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
+    else if (v.length > 3) v = v.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+    this.value = v;
+  });
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    hideAlert(alertEl);
+
+    var data = {
+      nome: document.getElementById('nome').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      cpf: document.getElementById('cpf').value.trim(),
+      telefone: document.getElementById('telefone').value.trim(),
+      senha: document.getElementById('senha').value
+    };
+
+    if (!data.nome || !data.email || !data.cpf || !data.telefone || !data.senha) {
+      showAlert(alertEl, 'Preencha todos os campos.', 'error');
+      return;
+    }
+    if (data.senha.length < 6) {
+      showAlert(alertEl, 'A senha deve ter pelo menos 6 caracteres.', 'error');
+      return;
+    }
+
+    btn.disabled = true;
+    btnText.innerHTML = '<span class="spinner"></span> Cadastrando...';
+
+    try {
+      await Auth.register(data);
+      showAlert(alertEl, 'Cadastro realizado com sucesso! Redirecionando para o login...', 'success');
+      setTimeout(function () { window.location.href = 'login.html'; }, 1200);
+    } catch (err) {
+      showAlert(alertEl, err.message || 'Erro ao cadastrar.', 'error');
+      btn.disabled = false;
+      btnText.textContent = 'Cadastrar';
+    }
+  });
+})();
+</script>
+</body>
+</html>

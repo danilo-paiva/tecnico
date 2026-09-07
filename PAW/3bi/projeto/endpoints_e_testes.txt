@@ -1,0 +1,234 @@
+# Endpoints — Gestão de Eventos & Ingressos (PAW 3BI com JWT)
+# Base: http://127.0.0.1:8001
+# Front: http://127.0.0.1:8001/login.html (ana@email.com / Senha@123)
+# Todas as rotas de recursos exigem: Authorization: Bearer <token>
+
+# ========== AUTH (público) ==========
+POST http://127.0.0.1:8001/auth/login
+Content-Type: application/json
+{
+  "email": "ana@email.com",
+  "senha": "Senha@123"
+}
+# resposta: {success:true, data:{token:"eyJ...", expiresIn:7200, usuario:{idParticipante, nome, email}}}
+
+POST http://127.0.0.1:8001/auth/login
+# alternativa com wrapper participante (também aceito):
+{
+  "participante": {
+    "email": "ana@email.com",
+    "senha": "Senha@123"
+  }
+}
+
+POST http://127.0.0.1:8001/auth/register
+{
+  "nome": "Novo Usuario",
+  "email": "novo@email.com",
+  "cpf": "52998224725",
+  "telefone": "(47) 99999-0000",
+  "senha": "Senha@123"
+}
+
+GET http://127.0.0.1:8001/auth/me
+Authorization: Bearer <token>
+
+# ========== LOCAIS (protegido) ==========
+GET http://127.0.0.1:8001/locais
+Authorization: Bearer <token>
+
+GET http://127.0.0.1:8001/locais/count
+Authorization: Bearer <token>
+
+GET http://127.0.0.1:8001/locais/1
+Authorization: Bearer <token>
+
+GET http://127.0.0.1:8001/locais/nome/Tech
+Authorization: Bearer <token>
+
+POST http://127.0.0.1:8001/locais
+Authorization: Bearer <token>
+Content-Type: application/json
+{
+  "local": {
+    "nome": "Centro Teste Novo",
+    "endereco": "Rua Teste 123, Centro",
+    "capacidade": 450
+  }
+}
+
+PUT http://127.0.0.1:8001/locais/1
+Authorization: Bearer <token>
+{
+  "local": {
+    "nome": "Centro Teste Atualizado",
+    "endereco": "Rua Teste 456",
+    "capacidade": 500
+  }
+}
+
+DELETE http://127.0.0.1:8001/locais/5
+Authorization: Bearer <token>
+
+# Sem token → 401
+GET http://127.0.0.1:8001/locais
+# {success:false, message:"Token JWT não fornecido..."}
+
+# ========== EVENTOS (protegido) ==========
+GET http://127.0.0.1:8001/eventos
+Authorization: Bearer <token>
+
+GET http://127.0.0.1:8001/eventos/local/1
+Authorization: Bearer <token>
+
+POST http://127.0.0.1:8001/eventos
+Authorization: Bearer <token>
+{
+  "evento": {
+    "titulo": "Workshop PAW Avançado",
+    "descricao": "Oficina prática de REST + JWT",
+    "dataEvento": "2026-12-10 14:00:00",
+    "status": "planejado",
+    "idLocal": 1
+  }
+}
+
+PUT http://127.0.0.1:8001/eventos/1
+Authorization: Bearer <token>
+{
+  "evento": {
+    "titulo": "Workshop PAW Atualizado",
+    "descricao": "Nova descricao",
+    "dataEvento": "2026-12-10 14:00:00",
+    "status": "confirmado",
+    "idLocal": 1
+  }
+}
+
+DELETE http://127.0.0.1:8001/eventos/5
+Authorization: Bearer <token>
+
+# ========== PARTICIPANTES (protegido, exceto register) ==========
+GET http://127.0.0.1:8001/participantes
+Authorization: Bearer <token>
+
+POST http://127.0.0.1:8001/participantes
+Authorization: Bearer <token>
+{
+  "participante": {
+    "nome": "João Teste",
+    "email": "joao.teste@email.com",
+    "cpf": "52998224725",
+    "telefone": "(47) 99999-1111",
+    "senha": "Senha@123"
+  }
+}
+
+PUT http://127.0.0.1:8001/participantes/1
+Authorization: Bearer <token>
+{
+  "participante": {
+    "nome": "João Teste Atualizado",
+    "email": "joao.teste@email.com",
+    "cpf": "52998224725",
+    "telefone": "(47) 99999-2222",
+    "senha": "NovaSenha@123"
+  }
+}
+
+DELETE http://127.0.0.1:8001/participantes/5
+Authorization: Bearer <token>
+
+# ========== INGRESSOS (protegido) ==========
+GET http://127.0.0.1:8001/ingressos
+Authorization: Bearer <token>
+
+GET http://127.0.0.1:8001/ingressos/evento/1
+Authorization: Bearer <token>
+
+POST http://127.0.0.1:8001/ingressos
+Authorization: Bearer <token>
+{
+  "ingresso": {
+    "tipo": "camarote",
+    "preco": 199.90,
+    "quantidadeTotal": 80,
+    "quantidadeDisponivel": 80,
+    "idEvento": 1
+  }
+}
+
+PUT http://127.0.0.1:8001/ingressos/1
+Authorization: Bearer <token>
+{
+  "ingresso": {
+    "tipo": "inteira",
+    "preco": 90.00,
+    "quantidadeTotal": 200,
+    "quantidadeDisponivel": 180,
+    "idEvento": 1
+  }
+}
+
+DELETE http://127.0.0.1:8001/ingressos/7
+Authorization: Bearer <token>
+
+# ========== COMPRAS (protegido) ==========
+GET http://127.0.0.1:8001/compras
+Authorization: Bearer <token>
+
+GET http://127.0.0.1:8001/compras/participante/1
+Authorization: Bearer <token>
+
+GET http://127.0.0.1:8001/compras/ingresso/1
+Authorization: Bearer <token>
+
+POST http://127.0.0.1:8001/compras
+Authorization: Bearer <token>
+{
+  "compra": {
+    "quantidade": 2,
+    "idParticipante": 1,
+    "idIngresso": 1
+  }
+}
+# valor_total calculado = quantidade * preco
+
+PUT http://127.0.0.1:8001/compras/1
+Authorization: Bearer <token>
+{
+  "compra": {
+    "quantidade": 3,
+    "idParticipante": 1,
+    "idIngresso": 1
+  }
+}
+
+DELETE http://127.0.0.1:8001/compras/4
+Authorization: Bearer <token>
+
+# ========== TESTES DE REGRAS COM JWT ==========
+# Local duplicado → 409 (com token)
+POST http://127.0.0.1:8001/locais
+Authorization: Bearer <token>
+{"local":{"nome":"Teatro Municipal","endereco":"Outro","capacidade":100}}
+
+# Compra sem estoque → 409
+POST http://127.0.0.1:8001/compras
+Authorization: Bearer <token>
+{"compra":{"quantidade":9999,"idParticipante":1,"idIngresso":1}}
+
+# ========== cURL com JWT (copiar token do login) ==========
+# Login e salvar token
+TOKEN=$(curl -s -X POST http://127.0.0.1:8001/auth/login -H "Content-Type: application/json" -d '{"email":"ana@email.com","senha":"Senha@123"}' | php -r '$j=json_decode(file_get_contents("php://stdin"),true); echo $j["data"]["token"];')
+# Listar com token
+curl -s http://127.0.0.1:8001/locais -H "Authorization: Bearer $TOKEN" | jq
+curl -s http://127.0.0.1:8001/eventos -H "Authorization: Bearer $TOKEN" | jq
+# Criar com token
+curl -s -X POST http://127.0.0.1:8001/locais -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" -d '{"local":{"nome":"Local Via cURL JWT","endereco":"Rua cURL 99","capacidade":200}}' | jq
+# Front: abrir http://127.0.0.1:8001/login.html e logar
+
+# ========== Insomnia ==========
+# Crie Environment com variable token = {{ _.token }}
+# Login → extraia token da resposta para variável
+# Nas demais requisições, adicione Header: Authorization: Bearer {{ token }}

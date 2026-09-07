@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Dashboard — Gestão de Eventos & Ingressos">
+  <title>Dashboard — Gestão de Eventos</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-protected>
+
+<header class="header" role="banner">
+  <div class="container">
+    <a href="dashboard.html" class="brand" aria-label="Dashboard">
+      <span class="brand-icon">E</span>
+      Eventos <span style="color:var(--color-text-muted);font-weight:400">· PAW 3BI</span>
+    </a>
+    <nav class="nav" aria-label="Navegação principal" id="mainNav">
+      <a href="dashboard.html" class="active" aria-current="page">Dashboard</a>
+      <a href="locais.html">Locais</a>
+      <a href="eventos.html">Eventos</a>
+      <a href="participantes.html">Participantes</a>
+      <a href="ingressos.html">Ingressos</a>
+      <a href="compras.html">Compras</a>
+      <a href="login.html" id="navLogin">Login</a>
+      <a href="register.html" id="navRegister">Cadastro</a>
+    </nav>
+    <div class="header-actions">
+      <span id="userName" class="badge badge-neutral" style="display:none"></span>
+      <button type="button" id="btnLogout" class="btn btn-ghost btn-sm" style="display:none">Sair</button>
+      <button type="button" class="menu-toggle" aria-label="Abrir menu" aria-expanded="false" onclick="var n=document.getElementById('mainNav');n.classList.toggle('is-open');this.setAttribute('aria-expanded',n.classList.contains('is-open'))">☰</button>
+    </div>
+  </div>
+</header>
+
+<main class="main-content container" role="main">
+  <div class="page-header">
+    <div>
+      <h1 id="welcome-title">Bem-vindo(a), <span id="userNameInline">...</span>!</h1>
+      <p id="welcomeSub">Carregando suas informações... Verificando autenticação.</p>
+    </div>
+    <div class="btn-group">
+      <span id="userMeta" class="badge badge-neutral" hidden>
+        <span id="userEmail">—</span> · <span id="userId">ID: —</span> · JWT
+      </span>
+    </div>
+  </div>
+
+  <div id="alert" class="alert" role="alert" style="display:none"></div>
+
+  <section class="card" aria-labelledby="entidades-titulo">
+    <div class="card-header">
+      <h2 id="entidades-titulo">Entidades do sistema</h2>
+      <span class="badge badge-neutral">5 tabelas · JWT obrigatório</span>
+    </div>
+    <div class="card-body">
+      <p class="form-hint" style="margin-bottom:16px">Cada card leva à página completa de CRUD (cadastro + listagem + edição/exclusão) — todas protegidas por JWT.</p>
+      <div class="grid grid-dashboard">
+        <article class="card entity-card" style="box-shadow:none;border:1px solid var(--color-border)">
+          <div class="entity-icon icon-locais" aria-hidden="true">📍</div>
+          <h3>Locais</h3>
+          <p>Cadastro de locais onde eventos acontecem. Nome único, endereço e capacidade.</p>
+          <div class="entity-actions" style="margin-top:12px">
+            <a href="locais.html" class="btn btn-primary btn-sm">Gerenciar Locais</a>
+            <a href="#" class="btn btn-secondary btn-sm" data-action="listar" data-entity="locais">Prévia API</a>
+          </div>
+        </article>
+        <article class="card entity-card" style="box-shadow:none;border:1px solid var(--color-border)">
+          <div class="entity-icon icon-eventos" aria-hidden="true">🎫</div>
+          <h3>Eventos</h3>
+          <p>Eventos vinculados a um local. Título, descrição, data e status.</p>
+          <div class="entity-actions" style="margin-top:12px">
+            <a href="eventos.html" class="btn btn-primary btn-sm">Gerenciar Eventos</a>
+            <a href="#" class="btn btn-secondary btn-sm" data-action="listar" data-entity="eventos">Prévia API</a>
+          </div>
+        </article>
+        <article class="card entity-card" style="box-shadow:none;border:1px solid var(--color-border)">
+          <div class="entity-icon icon-participantes" aria-hidden="true">👥</div>
+          <h3>Participantes</h3>
+          <p>Pessoas que compram ingressos. E-mail e CPF únicos.</p>
+          <div class="entity-actions" style="margin-top:12px">
+            <a href="participantes.html" class="btn btn-primary btn-sm">Gerenciar Participantes</a>
+            <a href="#" class="btn btn-secondary btn-sm" data-action="listar" data-entity="participantes">Prévia API</a>
+          </div>
+        </article>
+        <article class="card entity-card" style="box-shadow:none;border:1px solid var(--color-border)">
+          <div class="entity-icon icon-ingressos" aria-hidden="true">🎟️</div>
+          <h3>Ingressos</h3>
+          <p>Lotes por evento: tipo, preço, estoque. Tipo único por evento.</p>
+          <div class="entity-actions" style="margin-top:12px">
+            <a href="ingressos.html" class="btn btn-primary btn-sm">Gerenciar Ingressos</a>
+            <a href="#" class="btn btn-secondary btn-sm" data-action="listar" data-entity="ingressos">Prévia API</a>
+          </div>
+        </article>
+        <article class="card entity-card" style="box-shadow:none;border:1px solid var(--color-border)">
+          <div class="entity-icon icon-compras" aria-hidden="true">🛒</div>
+          <h3>Compras</h3>
+          <p>Participante compra ingresso — controla estoque, calcula valor total.</p>
+          <div class="entity-actions" style="margin-top:12px">
+            <a href="compras.html" class="btn btn-primary btn-sm">Gerenciar Compras</a>
+            <a href="#" class="btn btn-secondary btn-sm" data-action="listar" data-entity="compras">Prévia API</a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="preview" class="card" hidden aria-live="polite" style="margin-top:var(--space-xl)">
+    <div class="card-header">
+      <h3 id="previewTitle" style="font-size:1.05rem">Prévia</h3>
+      <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('preview').hidden=true">Fechar</button>
+    </div>
+    <div class="card-body">
+      <pre id="previewBody" style="background:var(--color-bg-soft);border:1px solid var(--color-border);border-radius:8px;padding:14px;overflow:auto;max-height:380px;font-size:.84rem;white-space:pre-wrap;word-break:break-word"></pre>
+    </div>
+  </section>
+
+  <section class="card" style="margin-top:var(--space-xl)">
+    <div class="card-header">
+      <h3 style="font-size:1.05rem">Como demonstrar na apresentação (5 minutos)</h3>
+    </div>
+    <div class="card-body">
+      <ol style="margin:0 0 0 18px;line-height:1.7">
+        <li><strong>Login:</strong> mostre <code>login.html</code> fazendo <code>POST /auth/login</code> com <code>ana@email.com / Senha@123</code> — token JWT salvo e redireciona.</li>
+        <li><strong>Listar:</strong> clique em “Gerenciar Locais” → tabela carregada via <code>GET /locais</code> com <code>Authorization: Bearer</code>.</li>
+        <li><strong>Cadastrar:</strong> use formulário em qualquer página (ex: criar local) → <code>POST /locais</code> com token.</li>
+        <li><strong>Atualizar/Excluir:</strong> na mesma tabela, clique em Editar (PUT) ou Excluir (DELETE) — tudo via JWT.</li>
+        <li><strong>Sem token:</strong> <code>curl http://127.0.0.1:8001/locais</code> sem header → 401.</li>
+      </ol>
+    </div>
+  </section>
+</main>
+
+<footer class="footer" role="contentinfo">
+  <p>PAW 3BI · <a href="dashboard.html">Dashboard</a> · <a href="login.html">Login</a> · <a href="locais.html">Locais</a> · <a href="eventos.html">Eventos</a> · Gerenciado com JWT</p>
+</footer>
+
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script>
+(function () {
+  'use strict';
+  var userNameEl = document.getElementById('userName');
+  var userNameInline = document.getElementById('userNameInline');
+  var welcomeSub = document.getElementById('welcomeSub');
+  var userEmailEl = document.getElementById('userEmail');
+  var userIdEl = document.getElementById('userId');
+  var userMeta = document.getElementById('userMeta');
+  var alertEl = document.getElementById('alert');
+  var btnLogout = document.getElementById('btnLogout');
+  var navLogin = document.getElementById('navLogin');
+  var navRegister = document.getElementById('navRegister');
+
+  function showAlert(el, msg, type){
+    if(!el) return;
+    el.textContent = msg;
+    el.className = 'alert alert-'+(type||'error');
+    el.hidden = false;
+    el.style.display = 'flex';
+  }
+  function hideAlert(el){ if(el){ el.hidden=true; el.style.display='none'; } }
+
+  // Auth
+  Auth.requireAuth('/login.html').then(function (user) {
+    if (!user) return;
+    var nome = user.nome || user.email || 'Usuário';
+    if(userNameEl) { userNameEl.textContent = nome; userNameEl.style.display='inline-flex'; }
+    if(userNameInline) userNameInline.textContent = nome;
+    welcomeSub.textContent = 'Você está autenticado. Escolha uma entidade acima para gerenciar (todas exigem JWT).';
+    if(userEmailEl) userEmailEl.textContent = user.email || '—';
+    if(userIdEl) userIdEl.textContent = 'ID: ' + (user.id || user.sub || '—');
+    if(userMeta) userMeta.hidden = false;
+    if(btnLogout) btnLogout.style.display = 'inline-flex';
+    if(navLogin) navLogin.style.display = 'none';
+    if(navRegister) navRegister.style.display = 'none';
+  });
+
+  if(btnLogout) btnLogout.addEventListener('click', function () { Auth.logout(); });
+
+  var preview = document.getElementById('preview');
+  var previewTitle = document.getElementById('previewTitle');
+  var previewBody = document.getElementById('previewBody');
+
+  function showPreview(title, data) {
+    previewTitle.textContent = title;
+    previewBody.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+    preview.hidden = false;
+    preview.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  document.querySelectorAll('[data-action]').forEach(function (el) {
+    el.addEventListener('click', async function (e) {
+      e.preventDefault();
+      var entity = el.getAttribute('data-entity');
+      hideAlert(alertEl);
+      previewTitle.textContent = 'Carregando ' + entity + '...';
+      previewBody.textContent = 'Buscando em /' + entity + ' com Authorization: Bearer <token>...';
+      preview.hidden = false;
+      try {
+        var data = await Api.get('/' + entity);
+        showPreview(entity + ' — listagem (com JWT)', data);
+      } catch (err) {
+        var msg = err.message || 'Erro';
+        if (err.status === 401) {
+          showAlert(alertEl, 'Sessão expirada. Faça login novamente.', 'error');
+          setTimeout(function(){ Auth.logout(); }, 1200);
+          previewBody.textContent = '401 — ' + msg;
+        } else {
+          showAlert(alertEl, 'Erro ao listar ' + entity + ': ' + msg, 'error');
+          previewBody.textContent = 'Erro: ' + msg + '\n' + JSON.stringify(err.data || err.payload || {}, null, 2);
+        }
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>
