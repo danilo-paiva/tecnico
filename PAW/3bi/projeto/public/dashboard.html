@@ -160,9 +160,13 @@
   }
   function hideAlert(el){ if(el){ el.hidden=true; el.style.display='none'; } }
 
-  // Auth
-  Auth.requireAuth('/login.html').then(function (user) {
-    if (!user) return;
+  // Auth (checkAuth retorna boolean; verifyAuth retorna Promise)
+  // Padrão da aula: valida token e usa payload (iss/aud/exp) via /auth/me
+  if (typeof checkAuth === 'function' && typeof verifyAuth === 'function') {
+    if (checkAuth({ redirectTo: 'login.html' })) {
+      verifyAuth().then(function (res) {
+        var user = res && res.data ? res.data : res;
+        if (!user) return;
     var nome = user.nome || user.email || 'Usuário';
     if(userNameEl) { userNameEl.textContent = nome; userNameEl.style.display='inline-flex'; }
     if(userNameInline) userNameInline.textContent = nome;
@@ -173,7 +177,9 @@
     if(btnLogout) btnLogout.style.display = 'inline-flex';
     if(navLogin) navLogin.style.display = 'none';
     if(navRegister) navRegister.style.display = 'none';
-  });
+      }).catch(function () { /* 401 já redireciona via apiFetch */ });
+    }
+  }
 
   if(btnLogout) btnLogout.addEventListener('click', function () { Auth.logout(); });
 

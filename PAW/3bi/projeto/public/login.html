@@ -77,6 +77,9 @@
 <script>
 (function () {
   var form = document.getElementById('loginForm');
+  // Flag lida por js/auth.js:initLoginPage para evitar duplo POST /auth/login
+  window.__loginFormHandled = true;
+  if (form.dataset.authJsBound === '1') return;
   var alertEl = document.getElementById('alert');
   var btn = document.getElementById('btnSubmit');
   var btnText = document.getElementById('btnText');

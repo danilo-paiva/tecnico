@@ -215,6 +215,12 @@
   function initLoginPage() {
     if (!requireApi()) return;
 
+    // Evita duplo submit: login.html possui handler inline próprio.
+    // Se a página já marcou o form como tratado, não anexa segundo listener.
+    try {
+      if (window.__loginFormHandled) return;
+    } catch (_e) {}
+
     // Se já estiver autenticado, opcionalmente redireciona direto para dashboard
     // Só faz se estiver em login.html / register.html para evitar loop em outras páginas
     const path = (window.location.pathname || '').toLowerCase();
@@ -255,6 +261,9 @@
 
     // Se não houver form (página não é login), encerra aqui
     if (!form) return;
+    // Guarda anti-duplo-bind (aula 2: um listener por evento)
+    if (form.dataset.authJsBound === '1') return;
+    form.dataset.authJsBound = '1';
     // Heurística: só trata como login se houver campo de senha/email
     const hasPasswordField = form.querySelector('input[type="password"]') || form.querySelector('#senha') || form.querySelector('[name="senha"]');
     const hasEmailField = form.querySelector('input[type="email"]') || form.querySelector('#email') || form.querySelector('[name="email"]');
