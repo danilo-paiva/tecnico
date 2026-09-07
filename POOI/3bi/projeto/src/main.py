@@ -14,7 +14,7 @@ try:
         print('Banco de dados FECHADO: NAO OCORREU Conexao com banco')
 
 except Exception as erro:
-    print(f'Erro : {erro.msg}')
+    print(f'Erro : {erro}')
     exit()
 
 
@@ -47,7 +47,7 @@ def cadastrarTurma():
         mensagem = f'{VERDE}Turma cadastrada com sucesso!{PADRAO}'
         comandosql.close()
     except Exception as erro:
-        mensagem = f'{VERMELHO}Erro : {erro.msg}{PADRAO}'
+        mensagem = f'{VERMELHO}Erro : {erro}{PADRAO}'
 
 
 def alterarTurma():
@@ -62,7 +62,7 @@ def alterarTurma():
         mensagem = f'{VERDE}Turma alterada com sucesso!{PADRAO}'
         comandosql.close()
     except Exception as erro:
-        mensagem = f'{VERMELHO}Erro : {erro.msg}{PADRAO}'
+        mensagem = f'{VERMELHO}Erro : {erro}{PADRAO}'
 
 
 def excluirTurma():
@@ -78,7 +78,7 @@ def excluirTurma():
             mensagem = f'{VERDE}Turma excluida com sucesso!{PADRAO}'
             comandosql.close()
         except Exception as erro:
-            mensagem = f'{VERMELHO}Erro : {erro.msg}{PADRAO}'
+            mensagem = f'{VERMELHO}Erro : {erro}{PADRAO}'
     else:
         mensagem = f'{VERMELHO}Exclusao cancelada.{PADRAO}'
 
@@ -99,7 +99,7 @@ def consultarTurmas():
 
         comandosql.close()
     except Exception as erro:
-        mensagem = f'{VERMELHO}Erro : {erro.msg}{PADRAO}'
+        mensagem = f'{VERMELHO}Erro : {erro}{PADRAO}'
 
 
 # ====== ALUNOS ======
@@ -116,7 +116,7 @@ def cadastrarAluno():
         mensagem = f'{VERDE}Aluno cadastrado com sucesso!{PADRAO}'
         comandosql.close()
     except Exception as erro:
-        mensagem = f'{VERMELHO}Erro : {erro.msg}{PADRAO}'
+        mensagem = f'{VERMELHO}Erro : {erro}{PADRAO}'
 
 
 def alterarAluno():
@@ -132,7 +132,7 @@ def alterarAluno():
         mensagem = f'{VERDE}Aluno alterado com sucesso!{PADRAO}'
         comandosql.close()
     except Exception as erro:
-        mensagem = f'{VERMELHO}Erro : {erro.msg}{PADRAO}'
+        mensagem = f'{VERMELHO}Erro : {erro}{PADRAO}'
 
 
 def excluirAluno():
@@ -148,7 +148,7 @@ def excluirAluno():
             mensagem = f'{VERDE}Aluno excluido com sucesso!{PADRAO}'
             comandosql.close()
         except Exception as erro:
-            mensagem = f'{VERMELHO}Erro : {erro.msg}{PADRAO}'
+            mensagem = f'{VERMELHO}Erro : {erro}{PADRAO}'
     else:
         mensagem = f'{VERMELHO}Exclusao cancelada.{PADRAO}'
 
@@ -174,7 +174,7 @@ def consultarAlunos():
 
         comandosql.close()
     except Exception as erro:
-        mensagem = f'{VERMELHO}Erro : {erro.msg}{PADRAO}'
+        mensagem = f'{VERMELHO}Erro : {erro}{PADRAO}'
 
 
 # ====== CONSULTAS AVANCADAS ======
@@ -201,7 +201,7 @@ def consultarTurmaDoAluno():
 
         comandosql.close()
     except Exception as erro:
-        mensagem = f'{VERMELHO}Erro : {erro.msg}{PADRAO}'
+        mensagem = f'{VERMELHO}Erro : {erro}{PADRAO}'
 
 
 def consultarAlunosDaTurma():
@@ -229,7 +229,7 @@ def consultarAlunosDaTurma():
 
         comandosql.close()
     except Exception as erro:
-        mensagem = f'{VERMELHO}Erro : {erro.msg}{PADRAO}'
+        mensagem = f'{VERMELHO}Erro : {erro}{PADRAO}'
 
 
 # ====== MENU ======
