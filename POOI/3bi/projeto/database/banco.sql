@@ -4,19 +4,19 @@ USE pooi3bi;
 
 CREATE TABLE TURMAS(
 	id_turma INT PRIMARY KEY,
-    curso VARCHAR(255) NOT NULL
+    curso VARCHAR(30) NOT NULL
 	);
     
 CREATE TABLE ALUNOS(
 	matricula INT PRIMARY KEY,
-    nome VARCHAR(255) NOT NULL,
+    nome VARCHAR(100) NOT NULL,
     id_turma INT NOT NULL,
     FOREIGN KEY (id_turma) REFERENCES TURMAS(id_turma)
     );
 
 DELIMITER //
 CREATE PROCEDURE sp_validar_curso(
-    IN p_curso VARCHAR(255),
+    IN p_curso VARCHAR(30),
     OUT resultado INT
 )
 BEGIN
@@ -74,7 +74,7 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE sp_cadastrar_turma(
     IN p_id_turma INT,
-    IN p_curso VARCHAR(255)
+    IN p_curso VARCHAR(30)
 )
 BEGIN
     DECLARE v_valido INT;
@@ -99,7 +99,7 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE sp_alterar_turma(
     IN p_id_turma INT,
-    IN p_curso VARCHAR(255)
+    IN p_curso VARCHAR(30)
 )
 BEGIN
     DECLARE v_valido INT;
@@ -155,7 +155,7 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE sp_cadastrar_aluno(
     IN p_matricula INT,
-    IN p_nome VARCHAR(255),
+    IN p_nome VARCHAR(100),
     IN p_id_turma INT
 )
 BEGIN
@@ -185,7 +185,7 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE sp_alterar_aluno(
     IN p_matricula INT,
-    IN p_nome VARCHAR(255),
+    IN p_nome VARCHAR(100),
     IN p_id_turma INT
 )
 BEGIN

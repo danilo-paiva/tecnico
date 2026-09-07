@@ -251,46 +251,78 @@ def consultarAlunosDaTurma():
 if abrebanco() == 1:
     while True:
         print('''
-===== SISTEMA TURMAS E ALUNOS =====
-1  - Cadastrar turma
-2  - Alterar turma
-3  - Excluir turma
-4  - Consultar turmas
-5  - Cadastrar aluno
-6  - Alterar aluno
-7  - Excluir aluno
-8  - Consultar alunos
-9  - Consultar turma de um aluno
-10 - Consultar alunos de uma turma
-0  - Sair
+===== SISTEMA ESCOLAR =====
+1 - TURMAS
+2 - ALUNOS
+0 - Sair
 ''')
 
-        if mensagem != '':
-            print(f'>>> {mensagem}')
-            mensagem = ''      # limpa a mensagem depois de mostrar
-
-        opcao = ler_inteiro('Escolha uma opcao:\n> ')
+        opcao = ler_inteiro('O que deseja rodar?\n> ')
 
         if opcao == 1:
-            cadastrarTurma()
+            while True:
+                print('''
+===== TURMAS =====
+1 - Cadastrar turma
+2 - Alterar turma
+3 - Excluir turma
+4 - Consultar turmas
+5 - Consultar alunos de uma turma
+0 - Voltar
+''')
+
+                if mensagem != '':
+                    print(f'>>> {mensagem}')
+                    mensagem = ''
+
+                op = ler_inteiro('Escolha uma opcao:\n> ')
+
+                if op == 1:
+                    cadastrarTurma()
+                elif op == 2:
+                    alterarTurma()
+                elif op == 3:
+                    excluirTurma()
+                elif op == 4:
+                    consultarTurmas()
+                elif op == 5:
+                    consultarAlunosDaTurma()
+                elif op == 0:
+                    break
+                else:
+                    mensagem = f'{VERMELHO}Opcao invalida!{PADRAO}'
         elif opcao == 2:
-            alterarTurma()
-        elif opcao == 3:
-            excluirTurma()
-        elif opcao == 4:
-            consultarTurmas()
-        elif opcao == 5:
-            cadastrarAluno()
-        elif opcao == 6:
-            alterarAluno()
-        elif opcao == 7:
-            excluirAluno()
-        elif opcao == 8:
-            consultarAlunos()
-        elif opcao == 9:
-            consultarTurmaDoAluno()
-        elif opcao == 10:
-            consultarAlunosDaTurma()
+            while True:
+                print('''
+===== ALUNOS =====
+1 - Cadastrar aluno
+2 - Alterar aluno
+3 - Excluir aluno
+4 - Consultar alunos
+5 - Consultar turma de um aluno
+0 - Voltar
+''')
+
+                if mensagem != '':
+                    print(f'>>> {mensagem}')
+                    mensagem = ''
+
+                op = ler_inteiro('Escolha uma opcao:\n> ')
+
+                if op == 1:
+                    cadastrarAluno()
+                elif op == 2:
+                    alterarAluno()
+                elif op == 3:
+                    excluirAluno()
+                elif op == 4:
+                    consultarAlunos()
+                elif op == 5:
+                    consultarTurmaDoAluno()
+                elif op == 0:
+                    break
+                else:
+                    mensagem = f'{VERMELHO}Opcao invalida!{PADRAO}'
         elif opcao == 0:
             print('Encerrando o sistema...')
             break
@@ -300,4 +332,4 @@ if abrebanco() == 1:
     conexao.close()
     print('Banco de dados FECHADO.')
 else:
-    print('FIM DO PROGRAMA! Algum problema na conexao com banco de dados.')
+    print('ERRO! Algum problema na conexao com banco de dados.')
