@@ -1,0 +1,28 @@
+PAW/2bi/aulas/
+PAW/aulas
+POOI/aulas
+PVB/aulas
+
+# Dependências
+PAW/3bi/projeto/vendor/
+**/vendor/
+
+# Build .NET / Visual Studio
+.vs/
+**/bin/
+**/obj/
+*.suo
+*.user
+*.dtbcache.v2
+
+# Python
+**/__pycache__/
+*.pyc
+
+# IDEs JetBrains
+.idea/workspace.xml
+**/.idea/workspace.xml
+
+# Temporários
+*.tmp-*
+**/.tmp-*
