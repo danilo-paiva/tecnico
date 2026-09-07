@@ -161,6 +161,11 @@ CREATE PROCEDURE sp_cadastrar_aluno(
 BEGIN
     DECLARE v_existe INT;
 
+    IF p_nome IS NULL OR TRIM(p_nome) = '' THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Nome do aluno nao pode ser vazio!';
+    END IF;
+
     CALL sp_verificar_matricula(p_matricula, v_existe);
     IF v_existe = 1 THEN
         SIGNAL SQLSTATE '45000'
@@ -185,6 +190,11 @@ CREATE PROCEDURE sp_alterar_aluno(
 )
 BEGIN
     DECLARE v_existe INT;
+
+    IF p_nome IS NULL OR TRIM(p_nome) = '' THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Nome do aluno nao pode ser vazio!';
+    END IF;
 
     CALL sp_verificar_matricula(p_matricula, v_existe);
     IF v_existe = 0 THEN

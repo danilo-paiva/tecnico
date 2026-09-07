@@ -40,7 +40,6 @@ def cadastrarTurma():
     turma = ler_inteiro("Digite o numero da turma:\n> ")
     curso = input('Digite o nome do curso:\n> ').upper()
 
-    comandosql = None
     try:
         comandosql = conexao.cursor()
         comandosql.execute(f'call sp_cadastrar_turma({turma}, "{curso}") ;')
@@ -49,8 +48,7 @@ def cadastrarTurma():
     except Exception as erro:
         mensagem = f'{VERMELHO}Erro : {erro}{PADRAO}'
     finally:
-        if comandosql is not None:
-            comandosql.close()
+        comandosql.close()
 
 
 def alterarTurma():
@@ -58,7 +56,6 @@ def alterarTurma():
     turma = ler_inteiro("Digite o numero da turma a alterar:\n> ")
     curso = input('Digite o NOVO nome do curso:\n> ').upper()
 
-    comandosql = None
     try:
         comandosql = conexao.cursor()
         comandosql.execute(f'call sp_alterar_turma({turma}, "{curso}") ;')
@@ -67,8 +64,7 @@ def alterarTurma():
     except Exception as erro:
         mensagem = f'{VERMELHO}Erro : {erro}{PADRAO}'
     finally:
-        if comandosql is not None:
-            comandosql.close()
+        comandosql.close()
 
 
 def excluirTurma():
@@ -77,7 +73,6 @@ def excluirTurma():
     confirmar = input(f'Tem certeza que deseja excluir a turma {turma}? (S/N):\n> ')
 
     if confirmar.upper() == 'S':
-        comandosql = None
         try:
             comandosql = conexao.cursor()
             comandosql.execute(f'call sp_excluir_turma({turma}) ;')
@@ -86,15 +81,13 @@ def excluirTurma():
         except Exception as erro:
             mensagem = f'{VERMELHO}Erro : {erro}{PADRAO}'
         finally:
-            if comandosql is not None:
-                comandosql.close()
+            comandosql.close()
     else:
         mensagem = f'{VERMELHO}Exclusao cancelada.{PADRAO}'
 
 
 def consultarTurmas():
     global mensagem
-    comandosql = None
     try:
         comandosql = conexao.cursor()
         comandosql.execute('select * from turmas order by id_turma ;')
@@ -110,8 +103,7 @@ def consultarTurmas():
     except Exception as erro:
         mensagem = f'{VERMELHO}Erro : {erro}{PADRAO}'
     finally:
-        if comandosql is not None:
-            comandosql.close()
+        comandosql.close()
 
 
 # ====== ALUNOS ======
@@ -121,7 +113,6 @@ def cadastrarAluno():
     nome = input('Digite o nome do aluno:\n> ')
     turma = ler_inteiro("Digite o numero da turma:\n> ")
 
-    comandosql = None
     try:
         comandosql = conexao.cursor()
         comandosql.execute(f'call sp_cadastrar_aluno({matricula}, "{nome}", {turma}) ;')
@@ -130,8 +121,7 @@ def cadastrarAluno():
     except Exception as erro:
         mensagem = f'{VERMELHO}Erro : {erro}{PADRAO}'
     finally:
-        if comandosql is not None:
-            comandosql.close()
+        comandosql.close()
 
 
 def alterarAluno():
@@ -140,7 +130,6 @@ def alterarAluno():
     nome = input('Digite o NOVO nome do aluno:\n> ')
     turma = ler_inteiro("Digite a NOVA turma:\n> ")
 
-    comandosql = None
     try:
         comandosql = conexao.cursor()
         comandosql.execute(f'call sp_alterar_aluno({matricula}, "{nome}", {turma}) ;')
@@ -149,8 +138,7 @@ def alterarAluno():
     except Exception as erro:
         mensagem = f'{VERMELHO}Erro : {erro}{PADRAO}'
     finally:
-        if comandosql is not None:
-            comandosql.close()
+        comandosql.close()
 
 
 def excluirAluno():
@@ -159,7 +147,6 @@ def excluirAluno():
     confirmar = input(f'Tem certeza que deseja excluir a matricula {matricula}? (S/N):\n> ')
 
     if confirmar.upper() == 'S':
-        comandosql = None
         try:
             comandosql = conexao.cursor()
             comandosql.execute(f'call sp_excluir_aluno({matricula}) ;')
@@ -168,15 +155,13 @@ def excluirAluno():
         except Exception as erro:
             mensagem = f'{VERMELHO}Erro : {erro}{PADRAO}'
         finally:
-            if comandosql is not None:
-                comandosql.close()
+            comandosql.close()
     else:
         mensagem = f'{VERMELHO}Exclusao cancelada.{PADRAO}'
 
 
 def consultarAlunos():
     global mensagem
-    comandosql = None
     try:
         comandosql = conexao.cursor()
         comandosql.execute('''
@@ -197,8 +182,7 @@ def consultarAlunos():
     except Exception as erro:
         mensagem = f'{VERMELHO}Erro : {erro}{PADRAO}'
     finally:
-        if comandosql is not None:
-            comandosql.close()
+        comandosql.close()
 
 
 # ====== CONSULTAS AVANCADAS ======
@@ -207,7 +191,6 @@ def consultarTurmaDoAluno():
     # dada a matricula de um aluno, mostra em qual turma ele esta
     matricula = ler_inteiro("Digite a matricula do aluno:\n> ")
 
-    comandosql = None
     try:
         comandosql = conexao.cursor()
         comandosql.execute(f'''
@@ -227,8 +210,7 @@ def consultarTurmaDoAluno():
     except Exception as erro:
         mensagem = f'{VERMELHO}Erro : {erro}{PADRAO}'
     finally:
-        if comandosql is not None:
-            comandosql.close()
+        comandosql.close()
 
 
 def consultarAlunosDaTurma():
@@ -236,7 +218,6 @@ def consultarAlunosDaTurma():
     # dado o id de uma turma, mostra todos os alunos dela
     turma = ler_inteiro("Digite o numero da turma:\n> ")
 
-    comandosql = None
     try:
         comandosql = conexao.cursor()
         comandosql.execute(f'''
@@ -258,8 +239,7 @@ def consultarAlunosDaTurma():
     except Exception as erro:
         mensagem = f'{VERMELHO}Erro : {erro}{PADRAO}'
     finally:
-        if comandosql is not None:
-            comandosql.close()
+        comandosql.close()
 
 
 # ====== MENU ======

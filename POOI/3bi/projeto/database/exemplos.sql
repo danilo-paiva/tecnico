@@ -6,7 +6,20 @@ INSERT INTO TURMAS (id_turma, curso) VALUES
 (3, 'PUBLICIDADE'),
 (4, 'ANALISE CLINICA'),
 (5, 'ADMINISTRACAO'),
-(6, 'QUIMICA');
+(6, 'QUIMICA'),
+-- 3 registros por curso (exigencia do projeto): turmas extras vazias para testes
+(7, 'INFORMATICA'),
+(8, 'INFORMATICA'),
+(9, 'ELETRONICA'),
+(10, 'ELETRONICA'),
+(11, 'PUBLICIDADE'),
+(12, 'PUBLICIDADE'),
+(13, 'ANALISE CLINICA'),
+(14, 'ANALISE CLINICA'),
+(15, 'ADMINISTRACAO'),
+(16, 'ADMINISTRACAO'),
+(17, 'QUIMICA'),
+(18, 'QUIMICA');
 
 INSERT INTO ALUNOS (matricula, nome, id_turma) VALUES
 (1001, 'Ana Silva', 1),
