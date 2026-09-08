@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "MetaTrader5": {
+      "disabled": true
+    }
+  }
+}

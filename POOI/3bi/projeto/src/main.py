@@ -1,4 +1,5 @@
 import mysql.connector
+from prettytable import PrettyTable
 
 
 VERDE = '\033[92m'    # codigo ANSI: texto verde
@@ -101,9 +102,10 @@ def consultarTurmas():
         if not resultado:
             print('Nenhuma turma cadastrada.')
         else:
-            print('\n----- TURMAS -----')
+            grid = PrettyTable(['Numero da Turma', 'Curso'])
             for id_turma, curso in resultado:
-                print(f'{id_turma} - {curso}')
+                grid.add_row([id_turma, curso])
+            print(grid)
 
     except Exception as erro:
         mensagem = f'{VERMELHO}Erro : {erro}{PADRAO}'
@@ -180,9 +182,10 @@ def consultarAlunos():
         if not resultado:
             print('Nenhum aluno cadastrado.')
         else:
-            print('\n----- ALUNOS -----')
+            grid = PrettyTable(['Matricula', 'Nome', 'Turma', 'Curso'])
             for matricula, nome, id_turma, curso in resultado:
-                print(f'{matricula} - {nome} | Turma {id_turma} ({curso})')
+                grid.add_row([matricula, nome, id_turma, curso])
+            print(grid)
 
     except Exception as erro:
         mensagem = f'{VERMELHO}Erro : {erro}{PADRAO}'
@@ -210,7 +213,9 @@ def consultarTurmaDoAluno():
             print('Aluno nao encontrado.')
         else:
             mat, nome, id_turma, curso = aluno
-            print(f'\n{mat} - {nome} esta na Turma {id_turma} ({curso})')
+            grid = PrettyTable(['Matricula', 'Nome', 'Turma', 'Curso'])
+            grid.add_row([mat, nome, id_turma, curso])
+            print(grid)
 
     except Exception as erro:
         mensagem = f'{VERMELHO}Erro : {erro}{PADRAO}'
@@ -237,9 +242,11 @@ def consultarAlunosDaTurma():
         if not resultado:
             print('Nenhum aluno nessa turma (ou turma inexistente).')
         else:
-            print(f'\n----- ALUNOS DA TURMA {turma} -----')
+            grid = PrettyTable(['Matricula', 'Nome'])
             for matricula, nome in resultado:
-                print(f'{matricula} - {nome}')
+                grid.add_row([matricula, nome])
+            print(f'----- ALUNOS DA TURMA {turma} -----')
+            print(grid)
 
     except Exception as erro:
         mensagem = f'{VERMELHO}Erro : {erro}{PADRAO}'
