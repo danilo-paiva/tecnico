@@ -1,0 +1,30 @@
+{
+  "nome": "fluxograma",
+  "nos": [
+    ["inicio", "", 100],
+    ["input", "r1", 80],
+    ["input", "r2", 80],
+    ["input", "m", 80],
+    ["input", "Isp", 90],
+    ["proc", "mu = 1.327 x 10^11", 170],
+    ["proc", "r1 = r1 x 10^6", 140],
+    ["proc", "r2 = r2 x 10^6", 140],
+    ["proc", "a = (r1 + r2) / 2", 150],
+    ["proc", "T = pi x raiz(a^3 / mu)", 190],
+    ["proc", "dias = T / 86400", 150],
+    ["proc", "meses = dias / 30", 140],
+    ["proc2", "dv1 = raiz(mu/r1) x (raiz(2 x r2 / (r1 + r2)) - 1)", 240],
+    ["proc2", "dv2 = raiz(mu/r2) x (1 - raiz(2 x r1 / (r1 + r2)))", 240],
+    ["proc", "dv = |dv1| + |dv2|", 150],
+    ["proc2", "razao = e^(dv x 1000 / (Isp x 9.81))", 230],
+    ["proc", "combustivel = m x (razao - 1)", 200],
+    ["proc", "toneladas = combustivel / 1000", 200],
+    ["display", "dias", 150],
+    ["display", "meses", 150],
+    ["display", "dv", 150],
+    ["display", "razao", 150],
+    ["display", "combustivel", 150],
+    ["display", "toneladas", 150],
+    ["fim", "", 100]
+  ]
+}
