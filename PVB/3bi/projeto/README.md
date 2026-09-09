@@ -37,6 +37,28 @@ Razão de massa: 6,2872
 Combustível necessário: 26.436,07 kg (26,44 t)
 ```
 
+
+## Testes (cenários do enunciado)
+
+Missão principal — Terra → Marte:
+
+```
+149,6 / 227,9 / 5000 / 310
+Tempo de viagem: 259 dias (~8,6 meses)
+Δv total: 5,591 km/s
+Razão de massa: 6,2872
+Combustível necessário: 26.436,07 kg (26,44 t)
+```
+
+Cenários de teste:
+
+| Missão | Entrada (r1 / r2 / m / Isp) | Tempo | Δv total | Combustível |
+| --- | --- | --- | --- | --- |
+| Terra → Vênus | 149,6 / 108,2 / 3200 / 320 | 146 dias (~4,9 meses) | 5,203 km/s | 13.588,35 kg (13,59 t) |
+| Terra → Júpiter | 149,6 / 778,5 / 1200 / 350 | 998 dias (~33,3 meses) | 14,436 km/s | 79.176,72 kg (79,18 t) |
+| Terra → Plutão | 149,6 / 5906,4 / 500 / 3000 | 16632 dias (~554,4 meses) | 15,499 km/s | 346,63 kg (0,35 t) |
+| Vênus → Marte | 108,2 / 227,9 / 2500 / 310 | 217 dias (~7,2 meses) | 10,530 km/s | 77.249,83 kg (77,25 t) |
+
 Os valores "~esperados" do enunciado são aproximados; alguns não batem com as
 próprias fórmulas dele (ex.: o combustível de 25.823,28 kg do Terra → Marte).
 Este projeto aplica exatamente as fórmulas do enunciado.
