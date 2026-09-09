@@ -49,3 +49,6 @@ desktop.ini
 # Temporários
 *.tmp-*
 **/.tmp-*
+
+# pi (agente)
+.pi/
