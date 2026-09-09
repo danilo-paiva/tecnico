@@ -46,12 +46,13 @@ namespace projeto
 
 
             // As distancias sao informadas em MILHOES de km -> converter para km
-            r1 = r1 * 1000000;
-            r2 = r2 * 1000000;
+            // (x 10^6)
+            r1 = r1 * Math.Pow(10, 6);
+            r2 = r2 * Math.Pow(10, 6);
 
             // Constante gravitacional do Sol (mu), em km^3/s^2
-            // (1.327 x 10^11 = 132700000000)
-            double mu = 132700000000;
+            // (1.327 x 10^11)
+            double mu = 1.327 * Math.Pow(10, 11);
 
             // 1) Semi-eixo maior da orbita de transferencia (a), em km
             double a = (r1 + r2) / 2;
@@ -78,12 +79,12 @@ namespace projeto
 
             // Saida formatada (String.Format e ToString - aula 06)
             // Tempo de viagem: dias inteiros e meses com 1 casa decimal
-            // Dias TRUNCADOS (258,84 -> 258), igual ao PDF do enunciado.
-            // CASO PRECISE VOLTAR PARA O ARREDONDAMENTO (258,84 -> 259),
+            // Dias ARREDONDADOS (258,84 -> 259).
+            // CASO PRECISE TRUNCAR (258,84 -> 258, igual ao PDF do enunciado),
             // troque a linha abaixo por:
-            //   String.Format("{0:0} dias (~{1:F1} meses)", dias, meses);
+            //   String.Format("{0:0} dias (~{1:F1} meses)", Math.Truncate(dias), meses);
             tempo_viagem.Content = "Tempo de viagem: " +
-                String.Format("{0:0} dias (~{1:F1} meses)", Math.Truncate(dias), meses);
+                String.Format("{0:0} dias (~{1:F1} meses)", dias, meses);
 
             // Delta-V total com 3 casas decimais + unidade
             // (equivale ao ToString("N3") pedido no enunciado)
