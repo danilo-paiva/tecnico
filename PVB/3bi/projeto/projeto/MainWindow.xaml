@@ -1,0 +1,29 @@
+<Window x:Class="projeto.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:projeto"
+        mc:Ignorable="d"
+        Title="AeroSpaceX - Calculadora de Trajetoria Interplanetaria" Height="560" Width="800">
+    <Grid>
+        <!-- Identificacao dos dados de entrada -->
+        <Label Content="AeroSpaceX - Calculadora de Trajetoria Interplanetaria (Transferencia de Hohmann)" HorizontalAlignment="Left" Margin="20,5,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+        <Label Content="Digite os valores, um por linha:" HorizontalAlignment="Left" Margin="40,45,0,0" VerticalAlignment="Top"/>
+        <Label Content="Linha 1 - Distancia do corpo de origem ao Sol (r1, em milhoes de km)&#xA;Linha 2 - Distancia do corpo de destino ao Sol (r2, em milhoes de km)&#xA;Linha 3 - Massa da nave (m, em kg)&#xA;Linha 4 - Impulso especifico do motor (Isp, em segundos)&#xA;Usar virgula decimal (ex.: 149,6)" HorizontalAlignment="Left" Margin="40,72,0,0" VerticalAlignment="Top"/>
+
+        <!-- Caixa de texto multilinha para entrada -->
+        <TextBox x:Name="entrada" HorizontalAlignment="Left" Margin="40,160,0,0" TextWrapping="Wrap" AcceptsReturn="True" VerticalAlignment="Top" Width="220" Height="110" FontFamily="Consolas"/>
+
+        <!-- Botoes de comando -->
+        <Button Content=" Calcular Trajetoria " HorizontalAlignment="Left" Margin="40,290,0,0" VerticalAlignment="Top" Click="Button_Calcular_Click"/>
+        <Button Content=" Limpar Campos " HorizontalAlignment="Left" Margin="40,325,0,0" VerticalAlignment="Top" Click="Button_Limpar_Click"/>
+
+        <!-- Labels de saida -->
+        <Label Content="Resultados da Missao:" HorizontalAlignment="Left" Margin="380,45,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+        <Label x:Name="tempo_viagem" Content="" HorizontalAlignment="Left" Margin="380,90,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="delta_v_total" Content="" HorizontalAlignment="Left" Margin="380,120,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+        <Label x:Name="razao_massa" Content="" HorizontalAlignment="Left" Margin="380,150,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="combustivel" Content="" HorizontalAlignment="Left" Margin="380,180,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+    </Grid>
+</Window>
