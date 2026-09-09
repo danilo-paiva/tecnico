@@ -30,7 +30,7 @@ Gerar fluxogramas no MESMO estilo visual que o aluno cria manualmente no draw.io
 | --- | --- | --- | --- |
 | Terminal | `strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;` | inicio / fim (valor `<b>inicio</b>` / `<b>fim</b>`) | 60 |
 | Entrada | `html=1;strokeWidth=2;shape=manualInput;whiteSpace=wrap;rounded=1;size=26;arcSize=11;` | variavel lida | 60 |
-| Processo | `rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;` | `var = expressao` | 30 (40 se quebra 2 linhas) |
+| Processo | `rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;` | `var = expressao` | 30 (40 se quebra 2 linhas) |
 | Saida | `strokeWidth=2;html=1;shape=mxgraph.flowchart.display;whiteSpace=wrap;` | variavel mostrada | 60 |
 | Decisao | `strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;` | condicao (so se houver if) | 80 |
 
@@ -81,19 +81,25 @@ conferir alinhamento/textos antes de exportar.
 
 ## Exportar PDF
 
-Com a aba do render aberta, escalar para caber em 1 pagina A4 (1050px) e imprimir:
+Como o export do draw.io: pagina A4, diagrama no TAMANHO NATURAL (sem escala,
+fonte legivel) e fluxo quebrando em quantas paginas forem necessarias (tipicamente 2):
 
 ```js
+await wait(6000); // aguarda o viewer carregar o SVG
 await tab.evaluate(() => {
+  const st = document.createElement('style');
+  st.textContent = '@page { size: A4 portrait; margin: 0; } body { margin: 0; padding: 0; }';
+  document.head.appendChild(st);
   const d = document.querySelector('.mxgraph');
-  const h = d.getBoundingClientRect().height;
-  const z = Math.min(1, 1050 / h);
-  d.style.transform = 'scale(' + z + ')';
-  d.style.transformOrigin = 'top left';
-  document.body.style.height = (h * z + 20) + 'px';
+  const r = d.getBoundingClientRect();
+  const delta = (793.7 - r.width) / 2 - r.left; // centraliza na largura da A4
+  d.style.transform = 'translateX(' + delta.toFixed(1) + 'px)';
 });
 await tab.pdf({ path: '<caminho>/<nome>.pdf' });
 ```
+
+Verificar: `/Count 2` no PDF (2 paginas). NAO escalar o diagrama nem gerar
+pagina unica do tamanho do diagrama — o texto fica miudo e a visibilidade cai.
 
 Depois limpar os temporarios (`fluxo_render.html`, screenshots) e manter apenas
 `<nome>.drawio` e `<nome>.pdf` junto ao projeto.

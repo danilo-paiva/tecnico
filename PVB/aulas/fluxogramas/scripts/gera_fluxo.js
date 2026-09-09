@@ -14,12 +14,12 @@ const styles = {
   inicio: 'strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;',
   fim: 'strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;',
   input: 'html=1;strokeWidth=2;shape=manualInput;whiteSpace=wrap;rounded=1;size=26;arcSize=11;',
-  proc: 'rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;',
-  proc2: 'rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;',
+  proc: 'rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;',
+  proc2: 'rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;',
   display: 'strokeWidth=2;html=1;shape=mxgraph.flowchart.display;whiteSpace=wrap;',
 };
 const heights = { inicio: 60, fim: 60, input: 60, proc: 30, proc2: 40, display: 60 };
-const labels = { inicio: '&lt;b&gt;inicio&lt;/b&gt;', fim: '&lt;b&gt;fim&lt;/b&gt;' };
+const labels = { inicio: '<b>inicio</b>', fim: '<b>fim</b>' };
 
 const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const CX = 413; // centro da pagina A4 (827)
