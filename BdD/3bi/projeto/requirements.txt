@@ -1,0 +1,4 @@
+pymongo[srv]
+sentence-transformers
+python-dotenv
+numpy
