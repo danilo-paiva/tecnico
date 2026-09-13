@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Locais — Gestão de Eventos</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="logo">🎟️ Gestão de <span>Eventos</span></div>
+    <nav>
+      <a href="dashboard.html" data-pagina="painel">Painel</a>
+      <a href="locais.html" data-pagina="locais">Locais</a>
+      <a href="eventos.html" data-pagina="eventos">Eventos</a>
+      <a href="ingressos.html" data-pagina="ingressos">Ingressos</a>
+      <a href="participantes.html" data-pagina="participantes">Participantes</a>
+      <a href="compras.html" data-pagina="compras">Compras</a>
+    </nav>
+    <div class="usuario">
+      <span id="usuarioLogado"></span>
+      <button id="btnSair" class="btn-neutro btn-pequeno">Sair</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="card">
+      <h2 id="tituloForm">Cadastrar local</h2>
+      <p class="muted">POST /locais para criar · PUT /locais/{id} para atualizar (com JWT).</p>
+      <div id="msg" class="msg"></div>
+      <form id="formLocal">
+        <input type="hidden" id="txtId">
+        <label for="txtNome">Nome</label>
+        <input id="txtNome" required maxlength="120" placeholder="Ex.: Centro de Convenções">
+        <label for="txtEndereco">Endereço</label>
+        <input id="txtEndereco" required maxlength="255" placeholder="Ex.: Av. Principal 1000, Centro">
+        <label for="txtCapacidade">Capacidade</label>
+        <input id="txtCapacidade" type="number" min="1" step="1" required placeholder="Ex.: 500">
+        <div class="acoes">
+          <button type="submit" class="btn-primario" id="btnSalvar">Salvar</button>
+          <button type="button" class="btn-neutro" id="btnCancelar" hidden>Cancelar edição</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Locais cadastrados</h2>
+      <p class="muted">GET /locais para listar · DELETE /locais/{id} para excluir (com JWT).</p>
+      <div class="tabela-responsiva">
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Nome</th><th>Endereço</th><th>Capacidade</th><th>Ações</th></tr>
+          </thead>
+          <tbody id="corpoTabela"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script type="module">
+    import { exigirLogin, montarTopo, apiAutenticada, tratarResposta, mostrarMsg } from "./js/auth.js";
+
+    exigirLogin();
+    const api = apiAutenticada();
+    const URI = `${API_BASE_URL}/locais`;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      montarTopo("locais");
+      carregar();
+      document.getElementById("formLocal").addEventListener("submit", salvar);
+      document.getElementById("btnCancelar").addEventListener("click", limparForm);
+    });
+
+    async function carregar() {
+      const resposta = await api.get(URI);
+      if (!tratarResposta(resposta)) return;
+      if (!resposta || !resposta.success) { mostrarMsg(resposta?.message || "Erro ao listar.", "erro"); return; }
+      const corpo = document.getElementById("corpoTabela");
+      corpo.innerHTML = "";
+      for (const l of resposta.data.locais) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${l.id_local}</td><td></td><td></td><td>${l.capacidade}</td><td></td>`;
+        tr.children[1].textContent = l.nome;
+        tr.children[2].textContent = l.endereco;
+        const tdAcoes = tr.children[4];
+
+        const btnEditar = document.createElement("button");
+        btnEditar.textContent = "Editar";
+        btnEditar.className = "btn-neutro btn-pequeno";
+        btnEditar.addEventListener("click", () => entrarEmEdicao(l));
+
+        const btnExcluir = document.createElement("button");
+        btnExcluir.textContent = "Excluir";
+        btnExcluir.className = "btn-perigo btn-pequeno";
+        btnExcluir.addEventListener("click", () => excluir(l.id_local));
+
+        tdAcoes.append(btnEditar, " ", btnExcluir);
+        corpo.appendChild(tr);
+      }
+    }
+
+    async function salvar(event) {
+      event.preventDefault();
+      const id = document.getElementById("txtId").value;
+      const local = {
+        nome: document.getElementById("txtNome").value.trim(),
+        endereco: document.getElementById("txtEndereco").value.trim(),
+        capacidade: Number(document.getElementById("txtCapacidade").value),
+      };
+      const resposta = id
+        ? await api.put(URI, id, { local })
+        : await api.post(URI, { local });
+      if (!tratarResposta(resposta)) return;
+      if (resposta && resposta.success) {
+        mostrarMsg(id ? "Atualizado com sucesso!" : "Cadastro realizado com sucesso!", "ok");
+        limparForm();
+        carregar();
+      } else {
+        mostrarMsg(resposta?.message || "Não foi possível salvar.", "erro");
+      }
+    }
+
+    function entrarEmEdicao(l) {
+      document.getElementById("txtId").value = l.id_local;
+      document.getElementById("txtNome").value = l.nome;
+      document.getElementById("txtEndereco").value = l.endereco;
+      document.getElementById("txtCapacidade").value = l.capacidade;
+      document.getElementById("tituloForm").textContent = `Editar local #${l.id_local}`;
+      document.getElementById("btnSalvar").textContent = "Atualizar";
+      document.getElementById("btnCancelar").hidden = false;
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function limparForm() {
+      document.getElementById("formLocal").reset();
+      document.getElementById("txtId").value = "";
+      document.getElementById("tituloForm").textContent = "Cadastrar local";
+      document.getElementById("btnSalvar").textContent = "Salvar";
+      document.getElementById("btnCancelar").hidden = true;
+    }
+
+    async function excluir(id) {
+      if (!confirm(`Excluir o local #${id}?`)) return;
+      const resposta = await api.delete(URI, id);
+      if (!tratarResposta(resposta)) return;
+      if (resposta) { mostrarMsg("Excluído com sucesso!", "ok"); carregar(); }
+      else mostrarMsg("Não foi possível excluir (verifique vínculos com eventos).", "erro");
+    }
+  </script>
+</body>
+</html>

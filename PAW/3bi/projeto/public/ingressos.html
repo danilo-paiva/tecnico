@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ingressos — Gestão de Eventos</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="logo">🎟️ Gestão de <span>Eventos</span></div>
+    <nav>
+      <a href="dashboard.html" data-pagina="painel">Painel</a>
+      <a href="locais.html" data-pagina="locais">Locais</a>
+      <a href="eventos.html" data-pagina="eventos">Eventos</a>
+      <a href="ingressos.html" data-pagina="ingressos">Ingressos</a>
+      <a href="participantes.html" data-pagina="participantes">Participantes</a>
+      <a href="compras.html" data-pagina="compras">Compras</a>
+    </nav>
+    <div class="usuario">
+      <span id="usuarioLogado"></span>
+      <button id="btnSair" class="btn-neutro btn-pequeno">Sair</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="card">
+      <h2 id="tituloForm">Cadastrar ingresso</h2>
+      <p class="muted">POST /ingressos para criar · PUT /ingressos/{id} para atualizar (com JWT). O estoque começa cheio.</p>
+      <div id="msg" class="msg"></div>
+      <form id="formIngresso">
+        <input type="hidden" id="txtId">
+        <div class="linha">
+          <div>
+            <label for="txtTipo">Tipo</label>
+            <input id="txtTipo" required maxlength="80" placeholder="Ex.: Inteira">
+          </div>
+          <div>
+            <label for="cboEvento">Evento</label>
+            <select id="cboEvento" required></select>
+          </div>
+        </div>
+        <div class="linha">
+          <div>
+            <label for="txtPreco">Preço (R$)</label>
+            <input id="txtPreco" type="number" min="0" step="0.01" required placeholder="Ex.: 80.00">
+          </div>
+          <div>
+            <label for="txtTotal">Quantidade total</label>
+            <input id="txtTotal" type="number" min="1" step="1" required placeholder="Ex.: 200">
+          </div>
+        </div>
+        <div class="acoes">
+          <button type="submit" class="btn-primario" id="btnSalvar">Salvar</button>
+          <button type="button" class="btn-neutro" id="btnCancelar" hidden>Cancelar edição</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Ingressos cadastrados</h2>
+      <p class="muted">GET /ingressos para listar · DELETE /ingressos/{id} para excluir (com JWT).</p>
+      <div class="tabela-responsiva">
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Tipo</th><th>Preço</th><th>Total</th><th>Disponível</th><th>Evento</th><th>Ações</th></tr>
+          </thead>
+          <tbody id="corpoTabela"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script type="module">
+    import { exigirLogin, montarTopo, apiAutenticada, tratarResposta, mostrarMsg } from "./js/auth.js";
+
+    exigirLogin();
+    const api = apiAutenticada();
+    const URI = `${API_BASE_URL}/ingressos`;
+    let eventos = [];
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      montarTopo("ingressos");
+      await carregarEventos();
+      carregar();
+      document.getElementById("formIngresso").addEventListener("submit", salvar);
+      document.getElementById("btnCancelar").addEventListener("click", limparForm);
+    });
+
+    async function carregarEventos() {
+      const resposta = await api.get(`${API_BASE_URL}/eventos`);
+      if (!tratarResposta(resposta)) return;
+      eventos = (resposta && resposta.success) ? resposta.data.eventos : [];
+      const cbo = document.getElementById("cboEvento");
+      cbo.innerHTML = "";
+      for (const e of eventos) {
+        const op = document.createElement("option");
+        op.value = e.id_evento;
+        op.textContent = `#${e.id_evento} — ${e.titulo}`;
+        cbo.appendChild(op);
+      }
+    }
+
+    const tituloEvento = (id) => (eventos.find((e) => e.id_evento === id)?.titulo || `#${id}`);
+
+    async function carregar() {
+      const resposta = await api.get(URI);
+      if (!tratarResposta(resposta)) return;
+      if (!resposta || !resposta.success) { mostrarMsg(resposta?.message || "Erro ao listar.", "erro"); return; }
+      const corpo = document.getElementById("corpoTabela");
+      corpo.innerHTML = "";
+      for (const i of resposta.data.ingressos) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${i.id_ingresso}</td><td></td><td>R$ ${Number(i.preco).toFixed(2)}</td>` +
+          `<td>${i.quantidade_total}</td><td>${i.quantidade_disponivel}</td><td></td><td></td>`;
+        tr.children[1].textContent = i.tipo;
+        tr.children[5].textContent = tituloEvento(i.id_evento);
+        const tdAcoes = tr.children[6];
+
+        const btnEditar = document.createElement("button");
+        btnEditar.textContent = "Editar";
+        btnEditar.className = "btn-neutro btn-pequeno";
+        btnEditar.addEventListener("click", () => entrarEmEdicao(i));
+
+        const btnExcluir = document.createElement("button");
+        btnExcluir.textContent = "Excluir";
+        btnExcluir.className = "btn-perigo btn-pequeno";
+        btnExcluir.addEventListener("click", () => excluir(i.id_ingresso));
+
+        tdAcoes.append(btnEditar, " ", btnExcluir);
+        corpo.appendChild(tr);
+      }
+    }
+
+    async function salvar(event) {
+      event.preventDefault();
+      const id = document.getElementById("txtId").value;
+      const ingresso = {
+        tipo: document.getElementById("txtTipo").value.trim(),
+        preco: Number(document.getElementById("txtPreco").value),
+        quantidade_total: Number(document.getElementById("txtTotal").value),
+        id_evento: Number(document.getElementById("cboEvento").value),
+      };
+      const resposta = id
+        ? await api.put(URI, id, { ingresso })
+        : await api.post(URI, { ingresso });
+      if (!tratarResposta(resposta)) return;
+      if (resposta && resposta.success) {
+        mostrarMsg(id ? "Atualizado com sucesso!" : "Cadastro realizado com sucesso!", "ok");
+        limparForm();
+        carregar();
+      } else {
+        mostrarMsg(resposta?.message || "Não foi possível salvar.", "erro");
+      }
+    }
+
+    function entrarEmEdicao(i) {
+      document.getElementById("txtId").value = i.id_ingresso;
+      document.getElementById("txtTipo").value = i.tipo;
+      document.getElementById("txtPreco").value = i.preco;
+      document.getElementById("txtTotal").value = i.quantidade_total;
+      document.getElementById("cboEvento").value = i.id_evento;
+      document.getElementById("tituloForm").textContent = `Editar ingresso #${i.id_ingresso}`;
+      document.getElementById("btnSalvar").textContent = "Atualizar";
+      document.getElementById("btnCancelar").hidden = false;
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function limparForm() {
+      document.getElementById("formIngresso").reset();
+      document.getElementById("txtId").value = "";
+      document.getElementById("tituloForm").textContent = "Cadastrar ingresso";
+      document.getElementById("btnSalvar").textContent = "Salvar";
+      document.getElementById("btnCancelar").hidden = true;
+    }
+
+    async function excluir(id) {
+      if (!confirm(`Excluir o ingresso #${id}?`)) return;
+      const resposta = await api.delete(URI, id);
+      if (!tratarResposta(resposta)) return;
+      if (resposta) { mostrarMsg("Excluído com sucesso!", "ok"); carregar(); }
+      else mostrarMsg("Não foi possível excluir (verifique vínculos com compras).", "erro");
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compras — Gestão de Eventos</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="logo">🎟️ Gestão de <span>Eventos</span></div>
+    <nav>
+      <a href="dashboard.html" data-pagina="painel">Painel</a>
+      <a href="locais.html" data-pagina="locais">Locais</a>
+      <a href="eventos.html" data-pagina="eventos">Eventos</a>
+      <a href="ingressos.html" data-pagina="ingressos">Ingressos</a>
+      <a href="participantes.html" data-pagina="participantes">Participantes</a>
+      <a href="compras.html" data-pagina="compras">Compras</a>
+    </nav>
+    <div class="usuario">
+      <span id="usuarioLogado"></span>
+      <button id="btnSair" class="btn-neutro btn-pequeno">Sair</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="card">
+      <h2 id="tituloForm">Cadastrar compra</h2>
+      <p class="muted">POST /compras para criar · PUT /compras/{id} para alterar a quantidade (com JWT). O valor total é calculado pela API e o estoque baixa sozinho.</p>
+      <div id="msg" class="msg"></div>
+      <form id="formCompra">
+        <input type="hidden" id="txtId">
+        <div class="linha">
+          <div>
+            <label for="cboParticipante">Participante</label>
+            <select id="cboParticipante" required></select>
+          </div>
+          <div>
+            <label for="cboIngresso">Ingresso</label>
+            <select id="cboIngresso" required></select>
+          </div>
+        </div>
+        <label for="txtQuantidade">Quantidade</label>
+        <input id="txtQuantidade" type="number" min="1" step="1" required value="1">
+        <div class="acoes">
+          <button type="submit" class="btn-primario" id="btnSalvar">Salvar</button>
+          <button type="button" class="btn-neutro" id="btnCancelar" hidden>Cancelar edição</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Compras realizadas</h2>
+      <p class="muted">GET /compras para listar · DELETE /compras/{id} para excluir e devolver o estoque (com JWT).</p>
+      <div class="tabela-responsiva">
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Data</th><th>Qtd</th><th>Total (R$)</th><th>Participante</th><th>Ingresso</th><th>Ações</th></tr>
+          </thead>
+          <tbody id="corpoTabela"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script type="module">
+    import { exigirLogin, montarTopo, apiAutenticada, tratarResposta, mostrarMsg } from "./js/auth.js";
+
+    exigirLogin();
+    const api = apiAutenticada();
+    const URI = `${API_BASE_URL}/compras`;
+    let participantes = [], ingressos = [];
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      montarTopo("compras");
+      await carregarCombos();
+      carregar();
+      document.getElementById("formCompra").addEventListener("submit", salvar);
+      document.getElementById("btnCancelar").addEventListener("click", limparForm);
+    });
+
+    async function carregarCombos() {
+      const [rP, rI] = await Promise.all([
+        api.get(`${API_BASE_URL}/participantes`),
+        api.get(`${API_BASE_URL}/ingressos`),
+      ]);
+      if (!tratarResposta(rP) || !tratarResposta(rI)) return;
+      participantes = (rP && rP.success) ? rP.data.participantes : [];
+      ingressos = (rI && rI.success) ? rI.data.ingressos : [];
+
+      const cboP = document.getElementById("cboParticipante");
+      cboP.innerHTML = "";
+      for (const p of participantes) {
+        const op = document.createElement("option");
+        op.value = p.id_participante;
+        op.textContent = `#${p.id_participante} — ${p.nome}`;
+        cboP.appendChild(op);
+      }
+      const cboI = document.getElementById("cboIngresso");
+      cboI.innerHTML = "";
+      for (const i of ingressos) {
+        const op = document.createElement("option");
+        op.value = i.id_ingresso;
+        op.textContent = `#${i.id_ingresso} — ${i.tipo} (R$ ${Number(i.preco).toFixed(2)}, disp.: ${i.quantidade_disponivel})`;
+        cboI.appendChild(op);
+      }
+    }
+
+    const nomeParticipante = (id) => (participantes.find((p) => p.id_participante === id)?.nome || `#${id}`);
+    const tipoIngresso = (id) => (ingressos.find((i) => i.id_ingresso === id)?.tipo || `#${id}`);
+
+    async function carregar() {
+      const resposta = await api.get(URI);
+      if (!tratarResposta(resposta)) return;
+      if (!resposta || !resposta.success) { mostrarMsg(resposta?.message || "Erro ao listar.", "erro"); return; }
+      const corpo = document.getElementById("corpoTabela");
+      corpo.innerHTML = "";
+      for (const c of resposta.data.compras) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${c.id_compra}</td><td>${c.data_compra}</td><td>${c.quantidade}</td>` +
+          `<td>R$ ${Number(c.valor_total).toFixed(2)}</td><td></td><td></td><td></td>`;
+        tr.children[4].textContent = nomeParticipante(c.id_participante);
+        tr.children[5].textContent = tipoIngresso(c.id_ingresso);
+        const tdAcoes = tr.children[6];
+
+        const btnEditar = document.createElement("button");
+        btnEditar.textContent = "Editar";
+        btnEditar.className = "btn-neutro btn-pequeno";
+        btnEditar.title = "Altera só a quantidade (a compra não pode trocar de dono/ingresso)";
+        btnEditar.addEventListener("click", () => entrarEmEdicao(c));
+
+        const btnExcluir = document.createElement("button");
+        btnExcluir.textContent = "Excluir";
+        btnExcluir.className = "btn-perigo btn-pequeno";
+        btnExcluir.addEventListener("click", () => excluir(c.id_compra));
+
+        tdAcoes.append(btnEditar, " ", btnExcluir);
+        corpo.appendChild(tr);
+      }
+    }
+
+    async function salvar(event) {
+      event.preventDefault();
+      const id = document.getElementById("txtId").value;
+      const compra = {
+        id_participante: Number(document.getElementById("cboParticipante").value),
+        id_ingresso: Number(document.getElementById("cboIngresso").value),
+        quantidade: Number(document.getElementById("txtQuantidade").value),
+      };
+      const resposta = id
+        ? await api.put(URI, id, { compra })
+        : await api.post(URI, { compra });
+      if (!tratarResposta(resposta)) return;
+      if (resposta && resposta.success) {
+        mostrarMsg(id ? "Quantidade atualizada com sucesso!" : "Compra realizada com sucesso!", "ok");
+        limparForm();
+        carregarCombos();
+        carregar();
+      } else {
+        mostrarMsg(resposta?.message || "Não foi possível salvar (verifique o estoque).", "erro");
+      }
+    }
+
+    function entrarEmEdicao(c) {
+      document.getElementById("txtId").value = c.id_compra;
+      document.getElementById("cboParticipante").value = c.id_participante;
+      document.getElementById("cboIngresso").value = c.id_ingresso;
+      document.getElementById("txtQuantidade").value = c.quantidade;
+      document.getElementById("tituloForm").textContent = `Editar compra #${c.id_compra} (quantidade)`;
+      document.getElementById("btnSalvar").textContent = "Atualizar";
+      document.getElementById("btnCancelar").hidden = false;
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function limparForm() {
+      document.getElementById("formCompra").reset();
+      document.getElementById("txtId").value = "";
+      document.getElementById("txtQuantidade").value = "1";
+      document.getElementById("tituloForm").textContent = "Cadastrar compra";
+      document.getElementById("btnSalvar").textContent = "Salvar";
+      document.getElementById("btnCancelar").hidden = true;
+    }
+
+    async function excluir(id) {
+      if (!confirm(`Excluir a compra #${id}? O estoque será devolvido.`)) return;
+      const resposta = await api.delete(URI, id);
+      if (!tratarResposta(resposta)) return;
+      if (resposta) { mostrarMsg("Excluída com sucesso!", "ok"); carregarCombos(); carregar(); }
+      else mostrarMsg("Não foi possível excluir.", "erro");
+    }
+  </script>
+</body>
+</html>

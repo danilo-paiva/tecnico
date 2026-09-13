@@ -1,0 +1,153 @@
+/* Tema do projeto 3bi — PAW (Gestão de Eventos e Ingressos) */
+:root {
+  --bg: #0f172a;
+  --bg-soft: #1e293b;
+  --card: #ffffff;
+  --ink: #0f172a;
+  --muted: #64748b;
+  --line: #e2e8f0;
+  --brand: #4f46e5;
+  --brand-dark: #4338ca;
+  --ok: #16a34a;
+  --warn: #d97706;
+  --danger: #dc2626;
+  --radius: 12px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+  background: #f1f5f9;
+  color: var(--ink);
+}
+
+/* ---------- topo / navegação ---------- */
+.topbar {
+  background: var(--bg);
+  color: #fff;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.topbar .logo { font-weight: 700; font-size: 18px; }
+.topbar .logo span { color: #a5b4fc; }
+
+.topbar nav { display: flex; gap: 8px; flex-wrap: wrap; }
+.topbar nav a {
+  color: #e2e8f0;
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+.topbar nav a:hover, .topbar nav a.ativo { background: var(--bg-soft); color: #fff; }
+
+.topbar .usuario {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #cbd5e1;
+}
+
+/* ---------- layout ---------- */
+.container { max-width: 1080px; margin: 24px auto; padding: 0 16px; }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, .08);
+}
+
+.card h2 { margin-top: 0; }
+.muted { color: var(--muted); font-size: 14px; }
+
+/* ---------- formulários ---------- */
+label { display: block; font-size: 14px; margin: 10px 0 4px; font-weight: 600; }
+
+input, select, textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 15px;
+  background: #fff;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: 2px solid #c7d2fe;
+  border-color: var(--brand);
+}
+
+.linha { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 640px) { .linha { grid-template-columns: 1fr; } }
+
+/* ---------- botões ---------- */
+button, .btn {
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 15px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-primario { background: var(--brand); color: #fff; }
+.btn-primario:hover { background: var(--brand-dark); }
+.btn-perigo { background: var(--danger); color: #fff; }
+.btn-neutro { background: #e2e8f0; color: var(--ink); }
+.btn-pequeno { padding: 6px 10px; font-size: 13px; }
+.acoes { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+
+/* ---------- tabelas ---------- */
+.tabela-responsiva { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { text-align: left; padding: 10px; border-bottom: 1px solid var(--line); }
+th { background: #f8fafc; font-size: 13px; text-transform: uppercase; color: var(--muted); }
+tr:hover td { background: #f8fafc; }
+
+/* ---------- mensagens ---------- */
+.msg {
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin: 12px 0;
+  font-size: 14px;
+  display: none;
+}
+.msg.ok { display: block; background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+.msg.erro { display: block; background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+.msg.info { display: block; background: #e0e7ff; color: #3730a3; border: 1px solid #a5b4fc; }
+
+/* ---------- login ---------- */
+.login-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--bg), var(--brand-dark));
+  padding: 16px;
+}
+.login-card { width: 100%; max-width: 420px; }
+
+/* ---------- dashboard ---------- */
+.grade { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.painel {
+  background: var(--bg-soft);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 16px;
+  text-decoration: none;
+}
+.painel:hover { background: #334155; }
+.painel strong { font-size: 28px; display: block; }
+.painel span { font-size: 14px; color: #cbd5e1; }

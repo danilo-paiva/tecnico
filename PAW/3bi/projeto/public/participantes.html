@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Participantes — Gestão de Eventos</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="logo">🎟️ Gestão de <span>Eventos</span></div>
+    <nav>
+      <a href="dashboard.html" data-pagina="painel">Painel</a>
+      <a href="locais.html" data-pagina="locais">Locais</a>
+      <a href="eventos.html" data-pagina="eventos">Eventos</a>
+      <a href="ingressos.html" data-pagina="ingressos">Ingressos</a>
+      <a href="participantes.html" data-pagina="participantes">Participantes</a>
+      <a href="compras.html" data-pagina="compras">Compras</a>
+    </nav>
+    <div class="usuario">
+      <span id="usuarioLogado"></span>
+      <button id="btnSair" class="btn-neutro btn-pequeno">Sair</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="card">
+      <h2 id="tituloForm">Cadastrar participante</h2>
+      <p class="muted">POST /participantes para criar · PUT /participantes/{id} para atualizar (com JWT).</p>
+      <div id="msg" class="msg"></div>
+      <form id="formParticipante">
+        <input type="hidden" id="txtId">
+        <label for="txtNome">Nome</label>
+        <input id="txtNome" required minlength="3" maxlength="150" placeholder="Ex.: Diego">
+        <div class="linha">
+          <div>
+            <label for="txtEmail">E-mail</label>
+            <input id="txtEmail" type="email" required placeholder="Ex.: diego@email.com">
+          </div>
+          <div>
+            <label for="txtCpf">CPF</label>
+            <input id="txtCpf" required placeholder="Ex.: 444.555.666-77">
+          </div>
+        </div>
+        <div class="linha">
+          <div>
+            <label for="txtTelefone">Telefone</label>
+            <input id="txtTelefone" placeholder="Ex.: (47) 90000-0000">
+          </div>
+          <div>
+            <label for="txtSenha">Senha (mín. 6 caracteres)</label>
+            <input id="txtSenha" type="password" required minlength="6" placeholder="••••••">
+          </div>
+        </div>
+        <div class="acoes">
+          <button type="submit" class="btn-primario" id="btnSalvar">Salvar</button>
+          <button type="button" class="btn-neutro" id="btnCancelar" hidden>Cancelar edição</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Participantes cadastrados</h2>
+      <p class="muted">GET /participantes para listar · DELETE /participantes/{id} para excluir (com JWT). A senha nunca aparece na lista.</p>
+      <div class="tabela-responsiva">
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Nome</th><th>E-mail</th><th>CPF</th><th>Telefone</th><th>Ações</th></tr>
+          </thead>
+          <tbody id="corpoTabela"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script type="module">
+    import { exigirLogin, montarTopo, apiAutenticada, tratarResposta, mostrarMsg } from "./js/auth.js";
+
+    exigirLogin();
+    const api = apiAutenticada();
+    const URI = `${API_BASE_URL}/participantes`;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      montarTopo("participantes");
+      carregar();
+      document.getElementById("formParticipante").addEventListener("submit", salvar);
+      document.getElementById("btnCancelar").addEventListener("click", limparForm);
+    });
+
+    async function carregar() {
+      const resposta = await api.get(URI);
+      if (!tratarResposta(resposta)) return;
+      if (!resposta || !resposta.success) { mostrarMsg(resposta?.message || "Erro ao listar.", "erro"); return; }
+      const corpo = document.getElementById("corpoTabela");
+      corpo.innerHTML = "";
+      for (const p of resposta.data.participantes) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${p.id_participante}</td><td></td><td></td><td>${p.cpf}</td><td>${p.telefone || ""}</td><td></td>`;
+        tr.children[1].textContent = p.nome;
+        tr.children[2].textContent = p.email;
+        const tdAcoes = tr.children[5];
+
+        const btnEditar = document.createElement("button");
+        btnEditar.textContent = "Editar";
+        btnEditar.className = "btn-neutro btn-pequeno";
+        btnEditar.addEventListener("click", () => entrarEmEdicao(p));
+
+        const btnExcluir = document.createElement("button");
+        btnExcluir.textContent = "Excluir";
+        btnExcluir.className = "btn-perigo btn-pequeno";
+        btnExcluir.addEventListener("click", () => excluir(p.id_participante));
+
+        tdAcoes.append(btnEditar, " ", btnExcluir);
+        corpo.appendChild(tr);
+      }
+    }
+
+    async function salvar(event) {
+      event.preventDefault();
+      const id = document.getElementById("txtId").value;
+      const participante = {
+        nome: document.getElementById("txtNome").value.trim(),
+        email: document.getElementById("txtEmail").value.trim(),
+        cpf: document.getElementById("txtCpf").value.trim(),
+        telefone: document.getElementById("txtTelefone").value.trim(),
+        senha: document.getElementById("txtSenha").value,
+      };
+      const resposta = id
+        ? await api.put(URI, id, { participante })
+        : await api.post(URI, { participante });
+      if (!tratarResposta(resposta)) return;
+      if (resposta && resposta.success) {
+        mostrarMsg(id ? "Atualizado com sucesso!" : "Cadastro realizado com sucesso!", "ok");
+        limparForm();
+        carregar();
+      } else {
+        mostrarMsg(resposta?.message || "Não foi possível salvar.", "erro");
+      }
+    }
+
+    function entrarEmEdicao(p) {
+      document.getElementById("txtId").value = p.id_participante;
+      document.getElementById("txtNome").value = p.nome;
+      document.getElementById("txtEmail").value = p.email;
+      document.getElementById("txtCpf").value = p.cpf;
+      document.getElementById("txtTelefone").value = p.telefone || "";
+      document.getElementById("txtSenha").value = "";
+      document.getElementById("tituloForm").textContent = `Editar participante #${p.id_participante}`;
+      document.getElementById("btnSalvar").textContent = "Atualizar";
+      document.getElementById("btnCancelar").hidden = false;
+      mostrarMsg("Informe a nova senha para concluir a atualização.", "info");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function limparForm() {
+      document.getElementById("formParticipante").reset();
+      document.getElementById("txtId").value = "";
+      document.getElementById("tituloForm").textContent = "Cadastrar participante";
+      document.getElementById("btnSalvar").textContent = "Salvar";
+      document.getElementById("btnCancelar").hidden = true;
+    }
+
+    async function excluir(id) {
+      if (!confirm(`Excluir o participante #${id}?`)) return;
+      const resposta = await api.delete(URI, id);
+      if (!tratarResposta(resposta)) return;
+      if (resposta) { mostrarMsg("Excluído com sucesso!", "ok"); carregar(); }
+      else mostrarMsg("Não foi possível excluir (verifique vínculos com compras).", "erro");
+    }
+  </script>
+</body>
+</html>

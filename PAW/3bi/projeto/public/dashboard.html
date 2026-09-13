@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel — Gestão de Eventos</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="logo">🎟️ Gestão de <span>Eventos</span></div>
+    <nav>
+      <a href="dashboard.html" data-pagina="painel">Painel</a>
+      <a href="locais.html" data-pagina="locais">Locais</a>
+      <a href="eventos.html" data-pagina="eventos">Eventos</a>
+      <a href="ingressos.html" data-pagina="ingressos">Ingressos</a>
+      <a href="participantes.html" data-pagina="participantes">Participantes</a>
+      <a href="compras.html" data-pagina="compras">Compras</a>
+    </nav>
+    <div class="usuario">
+      <span id="usuarioLogado"></span>
+      <button id="btnSair" class="btn-neutro btn-pequeno">Sair</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="card">
+      <h2>Painel</h2>
+      <p class="muted">Visão geral (GET + <code>/count</code> de cada entidade, com JWT).</p>
+      <div id="msg" class="msg"></div>
+      <div class="grade" id="gradeContadores">
+        <a class="painel" href="locais.html"><strong id="cLocais">…</strong><span>Locais</span></a>
+        <a class="painel" href="eventos.html"><strong id="cEventos">…</strong><span>Eventos</span></a>
+        <a class="painel" href="ingressos.html"><strong id="cIngressos">…</strong><span>Ingressos</span></a>
+        <a class="painel" href="participantes.html"><strong id="cParticipantes">…</strong><span>Participantes</span></a>
+        <a class="painel" href="compras.html"><strong id="cCompras">…</strong><span>Compras</span></a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>O que cada página faz</h2>
+      <ul>
+        <li><strong>Cadastrar</strong> (POST na API) — formulário no topo de cada página.</li>
+        <li><strong>Listar</strong> (GET na API) — tabela com todos os registros.</li>
+        <li><strong>Atualizar / Excluir</strong> (PUT e DELETE na API) — botões <em>Editar</em> e <em>Excluir</em> em cada linha.</li>
+      </ul>
+      <p class="muted">Todas as requisições enviam o token JWT no header <code>Authorization: Bearer …</code></p>
+    </div>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script type="module">
+    import { exigirLogin, montarTopo, apiAutenticada, tratarResposta, mostrarMsg } from "./js/auth.js";
+
+    exigirLogin();
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      montarTopo("painel");
+      const api = apiAutenticada();
+      const alvos = [
+        ["cLocais", "locais"], ["cEventos", "eventos"], ["cIngressos", "ingressos"],
+        ["cParticipantes", "participantes"], ["cCompras", "compras"],
+      ];
+      for (const [id, recurso] of alvos) {
+        const resposta = await api.get(`${API_BASE_URL}/${recurso}/count`);
+        if (!tratarResposta(resposta)) return;
+        document.getElementById(id).textContent =
+          (resposta && resposta.success) ? resposta.data.count : "—";
+      }
+    });
+  </script>
+</body>
+</html>
