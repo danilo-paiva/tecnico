@@ -1,0 +1,622 @@
+{
+    "_type": "export",
+    "__export_format": 4,
+    "__export_source": "insomnia.desktop.app",
+    "resources": [
+        {
+            "_id": "wrk_1629dee48cc4e53161f9b2be8614e062",
+            "_type": "workspace",
+            "name": "Eventos API",
+            "scope": "collection"
+        },
+        {
+            "_id": "env_e900e40bc91d3f9f7f0a99fed68a2e96",
+            "_type": "environment",
+            "parentId": "wrk_1629dee48cc4e53161f9b2be8614e062",
+            "name": "Base",
+            "data": {
+                "base_url": "http://localhost:8080"
+            }
+        },
+        {
+            "_id": "fld_0cffa54196a4f015323bb5da3add6e79",
+            "_type": "request_group",
+            "parentId": "wrk_1629dee48cc4e53161f9b2be8614e062",
+            "name": "Locais"
+        },
+        {
+            "_id": "req_684d935724997d6c8f2fef811a4a496b",
+            "_type": "request",
+            "parentId": "fld_0cffa54196a4f015323bb5da3add6e79",
+            "name": "Listar",
+            "method": "GET",
+            "url": "{{ _.base_url }}/locais",
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "body": {
+                "mimeType": "application/json",
+                "text": ""
+            }
+        },
+        {
+            "_id": "req_ad12743c7eb9f282d9af2b7240e8f7aa",
+            "_type": "request",
+            "parentId": "fld_0cffa54196a4f015323bb5da3add6e79",
+            "name": "Buscar por id",
+            "method": "GET",
+            "url": "{{ _.base_url }}/locais/1",
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "body": {
+                "mimeType": "application/json",
+                "text": ""
+            }
+        },
+        {
+            "_id": "req_b2c2d7355b9ae5c1a97f3173a4f95df8",
+            "_type": "request",
+            "parentId": "fld_0cffa54196a4f015323bb5da3add6e79",
+            "name": "Contar",
+            "method": "GET",
+            "url": "{{ _.base_url }}/locais/count",
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "body": {
+                "mimeType": "application/json",
+                "text": ""
+            }
+        },
+        {
+            "_id": "req_1811c5c980065246f6898468506c38c3",
+            "_type": "request",
+            "parentId": "fld_0cffa54196a4f015323bb5da3add6e79",
+            "name": "Criar",
+            "method": "POST",
+            "url": "{{ _.base_url }}/locais",
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\"local\":{\"nome\":\"Ginasio Central\",\"endereco\":\"Rua A, 100\",\"capacidade\":800}}"
+            }
+        },
+        {
+            "_id": "req_80c28ac4c6bcc8250e14e5ca6f6f8b35",
+            "_type": "request",
+            "parentId": "fld_0cffa54196a4f015323bb5da3add6e79",
+            "name": "Atualizar",
+            "method": "PUT",
+            "url": "{{ _.base_url }}/locais/1",
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\"local\":{\"nome\":\"Ginasio Central\",\"endereco\":\"Rua A, 101\",\"capacidade\":900}}"
+            }
+        },
+        {
+            "_id": "req_dc44a670113a64e8ea10aa554a150a72",
+            "_type": "request",
+            "parentId": "fld_0cffa54196a4f015323bb5da3add6e79",
+            "name": "Excluir",
+            "method": "DELETE",
+            "url": "{{ _.base_url }}/locais/1",
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "body": {
+                "mimeType": "application/json",
+                "text": ""
+            }
+        },
+        {
+            "_id": "fld_2849bf4bd11ae84fb9b3d2edbb7595ab",
+            "_type": "request_group",
+            "parentId": "wrk_1629dee48cc4e53161f9b2be8614e062",
+            "name": "Eventos"
+        },
+        {
+            "_id": "req_48fbd59eb49a25a73fa646d6870f23fa",
+            "_type": "request",
+            "parentId": "fld_2849bf4bd11ae84fb9b3d2edbb7595ab",
+            "name": "Listar",
+            "method": "GET",
+            "url": "{{ _.base_url }}/eventos",
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "body": {
+                "mimeType": "application/json",
+                "text": ""
+            }
+        },
+        {
+            "_id": "req_acd2143410db4adb255cad90ca6bc977",
+            "_type": "request",
+            "parentId": "fld_2849bf4bd11ae84fb9b3d2edbb7595ab",
+            "name": "Buscar por id",
+            "method": "GET",
+            "url": "{{ _.base_url }}/eventos/1",
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "body": {
+                "mimeType": "application/json",
+                "text": ""
+            }
+        },
+        {
+            "_id": "req_65abb48db41655259bd83f7f061495cd",
+            "_type": "request",
+            "parentId": "fld_2849bf4bd11ae84fb9b3d2edbb7595ab",
+            "name": "Contar",
+            "method": "GET",
+            "url": "{{ _.base_url }}/eventos/count",
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "body": {
+                "mimeType": "application/json",
+                "text": ""
+            }
+        },
+        {
+            "_id": "req_5bf9195d5b0751aaf32b09e81ed9ac9a",
+            "_type": "request",
+            "parentId": "fld_2849bf4bd11ae84fb9b3d2edbb7595ab",
+            "name": "Criar",
+            "method": "POST",
+            "url": "{{ _.base_url }}/eventos",
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\"evento\":{\"titulo\":\"Show de Rock\",\"descricao\":\"Banda local\",\"data_evento\":\"2026-12-10 20:00:00\",\"status\":\"planejado\",\"id_local\":2}}"
+            }
+        },
+        {
+            "_id": "req_5a064079ad52467d724f6c7bfc101338",
+            "_type": "request",
+            "parentId": "fld_2849bf4bd11ae84fb9b3d2edbb7595ab",
+            "name": "Atualizar",
+            "method": "PUT",
+            "url": "{{ _.base_url }}/eventos/1",
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\"evento\":{\"titulo\":\"Show de Rock\",\"data_evento\":\"2026-12-10 20:00:00\",\"status\":\"confirmado\",\"id_local\":2}}"
+            }
+        },
+        {
+            "_id": "req_2df06dab89b9fe601718aa7d707c136f",
+            "_type": "request",
+            "parentId": "fld_2849bf4bd11ae84fb9b3d2edbb7595ab",
+            "name": "Excluir",
+            "method": "DELETE",
+            "url": "{{ _.base_url }}/eventos/1",
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "body": {
+                "mimeType": "application/json",
+                "text": ""
+            }
+        },
+        {
+            "_id": "fld_8f6f32b671ee97ce782efb972e15a0ee",
+            "_type": "request_group",
+            "parentId": "wrk_1629dee48cc4e53161f9b2be8614e062",
+            "name": "Ingressos"
+        },
+        {
+            "_id": "req_36e20e7e70e9bc628b493a973dd3f76a",
+            "_type": "request",
+            "parentId": "fld_8f6f32b671ee97ce782efb972e15a0ee",
+            "name": "Listar",
+            "method": "GET",
+            "url": "{{ _.base_url }}/ingressos",
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "body": {
+                "mimeType": "application/json",
+                "text": ""
+            }
+        },
+        {
+            "_id": "req_cb17ec92cd05655f35457051d929788b",
+            "_type": "request",
+            "parentId": "fld_8f6f32b671ee97ce782efb972e15a0ee",
+            "name": "Buscar por id",
+            "method": "GET",
+            "url": "{{ _.base_url }}/ingressos/1",
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "body": {
+                "mimeType": "application/json",
+                "text": ""
+            }
+        },
+        {
+            "_id": "req_672e8ecd6f4b3a379fa58729cfb594a2",
+            "_type": "request",
+            "parentId": "fld_8f6f32b671ee97ce782efb972e15a0ee",
+            "name": "Contar",
+            "method": "GET",
+            "url": "{{ _.base_url }}/ingressos/count",
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "body": {
+                "mimeType": "application/json",
+                "text": ""
+            }
+        },
+        {
+            "_id": "req_b27e05557a444e4bd95810baccdbe2c0",
+            "_type": "request",
+            "parentId": "fld_8f6f32b671ee97ce782efb972e15a0ee",
+            "name": "Criar",
+            "method": "POST",
+            "url": "{{ _.base_url }}/ingressos",
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\"ingresso\":{\"tipo\":\"Camarote\",\"preco\":200,\"quantidade_total\":50,\"id_evento\":1}}"
+            }
+        },
+        {
+            "_id": "req_13fa00af32e1ba9a4362d57b50388772",
+            "_type": "request",
+            "parentId": "fld_8f6f32b671ee97ce782efb972e15a0ee",
+            "name": "Atualizar",
+            "method": "PUT",
+            "url": "{{ _.base_url }}/ingressos/1",
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\"ingresso\":{\"tipo\":\"Inteira\",\"preco\":90,\"quantidade_total\":200,\"id_evento\":1}}"
+            }
+        },
+        {
+            "_id": "req_d16a7693df6e7bc84ceb46930eaca771",
+            "_type": "request",
+            "parentId": "fld_8f6f32b671ee97ce782efb972e15a0ee",
+            "name": "Excluir",
+            "method": "DELETE",
+            "url": "{{ _.base_url }}/ingressos/1",
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "body": {
+                "mimeType": "application/json",
+                "text": ""
+            }
+        },
+        {
+            "_id": "fld_ac982450afae5644de00572e92f62661",
+            "_type": "request_group",
+            "parentId": "wrk_1629dee48cc4e53161f9b2be8614e062",
+            "name": "Participantes"
+        },
+        {
+            "_id": "req_dd332b0e17c08df8bfc1bdd7120bd278",
+            "_type": "request",
+            "parentId": "fld_ac982450afae5644de00572e92f62661",
+            "name": "Listar",
+            "method": "GET",
+            "url": "{{ _.base_url }}/participantes",
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "body": {
+                "mimeType": "application/json",
+                "text": ""
+            }
+        },
+        {
+            "_id": "req_645fdbf1b3570c4e77579c3c05ea330f",
+            "_type": "request",
+            "parentId": "fld_ac982450afae5644de00572e92f62661",
+            "name": "Buscar por id",
+            "method": "GET",
+            "url": "{{ _.base_url }}/participantes/1",
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "body": {
+                "mimeType": "application/json",
+                "text": ""
+            }
+        },
+        {
+            "_id": "req_45ea2fbb75e0ee067269f27b5074321d",
+            "_type": "request",
+            "parentId": "fld_ac982450afae5644de00572e92f62661",
+            "name": "Contar",
+            "method": "GET",
+            "url": "{{ _.base_url }}/participantes/count",
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "body": {
+                "mimeType": "application/json",
+                "text": ""
+            }
+        },
+        {
+            "_id": "req_c9756ad9f403eb951d11e81bda600a6e",
+            "_type": "request",
+            "parentId": "fld_ac982450afae5644de00572e92f62661",
+            "name": "Criar",
+            "method": "POST",
+            "url": "{{ _.base_url }}/participantes",
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\"participante\":{\"nome\":\"Diego\",\"email\":\"diego@email.com\",\"cpf\":\"444.555.666-77\",\"telefone\":\"(47) 90000-0000\",\"senha\":\"secreta123\"}}"
+            }
+        },
+        {
+            "_id": "req_2ab007e928ed13e32741a924db40682c",
+            "_type": "request",
+            "parentId": "fld_ac982450afae5644de00572e92f62661",
+            "name": "Atualizar",
+            "method": "PUT",
+            "url": "{{ _.base_url }}/participantes/1",
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\"participante\":{\"nome\":\"Diego\",\"email\":\"diego@email.com\",\"cpf\":\"444.555.666-77\",\"senha\":\"nova123\"}}"
+            }
+        },
+        {
+            "_id": "req_2878b5e64e76610cf49e2a39cb82887a",
+            "_type": "request",
+            "parentId": "fld_ac982450afae5644de00572e92f62661",
+            "name": "Excluir",
+            "method": "DELETE",
+            "url": "{{ _.base_url }}/participantes/1",
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "body": {
+                "mimeType": "application/json",
+                "text": ""
+            }
+        },
+        {
+            "_id": "fld_ffc47dd2a5874702416aa3274b75e1a9",
+            "_type": "request_group",
+            "parentId": "wrk_1629dee48cc4e53161f9b2be8614e062",
+            "name": "Compras"
+        },
+        {
+            "_id": "req_969e7fd38c767cb1053f1327a7e6c270",
+            "_type": "request",
+            "parentId": "fld_ffc47dd2a5874702416aa3274b75e1a9",
+            "name": "Listar",
+            "method": "GET",
+            "url": "{{ _.base_url }}/compras",
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "body": {
+                "mimeType": "application/json",
+                "text": ""
+            }
+        },
+        {
+            "_id": "req_28337f1f84c2f4ac2d60d475b18648b4",
+            "_type": "request",
+            "parentId": "fld_ffc47dd2a5874702416aa3274b75e1a9",
+            "name": "Buscar por id",
+            "method": "GET",
+            "url": "{{ _.base_url }}/compras/1",
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "body": {
+                "mimeType": "application/json",
+                "text": ""
+            }
+        },
+        {
+            "_id": "req_8f41aeb96297579bd8844ad686744852",
+            "_type": "request",
+            "parentId": "fld_ffc47dd2a5874702416aa3274b75e1a9",
+            "name": "Contar",
+            "method": "GET",
+            "url": "{{ _.base_url }}/compras/count",
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "body": {
+                "mimeType": "application/json",
+                "text": ""
+            }
+        },
+        {
+            "_id": "req_beb6b9ee96b71ca988eb7b6825a3adb7",
+            "_type": "request",
+            "parentId": "fld_ffc47dd2a5874702416aa3274b75e1a9",
+            "name": "Criar",
+            "method": "POST",
+            "url": "{{ _.base_url }}/compras",
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\"compra\":{\"id_participante\":1,\"id_ingresso\":1,\"quantidade\":2}}"
+            }
+        },
+        {
+            "_id": "req_1b5128bf8775f3acc1d26497824bc82b",
+            "_type": "request",
+            "parentId": "fld_ffc47dd2a5874702416aa3274b75e1a9",
+            "name": "Atualizar",
+            "method": "PUT",
+            "url": "{{ _.base_url }}/compras/1",
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\"compra\":{\"id_participante\":1,\"id_ingresso\":1,\"quantidade\":3}}"
+            }
+        },
+        {
+            "_id": "req_17aaa88417cff256740979516903b8a1",
+            "_type": "request",
+            "parentId": "fld_ffc47dd2a5874702416aa3274b75e1a9",
+            "name": "Excluir",
+            "method": "DELETE",
+            "url": "{{ _.base_url }}/compras/1",
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "body": {
+                "mimeType": "application/json",
+                "text": ""
+            }
+        }
+    ]
+}
