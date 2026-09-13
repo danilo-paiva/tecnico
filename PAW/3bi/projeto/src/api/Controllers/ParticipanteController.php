@@ -111,6 +111,7 @@ class ParticipanteController
                     'id_participante' => $participante->getIdParticipante(),
                     'nome' => $participante->getNome(),
                     'email' => $participante->getEmail(),
+                    'perfil' => $participante->getPerfil(),
                 ],
                 'token' => $resultado['token']
             ]

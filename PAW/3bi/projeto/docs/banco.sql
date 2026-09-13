@@ -157,6 +157,7 @@ CREATE TABLE `participantes` (
   `email` varchar(150) NOT NULL,
   `cpf` varchar(14) NOT NULL,
   `telefone` varchar(20) DEFAULT NULL,
+  `perfil` enum('administrador','comum') NOT NULL DEFAULT 'comum',
   `senha` varchar(255) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id_participante`),
@@ -171,7 +172,7 @@ CREATE TABLE `participantes` (
 
 LOCK TABLES `participantes` WRITE;
 /*!40000 ALTER TABLE `participantes` DISABLE KEYS */;
-INSERT INTO `participantes` VALUES (1,'Ana Souza','ana@email.com','111.222.333-44','(47) 99911-2233','$2y$10$3JjEJUodOjcvm4817aU7keVywDzdTrx46UcE7FFTZ8vEUWNeNeU3K','2026-08-24 11:04:03'),(2,'Bruno Lima','bruno@email.com','222.333.444-55','(47) 98822-3344','$2y$10$3JjEJUodOjcvm4817aU7keVywDzdTrx46UcE7FFTZ8vEUWNeNeU3K','2026-08-24 11:04:03'),(3,'Carla Mendes','carla@email.com','333.444.555-66','(47) 97733-4455','$2y$10$3JjEJUodOjcvm4817aU7keVywDzdTrx46UcE7FFTZ8vEUWNeNeU3K','2026-08-24 11:04:03');
+INSERT INTO `participantes` VALUES (1,'Ana Souza','ana@email.com','111.222.333-44','(47) 99911-2233','administrador','$2y$10$3JjEJUodOjcvm4817aU7keVywDzdTrx46UcE7FFTZ8vEUWNeNeU3K','2026-08-24 11:04:03'),(2,'Bruno Lima','bruno@email.com','222.333.444-55','(47) 98822-3344','comum','$2y$10$3JjEJUodOjcvm4817aU7keVywDzdTrx46UcE7FFTZ8vEUWNeNeU3K','2026-08-24 11:04:03'),(3,'Carla Mendes','carla@email.com','333.444.555-66','(47) 97733-4455','comum','$2y$10$3JjEJUodOjcvm4817aU7keVywDzdTrx46UcE7FFTZ8vEUWNeNeU3K','2026-08-24 11:04:03');
 /*!40000 ALTER TABLE `participantes` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

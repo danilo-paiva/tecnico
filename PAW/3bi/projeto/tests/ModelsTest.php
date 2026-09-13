@@ -111,6 +111,7 @@ class ModelsTest extends TestCase
         $json = $p->jsonSerialize();
         $this->assertArrayNotHasKey('senha', $json);
         $this->assertEquals('Diego Souza', $json['nome']);
+        $this->assertEquals('comum', $json['perfil']); // perfil padrao
     }
 
     public function testCompraValida(): void
@@ -127,5 +128,19 @@ class ModelsTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
         (new Compra())->setQuantidade(0);
+    }
+
+    public function testParticipantePerfilAdministrador(): void
+    {
+        $p = new Participante();
+        $p->setPerfil('administrador');
+        $this->assertEquals('administrador', $p->getPerfil());
+        $this->assertEquals('administrador', $p->jsonSerialize()['perfil']);
+    }
+
+    public function testParticipantePerfilInvalido(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        (new Participante())->setPerfil('dono');
     }
 }

@@ -24,6 +24,7 @@ class ParticipanteServiceLoginTest extends TestCase
                     $p->setNome('Ana Souza');
                     $p->setEmail($email);
                     $p->setCpf('111.222.333-44');
+                    $p->setPerfil('administrador');
                     return $p;
                 }
                 return null;
@@ -49,6 +50,7 @@ class ParticipanteServiceLoginTest extends TestCase
         $jwt = new MeuTokenJWT();
         $this->assertTrue($jwt->validateToken($resultado['token']));
         $this->assertEquals(1, $jwt->getPayload()->participante->id_participante);
+        $this->assertEquals('administrador', $jwt->getPayload()->participante->perfil);
     }
 
     public function testSenhaErradaDa401(): void

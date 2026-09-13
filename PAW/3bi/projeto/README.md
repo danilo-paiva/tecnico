@@ -28,8 +28,8 @@ Continuação do projeto do 2º bimestre (API REST Slim 4 + MySQL), acrescentand
 3. Suba o servidor (API **e** frontend na mesma origem):
    `composer start` (ou `php -S localhost:8080 -t public`)
 4. Abra no navegador: `http://localhost:8080/login.html`
-5. Entre com o usuário do seed: **ana@email.com** / **123456**
-   (também valem `bruno@email.com` e `carla@email.com`, mesma senha)
+5. Entre com o usuário do seed: **ana@email.com** / **123456** (administradora).
+   Para ver o perfil comum: `bruno@email.com` / `123456`.
 
 ## Login + JWT (resumo do fluxo)
 
@@ -38,7 +38,20 @@ Continuação do projeto do 2º bimestre (API REST Slim 4 + MySQL), acrescentand
 3. O frontend guarda o token no `localStorage` (`js/auth.js`).
 4. Toda chamada seguinte envia `Authorization: Bearer <token>` (`js/ApiService.js`).
 5. Sem token, ou com token inválido/expirado, a API responde `401`.
-6. O token dura 30 dias e carrega `{id_participante, nome, email}` (claims públicas).
+6. O token dura 30 dias e carrega `{id_participante, nome, email, perfil}` (claims públicas).
+
+## Perfis (aula paw03x01 — ValidateAdministrador)
+
+| Perfil | Leitura (GET) | Escrita (POST/PUT/PATCH/DELETE) |
+|---|---|---|
+| `comum` | ✅ com token | ❌ `403 Acesso negado` |
+| `administrador` | ✅ com token | ✅ com token |
+
+O perfil aparece no topo das páginas e o frontend esconde o formulário e
+os botões de quem é comum (a API barra com 403 de qualquer jeito).
+Um admin promove/rebaixa pelo campo `perfil` em `participantes.html`.
+Banco novo: `docs/banco.sql` já vem com a coluna; banco antigo: rode
+`docs/migracao-admin.sql`.
 
 Detalhes e exemplos `curl` em `API.md`. Coleção do Insomnia em
 `docs/insomnia.json` (pasta **Auth (JWT)** para o login; demais pastas já
@@ -48,9 +61,9 @@ enviam `Authorization: Bearer {{ _.token }}` — cole o token na variável
 ## Testes
 
 - PHPUnit (unitários, sem precisar do banco): `composer test`
-- Cobertura: `MeuTokenJWT` (gerar/validar/expirado/adulterado), `Models`
-  (validações e senha fora do JSON), middlewares (token + body do login) e
-  `ParticipanteService::loginService` (sucesso/401 com DAO simulado).
+- Cobertura: `MeuTokenJWT` (gerar/validar/perfil/expirado/adulterado), `Models`
+  (validações, perfil e senha fora do JSON), middlewares (token + body do login +
+  admin 403/401) e `ParticipanteService::loginService` (sucesso/401 com DAO simulado).
 - Roteiro manual do frontend em `docs/roteiro-testes.md`.
 
 ## Estrutura (o que mudou em relação ao 2º bi)
@@ -64,13 +77,15 @@ public/js/auth.js                   guarda token, protege paginas, trata 401
 src/api/Http/MeuTokenJWT.php        aula paw03x01: gerar/validar JWT
 src/api/Middlewares/Participante/ValidateParticipanteToken.php  barreira 401
 src/api/Middlewares/Participante/ValidateParticipanteLoginBody.php  valida body do login
+src/api/Middlewares/Participante/ValidateAdministrador.php  barreira 403 (aula paw03x01)
 src/api/Routes/AuthRouter.php       POST /login e POST /participantes/login (publicas)
-src/api/Routes/*Router.php          todas as rotas exigem Bearer (ficha item 2)
+src/api/Routes/*Router.php          GET exige Bearer; escrita exige admin (403)
 src/api/DAO/ParticipanteDAO.php     + verificarLogin() com password_verify
 src/api/Services/ParticipanteService.php  + loginService() que gera o JWT
 src/api/Controllers/ParticipanteController.php  + loginController()
-tests/                              PHPUnit (33 testes)
-docs/banco.sql                      seed com senha 123456 nos 3 participantes
+tests/                              PHPUnit (38 testes)
+docs/banco.sql                      seed com senha 123456 + perfil (ana admin)
+docs/migracao-admin.sql             ALTER + UPDATE para banco já importado
 docs/insomnia.json                  coleção atualizada (Auth + Bearer)
 docs/roteiro-testes.md              passo a passo da apresentação
 API.md                              endpoints + auth + exemplos

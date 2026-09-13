@@ -14,6 +14,7 @@ class Participante implements JsonSerializable
     private string $email = "";
     private string $cpf = "";
     private ?string $telefone = null;
+    private string $perfil = "comum";
     private string $senha = "";
 
     public function getIdParticipante(): ?int
@@ -84,6 +85,21 @@ class Participante implements JsonSerializable
         $this->telefone = $value === null ? null : trim($value);
     }
 
+    public function getPerfil(): string
+    {
+        return $this->perfil;
+    }
+
+    // So existem dois perfis: administrador (acesso total) e comum (so leitura).
+    public function setPerfil(string $value): void
+    {
+        $value = strtolower(trim($value));
+        if (!in_array($value, ['administrador', 'comum'], true)) {
+            throw new InvalidArgumentException("perfil deve ser 'administrador' ou 'comum'.");
+        }
+        $this->perfil = $value;
+    }
+
     public function getSenha(): string
     {
         return $this->senha;
@@ -104,7 +120,8 @@ class Participante implements JsonSerializable
             'nome' => $this->getNome(),
             'email' => $this->getEmail(),
             'cpf' => $this->getCpf(),
-            'telefone' => $this->getTelefone()
+            'telefone' => $this->getTelefone(),
+            'perfil' => $this->getPerfil()
         ];
     }
 }

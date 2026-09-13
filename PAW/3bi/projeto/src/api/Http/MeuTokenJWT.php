@@ -46,7 +46,7 @@ class MeuTokenJWT
     }
 
     // Gera um token JWT a partir dos dados do participante logado.
-    // Espera: $claims->id_participante, $claims->nome, $claims->email
+    // Espera: $claims->id_participante, $claims->nome, $claims->email, $claims->perfil
     public function gerarToken(stdClass $claims): string
     {
         $headers = [
@@ -67,6 +67,7 @@ class MeuTokenJWT
                 'id_participante' => $claims->id_participante ?? null,
                 'nome' => $claims->nome ?? null,
                 'email' => $claims->email ?? null,
+                'perfil' => $claims->perfil ?? 'comum',
             ],
         ];
 

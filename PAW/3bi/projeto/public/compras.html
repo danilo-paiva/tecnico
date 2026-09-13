@@ -65,7 +65,7 @@
 
   <script src="js/config.js"></script>
   <script type="module">
-    import { exigirLogin, montarTopo, apiAutenticada, tratarResposta, mostrarMsg } from "./js/auth.js";
+    import { exigirLogin, montarTopo, apiAutenticada, tratarResposta, mostrarMsg, isAdmin, bloquearEscritaParaComum } from "./js/auth.js";
 
     exigirLogin();
     const api = apiAutenticada();
@@ -74,6 +74,7 @@
 
     document.addEventListener("DOMContentLoaded", async () => {
       montarTopo("compras");
+      bloquearEscritaParaComum(); // perfil comum: so lista
       await carregarCombos();
       carregar();
       document.getElementById("formCompra").addEventListener("submit", salvar);
@@ -135,7 +136,7 @@
         btnExcluir.className = "btn-perigo btn-pequeno";
         btnExcluir.addEventListener("click", () => excluir(c.id_compra));
 
-        tdAcoes.append(btnEditar, " ", btnExcluir);
+        if (isAdmin()) tdAcoes.append(btnEditar, " ", btnExcluir); // escrita e so de admin
         corpo.appendChild(tr);
       }
     }

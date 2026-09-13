@@ -13,6 +13,7 @@ use Api\Http\MeuTokenJWT;
 use Api\Http\ErrorResponse;
 use Api\Middlewares\Participante\ValidateParticipanteToken;
 use Api\Middlewares\Participante\ValidateParticipanteLoginBody;
+use Api\Middlewares\Participante\ValidateAdministrador;
 
 // Handler falso: so devolve 200 (ou o atributo jwtPayload, para conferir).
 class EchoHandler implements Handler
@@ -146,6 +147,57 @@ class MiddlewaresTest extends TestCase
             $mw->process($this->pedido('POST', $body), new EchoHandler());
         } catch (ErrorResponse $e) {
             $this->assertEquals(400, $e->getHttpCode());
+            throw $e;
+        }
+    }
+
+    // ---- ValidateAdministrador (aula paw03x01) ----
+
+    private function tokenComPerfil(string $perfil): string
+    {
+        $claims = new \stdClass();
+        $claims->id_participante = 1;
+        $claims->nome = 'Ana';
+        $claims->email = 'ana@email.com';
+        $claims->perfil = $perfil;
+        return (new MeuTokenJWT())->gerarToken($claims);
+    }
+
+    private function pedidoAutenticado(string $perfil): Request
+    {
+        // Simula o que o ValidateParticipanteToken faz: valida e guarda o payload.
+        $jwt = new MeuTokenJWT();
+        $token = $this->tokenComPerfil($perfil);
+        $this->assertTrue($jwt->validateToken($token));
+        return $this->pedido('POST')->withAttribute('jwtPayload', $jwt->getPayload());
+    }
+
+    public function testAdminPassa(): void
+    {
+        $resposta = (new ValidateAdministrador())->process(
+            $this->pedidoAutenticado('administrador'), new EchoHandler());
+        $this->assertEquals(200, $resposta->getStatusCode());
+    }
+
+    public function testComumRecebe403(): void
+    {
+        $this->expectException(ErrorResponse::class);
+        try {
+            (new ValidateAdministrador())->process(
+                $this->pedidoAutenticado('comum'), new EchoHandler());
+        } catch (ErrorResponse $e) {
+            $this->assertEquals(403, $e->getHttpCode());
+            throw $e;
+        }
+    }
+
+    public function testSemPayloadRecebe401(): void
+    {
+        $this->expectException(ErrorResponse::class);
+        try {
+            (new ValidateAdministrador())->process($this->pedido('POST'), new EchoHandler());
+        } catch (ErrorResponse $e) {
+            $this->assertEquals(401, $e->getHttpCode());
             throw $e;
         }
     }

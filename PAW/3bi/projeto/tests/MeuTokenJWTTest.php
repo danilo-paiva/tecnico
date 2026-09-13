@@ -14,6 +14,7 @@ class MeuTokenJWTTest extends TestCase
         $c->id_participante = 1;
         $c->nome = 'Ana Souza';
         $c->email = 'ana@email.com';
+        $c->perfil = 'administrador';
         return $c;
     }
 
@@ -32,6 +33,7 @@ class MeuTokenJWTTest extends TestCase
         $this->assertNotNull($payload);
         $this->assertEquals('ana@email.com', $payload->participante->email);
         $this->assertEquals(1, $payload->participante->id_participante);
+        $this->assertEquals('administrador', $payload->participante->perfil);
     }
 
     public function testAceitaPrefixoBearer(): void

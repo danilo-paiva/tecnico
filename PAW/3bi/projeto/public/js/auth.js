@@ -37,7 +37,7 @@ export function exigirLogin() {
 export function montarTopo(paginaAtiva = "") {
   const usuario = obterUsuario();
   const el = document.getElementById("usuarioLogado");
-  if (el) el.textContent = usuario ? `Olá, ${usuario.nome}` : "";
+  if (el) el.textContent = usuario ? `Olá, ${usuario.nome} (${usuario.perfil || 'comum'})` : "";
   document.querySelectorAll(".topbar nav a").forEach((a) => {
     if (a.dataset.pagina === paginaAtiva) a.classList.add("ativo");
   });
@@ -51,6 +51,21 @@ export function mostrarMsg(texto, tipo = "info") {
   if (!msg) return;
   msg.className = `msg ${tipo}`;
   msg.textContent = texto;
+}
+
+// Perfil do logado (aula paw03x01): 'administrador' tem acesso total,
+// 'comum' so pode listar (GET).
+export function isAdmin() {
+  return (obterUsuario()?.perfil || 'comum') === 'administrador';
+}
+
+// Esconde o formulario de escrita quando o perfil e comum.
+// O #msg fica visivel para explicar o motivo.
+export function bloquearEscritaParaComum() {
+  if (isAdmin()) return;
+  const form = document.querySelector("main form");
+  if (form) form.style.display = "none";
+  mostrarMsg("Perfil comum: voce pode listar. So administradores cadastram, editam ou excluem.", "info");
 }
 
 // Se a API responder 401 (token invalido/expirado), derruba a sessao.

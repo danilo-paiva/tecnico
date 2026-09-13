@@ -7,6 +7,7 @@ use Api\Controllers\ParticipanteController;
 use Api\Middlewares\Participante\ValidateParticipanteBody;
 use Api\Middlewares\Participante\ValidateParticipanteId;
 use Api\Middlewares\Participante\ValidateParticipanteToken;
+use Api\Middlewares\Participante\ValidateAdministrador;
 
 // POST /participantes | GET /participantes | GET /participantes/count
 // GET /participantes/{id} | PUT+PATCH /participantes/{id} | DELETE /participantes/{id}
@@ -26,6 +27,7 @@ class ParticipanteRouter
     {
         $this->app->post('/participantes', [ParticipanteController::class, 'createController'])
             ->add(ValidateParticipanteBody::class)
+            ->add(ValidateAdministrador::class)
             ->add(ValidateParticipanteToken::class);
 
         $this->app->get('/participantes', [ParticipanteController::class, 'findAllController'])
@@ -42,15 +44,18 @@ class ParticipanteRouter
         $this->app->put('/participantes/{id_participante}', [ParticipanteController::class, 'updateController'])
             ->add(ValidateParticipanteBody::class)
             ->add(ValidateParticipanteId::class)
+            ->add(ValidateAdministrador::class)
             ->add(ValidateParticipanteToken::class);
 
         $this->app->patch('/participantes/{id_participante}', [ParticipanteController::class, 'updateController'])
             ->add(ValidateParticipanteBody::class)
             ->add(ValidateParticipanteId::class)
+            ->add(ValidateAdministrador::class)
             ->add(ValidateParticipanteToken::class);
 
         $this->app->delete('/participantes/{id_participante}', [ParticipanteController::class, 'deleteController'])
             ->add(ValidateParticipanteId::class)
+            ->add(ValidateAdministrador::class)
             ->add(ValidateParticipanteToken::class);
     }
 }

@@ -18,14 +18,15 @@ class ParticipanteDAO
 
     public function create(Participante $participante): Participante
     {
-        $sql = "INSERT INTO participantes (nome, email, cpf, telefone, senha)
-                VALUES (:nome, :email, :cpf, :telefone, :senha)";
+        $sql = "INSERT INTO participantes (nome, email, cpf, telefone, perfil, senha)
+                VALUES (:nome, :email, :cpf, :telefone, :perfil, :senha)";
         $stmt = $this->database->getConnection()->prepare($sql);
         $stmt->execute([
             ':nome' => $participante->getNome(),
             ':email' => $participante->getEmail(),
             ':cpf' => $participante->getCpf(),
             ':telefone' => $participante->getTelefone(),
+            ':perfil' => $participante->getPerfil(),
             ':senha' => password_hash($participante->getSenha(), PASSWORD_DEFAULT)
         ]);
         $participante->setIdParticipante((int) $this->database->getConnection()->lastInsertId());
@@ -35,7 +36,7 @@ class ParticipanteDAO
     public function findAll(): array
     {
         $stmt = $this->database->getConnection()->query(
-            "SELECT id_participante, nome, email, cpf, telefone FROM participantes ORDER BY id_participante"
+            "SELECT id_participante, nome, email, cpf, telefone, perfil FROM participantes ORDER BY id_participante"
         );
         $participantes = [];
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $linha) {
@@ -46,7 +47,7 @@ class ParticipanteDAO
 
     public function findById(int $id): ?Participante
     {
-        $sql = "SELECT id_participante, nome, email, cpf, telefone FROM participantes WHERE id_participante = :id";
+        $sql = "SELECT id_participante, nome, email, cpf, telefone, perfil FROM participantes WHERE id_participante = :id";
         $stmt = $this->database->getConnection()->prepare($sql);
         $stmt->execute([':id' => $id]);
         $linha = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -55,7 +56,7 @@ class ParticipanteDAO
 
     public function findByEmail(string $email): ?Participante
     {
-        $sql = "SELECT id_participante, nome, email, cpf, telefone FROM participantes WHERE email = :email";
+        $sql = "SELECT id_participante, nome, email, cpf, telefone, perfil FROM participantes WHERE email = :email";
         $stmt = $this->database->getConnection()->prepare($sql);
         $stmt->execute([':email' => $email]);
         $linha = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -64,7 +65,7 @@ class ParticipanteDAO
 
     public function findByCpf(string $cpf): ?Participante
     {
-        $sql = "SELECT id_participante, nome, email, cpf, telefone FROM participantes WHERE cpf = :cpf";
+        $sql = "SELECT id_participante, nome, email, cpf, telefone, perfil FROM participantes WHERE cpf = :cpf";
         $stmt = $this->database->getConnection()->prepare($sql);
         $stmt->execute([':cpf' => $cpf]);
         $linha = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -74,7 +75,7 @@ class ParticipanteDAO
     public function update(Participante $participante): bool
     {
         $sql = "UPDATE participantes
-                SET nome = :nome, email = :email, cpf = :cpf, telefone = :telefone, senha = :senha
+                SET nome = :nome, email = :email, cpf = :cpf, telefone = :telefone, perfil = :perfil, senha = :senha
                 WHERE id_participante = :id";
         $stmt = $this->database->getConnection()->prepare($sql);
         $stmt->execute([
@@ -82,6 +83,7 @@ class ParticipanteDAO
             ':email' => $participante->getEmail(),
             ':cpf' => $participante->getCpf(),
             ':telefone' => $participante->getTelefone(),
+            ':perfil' => $participante->getPerfil(),
             ':senha' => password_hash($participante->getSenha(), PASSWORD_DEFAULT),
             ':id' => $participante->getIdParticipante()
         ]);
@@ -99,7 +101,7 @@ class ParticipanteDAO
     // sem a senha quando confere, ou null quando nao confere.
     public function verificarLogin(Participante $participante): ?Participante
     {
-        $sql = "SELECT id_participante, nome, email, cpf, telefone, senha
+        $sql = "SELECT id_participante, nome, email, cpf, telefone, perfil, senha
                 FROM participantes WHERE email = :email LIMIT 1";
         $stmt = $this->database->getConnection()->prepare($sql);
         $stmt->execute([':email' => $participante->getEmail()]);
@@ -131,6 +133,7 @@ class ParticipanteDAO
         $participante->setEmail($linha['email']);
         $participante->setCpf($linha['cpf']);
         $participante->setTelefone($linha['telefone']);
+        $participante->setPerfil($linha['perfil'] ?? 'comum');
         return $participante;
     }
 }

@@ -59,7 +59,7 @@
 
   <script src="js/config.js"></script>
   <script type="module">
-    import { exigirLogin, montarTopo, apiAutenticada, tratarResposta, mostrarMsg } from "./js/auth.js";
+    import { exigirLogin, montarTopo, apiAutenticada, tratarResposta, mostrarMsg, isAdmin, bloquearEscritaParaComum } from "./js/auth.js";
 
     exigirLogin();
     const api = apiAutenticada();
@@ -67,6 +67,7 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       montarTopo("locais");
+      bloquearEscritaParaComum(); // perfil comum: so lista
       carregar();
       document.getElementById("formLocal").addEventListener("submit", salvar);
       document.getElementById("btnCancelar").addEventListener("click", limparForm);
@@ -95,7 +96,7 @@
         btnExcluir.className = "btn-perigo btn-pequeno";
         btnExcluir.addEventListener("click", () => excluir(l.id_local));
 
-        tdAcoes.append(btnEditar, " ", btnExcluir);
+        if (isAdmin()) tdAcoes.append(btnEditar, " ", btnExcluir); // escrita e so de admin
         corpo.appendChild(tr);
       }
     }

@@ -7,6 +7,7 @@ use Api\Controllers\CompraController;
 use Api\Middlewares\Compra\ValidateCompraBody;
 use Api\Middlewares\Compra\ValidateCompraId;
 use Api\Middlewares\Participante\ValidateParticipanteToken;
+use Api\Middlewares\Participante\ValidateAdministrador;
 
 // POST /compras | GET /compras | GET /compras/count | GET /compras/{id}
 // PUT+PATCH /compras/{id} | DELETE /compras/{id}
@@ -24,6 +25,7 @@ class CompraRouter
     {
         $this->app->post('/compras', [CompraController::class, 'createController'])
             ->add(ValidateCompraBody::class)
+            ->add(ValidateAdministrador::class)
             ->add(ValidateParticipanteToken::class);
 
         $this->app->get('/compras', [CompraController::class, 'findAllController'])
@@ -40,15 +42,18 @@ class CompraRouter
         $this->app->put('/compras/{id_compra}', [CompraController::class, 'updateController'])
             ->add(ValidateCompraBody::class)
             ->add(ValidateCompraId::class)
+            ->add(ValidateAdministrador::class)
             ->add(ValidateParticipanteToken::class);
 
         $this->app->patch('/compras/{id_compra}', [CompraController::class, 'updateController'])
             ->add(ValidateCompraBody::class)
             ->add(ValidateCompraId::class)
+            ->add(ValidateAdministrador::class)
             ->add(ValidateParticipanteToken::class);
 
         $this->app->delete('/compras/{id_compra}', [CompraController::class, 'deleteController'])
             ->add(ValidateCompraId::class)
+            ->add(ValidateAdministrador::class)
             ->add(ValidateParticipanteToken::class);
     }
 }

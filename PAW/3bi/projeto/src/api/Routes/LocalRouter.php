@@ -7,6 +7,7 @@ use Api\Controllers\LocalController;
 use Api\Middlewares\Local\ValidateLocalBody;
 use Api\Middlewares\Local\ValidateLocalId;
 use Api\Middlewares\Participante\ValidateParticipanteToken;
+use Api\Middlewares\Participante\ValidateAdministrador;
 
 // POST /locais | GET /locais | GET /locais/count | GET /locais/{id}
 // PUT+PATCH /locais/{id} | DELETE /locais/{id}
@@ -25,6 +26,7 @@ class LocalRouter
     {
         $this->app->post('/locais', [LocalController::class, 'createController'])
             ->add(ValidateLocalBody::class)
+            ->add(ValidateAdministrador::class)
             ->add(ValidateParticipanteToken::class);
 
         $this->app->get('/locais', [LocalController::class, 'findAllController'])
@@ -41,15 +43,18 @@ class LocalRouter
         $this->app->put('/locais/{id_local}', [LocalController::class, 'updateController'])
             ->add(ValidateLocalBody::class)
             ->add(ValidateLocalId::class)
+            ->add(ValidateAdministrador::class)
             ->add(ValidateParticipanteToken::class);
 
         $this->app->patch('/locais/{id_local}', [LocalController::class, 'updateController'])
             ->add(ValidateLocalBody::class)
             ->add(ValidateLocalId::class)
+            ->add(ValidateAdministrador::class)
             ->add(ValidateParticipanteToken::class);
 
         $this->app->delete('/locais/{id_local}', [LocalController::class, 'deleteController'])
             ->add(ValidateLocalId::class)
+            ->add(ValidateAdministrador::class)
             ->add(ValidateParticipanteToken::class);
     }
 }

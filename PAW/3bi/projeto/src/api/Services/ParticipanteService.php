@@ -54,6 +54,7 @@ class ParticipanteService
         $claims->id_participante = $autenticado->getIdParticipante();
         $claims->nome = $autenticado->getNome();
         $claims->email = $autenticado->getEmail();
+        $claims->perfil = $autenticado->getPerfil();
 
         $token = (new MeuTokenJWT())->gerarToken($claims);
 
@@ -78,9 +79,13 @@ class ParticipanteService
 
     public function updateService(int $id, stdClass $body): Participante
     {
-        $this->findByIdService($id);
+        $atual = $this->findByIdService($id);
         $participante = $this->buildParticipante($body->participante);
         $participante->setIdParticipante($id);
+        // Sem perfil no body, mantem o atual (evita rebaixar admin sem querer).
+        $participante->setPerfil(isset($body->participante->perfil)
+            ? (string) $body->participante->perfil
+            : $atual->getPerfil());
 
         $this->checkEmailUnico($participante->getEmail(), $id);
         $this->checkCpfUnico($participante->getCpf(), $id);
@@ -115,6 +120,10 @@ class ParticipanteService
             $participante->setEmail((string) $dados->email);
             $participante->setCpf((string) $dados->cpf);
             $participante->setTelefone(isset($dados->telefone) ? (string) $dados->telefone : null);
+            // Criacao sem perfil informado vira 'comum' (padrao do Model).
+            if (isset($dados->perfil)) {
+                $participante->setPerfil((string) $dados->perfil);
+            }
             $participante->setSenha((string) $dados->senha);
             return $participante;
         } catch (Throwable $e) {
