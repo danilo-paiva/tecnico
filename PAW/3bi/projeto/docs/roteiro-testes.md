@@ -7,7 +7,7 @@ Ordem sugerida (bate com os 5 itens da ficha, 2,0 cada).
 1. `mysql -u root < docs/banco.sql` (banco antigo: `docs/migracao-admin.sql`)
 2. `composer install`
 3. `composer start`
-4. `composer test` → esperado: **OK (40 testes, 70 assertions)**
+4. `composer test` → esperado: **OK (44 testes, 79 assertions)**
 
 ## 1. Login com JWT (2,0)
 
@@ -50,5 +50,6 @@ Em cada página (`locais.html`, `eventos.html`, `ingressos.html`,
 - Sair e entrar com `bruno@email.com` / `123456` → topo mostra "(comum)",
   formulários e botões somem (menos o de compra), tabelas continuam listando.
 - Como comum, tentar `POST /locais` (Insomnia ou curl) → `403 Acesso negado`.
-- Como comum, comprar em `compras.html` → funciona (`POST /compras` liberado).
+- Como comum, comprar em `compras.html` → funciona, só para si (combo travado;
+  tentar outro id via API → `403 Voce so pode comprar ingressos para voce mesmo`).
 - Como admin, `participantes.html` permite trocar o `perfil` de alguém.

@@ -187,12 +187,19 @@
   function showAlert(msg,type){ type=type||'info'; alertEl.className='alert alert-'+(type==='error'?'danger':type); alertEl.textContent=msg; alertEl.style.display='flex'; alertEl.hidden=false; alertEl.scrollIntoView({behavior:'smooth',block:'nearest'}); if(type==='success') setTimeout(hideAlert,3800); }
   function hideAlert(){ alertEl.style.display='none'; alertEl.hidden=true; alertEl.textContent=''; }
   window.hideAlert=hideAlert; window.showAlert=showAlert;
-  // ---- Perfil: comum pode LISTAR e COMPRAR (POST /compras e liberado).
+  // ---- Perfil: comum pode LISTAR e COMPRAR so para si mesmo.
+  // O combo de participante trava no proprio id; o backend confere de novo.
   // Editar/excluir compra continua so de admin (botoes escondidos).
   var ADMIN = (typeof isAdmin === 'function') ? isAdmin() : true;
   function aplicarPerfil(){
     if (ADMIN) return;
-    showAlert('Voce pode listar e comprar ingressos. Editar ou excluir compra e so de administrador.', 'info');
+    try {
+      var eu = (typeof getUser === 'function') ? getUser() : null;
+      var meuId = eu ? String(eu.id_participante || eu.id || '') : '';
+      var sel = document.getElementById('idParticipante');
+      if (meuId && sel){ sel.value = meuId; sel.disabled = true; }
+    } catch(_e){}
+    showAlert('Voce pode comprar ingressos para voce mesmo. Editar ou excluir compra e so de administrador.', 'info');
   }
   function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
   // Aceita qualquer lista da API: array direto, res.data array ou

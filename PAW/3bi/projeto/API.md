@@ -27,7 +27,8 @@ Token inválido/expirado → `401`. Body de login inválido → `400`
 Login com credencial errada → `401 {"success":false,"message":"Usuário ou senha inválidos"}`.
 Perfil comum tentando escrita → `403 {"success":false,"message":"Acesso negado",...}`
 (só `administrador` pode POST/PUT/PATCH/DELETE; GET vale para todo logado.
-Exceção: `POST /compras` (comprar) vale para todo logado.)
+Exceções: `POST /compras` (comprar) vale para todo logado, mas o comum só
+para si mesmo — 403 caso contrário.)
 
 ## Locais (com `Authorization: Bearer $TOKEN` em todas)
 
@@ -102,6 +103,6 @@ curl -X DELETE http://localhost:8080/compras/1 -H "Authorization: Bearer $TOKEN"
 | 201 | cadastro ok |
 | 400 | validação, duplicado, sem estoque, vínculo que impede excluir |
 | 401 | sem token, token inválido/expirado, login errado |
-| 403 | perfil comum tentando escrita (só admin; exceção: `POST /compras`) |
+| 403 | perfil comum em escrita indevida / compra para outro participante |
 | 404 | id não existe / FK não existe |
 | 500 | erro interno |

@@ -15,6 +15,7 @@ use Api\Middlewares\Participante\ValidateParticipanteToken;
 use Api\Middlewares\Participante\ValidateParticipanteLoginBody;
 use Api\Middlewares\Participante\ValidateParticipanteBody;
 use Api\Middlewares\Participante\ValidateAdministrador;
+use Api\Middlewares\Compra\ValidateCompraDono;
 
 // Handler falso: so devolve 200 (ou o atributo jwtPayload, para conferir).
 class EchoHandler implements Handler
@@ -154,23 +155,23 @@ class MiddlewaresTest extends TestCase
 
     // ---- ValidateAdministrador (aula paw03x01) ----
 
-    private function tokenComPerfil(string $perfil): string
+    private function tokenComPerfil(string $perfil, int $id = 1): string
     {
         $claims = new \stdClass();
-        $claims->id_participante = 1;
+        $claims->id_participante = $id;
         $claims->nome = 'Ana';
         $claims->email = 'ana@email.com';
         $claims->perfil = $perfil;
         return (new MeuTokenJWT())->gerarToken($claims);
     }
 
-    private function pedidoAutenticado(string $perfil): Request
+    private function pedidoAutenticado(string $perfil, int $id = 1, string $body = '', string $metodo = 'POST'): Request
     {
         // Simula o que o ValidateParticipanteToken faz: valida e guarda o payload.
         $jwt = new MeuTokenJWT();
-        $token = $this->tokenComPerfil($perfil);
+        $token = $this->tokenComPerfil($perfil, $id);
         $this->assertTrue($jwt->validateToken($token));
-        return $this->pedido('POST')->withAttribute('jwtPayload', $jwt->getPayload());
+        return $this->pedido($metodo, $body)->withAttribute('jwtPayload', $jwt->getPayload());
     }
 
     public function testAdminPassa(): void
@@ -229,5 +230,51 @@ class MiddlewaresTest extends TestCase
         $resposta = (new ValidateParticipanteBody())->process(
             $this->pedido('PUT', $this->corpoParticipante(false)), new EchoHandler());
         $this->assertEquals(200, $resposta->getStatusCode());
+    }
+
+    // ---- ValidateCompraDono: comum so compra para si ----
+
+    private function corpoCompra(int $idParticipante): string
+    {
+        return json_encode(['compra' => [
+            'id_participante' => $idParticipante, 'id_ingresso' => 1, 'quantidade' => 1]]);
+    }
+
+    public function testComumCompraPropriaPassa(): void
+    {
+        $resposta = (new ValidateCompraDono())->process(
+            $this->pedidoAutenticado('comum', 2, $this->corpoCompra(2)), new EchoHandler());
+        $this->assertEquals(200, $resposta->getStatusCode());
+    }
+
+    public function testComumCompraTerceiroDa403(): void
+    {
+        $this->expectException(ErrorResponse::class);
+        try {
+            (new ValidateCompraDono())->process(
+                $this->pedidoAutenticado('comum', 2, $this->corpoCompra(1)), new EchoHandler());
+        } catch (ErrorResponse $e) {
+            $this->assertEquals(403, $e->getHttpCode());
+            throw $e;
+        }
+    }
+
+    public function testAdminCompraTerceiroPassa(): void
+    {
+        $resposta = (new ValidateCompraDono())->process(
+            $this->pedidoAutenticado('administrador', 1, $this->corpoCompra(2)), new EchoHandler());
+        $this->assertEquals(200, $resposta->getStatusCode());
+    }
+
+    public function testDonoSemPayloadDa401(): void
+    {
+        $this->expectException(ErrorResponse::class);
+        try {
+            (new ValidateCompraDono())->process(
+                $this->pedido('POST', $this->corpoCompra(1)), new EchoHandler());
+        } catch (ErrorResponse $e) {
+            $this->assertEquals(401, $e->getHttpCode());
+            throw $e;
+        }
     }
 }

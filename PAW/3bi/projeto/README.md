@@ -44,13 +44,15 @@ Continuação do projeto do 2º bimestre (API REST Slim 4 + MySQL), acrescentand
 
 | Perfil | Leitura (GET) | Escrita (POST/PUT/PATCH/DELETE) |
 |---|---|---|
-| `comum` | ✅ com token | ❌ `403`, exceto **comprar** (`POST /compras` ✅) |
+| `comum` | ✅ com token | ❌ `403`, exceto **comprar pra si** (`POST /compras` com seu próprio id ✅) |
 | `administrador` | ✅ com token | ✅ com token |
 
-Comprar ingresso (`POST /compras`) é a ação do usuário comum, então vale para
-todo logado; editar/excluir compra continua só de admin. No frontend, o comum
-vê o formulário de compra mas não os botões Editar/Excluir (a API barra com
-403 de qualquer jeito).
+Comprar ingresso (`POST /compras`) é a ação do usuário comum: vale para todo
+logado, mas o comum só pode comprar **para si mesmo** (o backend confere
+o id do token — `ValidateCompraDono`, 403 caso contrário). Admin pode comprar
+para qualquer um. Editar/excluir compra continua só de admin. No frontend, o
+combo de participante do comum trava no próprio id (a API barra de qualquer
+jeito).
 Um admin promove/rebaixa pelo campo `perfil` em `participantes.html`.
 Banco novo: `docs/banco.sql` já vem com a coluna; banco antigo: rode
 `docs/migracao-admin.sql`.

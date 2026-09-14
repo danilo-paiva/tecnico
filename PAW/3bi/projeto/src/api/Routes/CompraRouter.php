@@ -5,6 +5,7 @@ namespace Api\Routes;
 use Slim\App;
 use Api\Controllers\CompraController;
 use Api\Middlewares\Compra\ValidateCompraBody;
+use Api\Middlewares\Compra\ValidateCompraDono;
 use Api\Middlewares\Compra\ValidateCompraId;
 use Api\Middlewares\Participante\ValidateParticipanteToken;
 use Api\Middlewares\Participante\ValidateAdministrador;
@@ -27,6 +28,7 @@ class CompraRouter
     {
         $this->app->post('/compras', [CompraController::class, 'createController'])
             ->add(ValidateCompraBody::class)
+            ->add(ValidateCompraDono::class)
             ->add(ValidateParticipanteToken::class);
 
         $this->app->get('/compras', [CompraController::class, 'findAllController'])
