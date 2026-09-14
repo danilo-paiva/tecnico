@@ -184,6 +184,396 @@
   <p>PAW 3BI · <a href="dashboard.html">Dashboard</a> · <a href="login.html">Login</a> · <a href="#" data-sair>Logout</a></p>
 </footer>
 
-<script type="module" src="js/participantes.js"></script>
+<script>
+/* ============================================================
+   JS embutido: ApiService (aula 4) + sessao.js + lógica desta página.
+   Sem 'import': tudo no mesmo <script> para a página funcionar
+   sozinha (inclusive abrindo o arquivo direto no navegador).
+   ============================================================ */
+/**
+ * ApiService.js — padrão da Aula 4 (3bi-resumo.md)
+ * Classe ES6 centralizando GET/POST/PUT/DELETE com Bearer Token.
+ * Uso com module: import ApiService from './ApiService.js';
+ * Uso legado: window.ApiService (carregado via <script src="js/ApiService.js">).
+ */
+class ApiService {
+  #token;
+
+  constructor(token = null) {
+    this.#token = token || (typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null);
+  }
+
+  #headers(extra = {}) {
+    const headers = { 'Content-Type': 'application/json', ...extra };
+    if (this.#token) headers['Authorization'] = `Bearer ${this.#token}`;
+    return headers;
+  }
+
+  // GET sem headers (APIs públicas) — padrão da aula
+  async simpleGet(uri) {
+    try {
+      const response = await fetch(uri);
+      return await response.json();
+    } catch (error) {
+      console.error('Erro:', error.message);
+      return [];
+    }
+  }
+
+  // GET autenticado (com token se existir)
+  async get(uri) {
+    try {
+      const response = await fetch(uri, { method: 'GET', headers: this.#headers() });
+      return await response.json();
+    } catch (error) {
+      console.error('Erro:', error.message);
+      return [];
+    }
+  }
+
+  // GET por id → uri/id
+  async getById(uri, id) {
+    try {
+      const response = await fetch(`${uri}/${encodeURIComponent(id)}`, {
+        method: 'GET',
+        headers: this.#headers(),
+      });
+      if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('Erro:', error.message);
+      return null;
+    }
+  }
+
+  // POST com corpo JSON
+  async post(uri, jsonObject) {
+    try {
+      const response = await fetch(uri, {
+        method: 'POST',
+        headers: this.#headers(),
+        body: JSON.stringify(jsonObject),
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Erro:', error.message);
+      return [];
+    }
+  }
+
+  // PUT para uri/id
+  async put(uri, id, jsonObject) {
+    try {
+      const response = await fetch(`${uri}/${encodeURIComponent(id)}`, {
+        method: 'PUT',
+        headers: this.#headers(),
+        body: JSON.stringify(jsonObject),
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Erro:', error.message);
+      return null;
+    }
+  }
+
+  // DELETE em uri/id
+  async delete(uri, id) {
+    try {
+      const response = await fetch(`${uri}/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        headers: this.#headers(),
+      });
+      if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+      return await response.json().catch(() => null); // pode não ter body
+    } catch (error) {
+      console.error('Erro:', error.message);
+      return null;
+    }
+  }
+
+  get token() {
+    return this.#token;
+  }
+
+  set token(value) {
+    this.#token = value;
+    try {
+      if (value) localStorage.setItem('token', value);
+    } catch (_e) { /* ignore */ }
+  }
+}
+
+// Expõe global para páginas sem type="module" (compat com api.js/auth.js)
+try {
+  if (typeof window !== 'undefined') window.ApiService = ApiService;
+} catch (_e) { /* ignore */ }
+
+// sessao.js — login guardado no navegador (aula: localStorage + JSON).
+// Usado por todas as páginas junto com ApiService.js (aula 4).
+//
+// Sobre o objeto 'window' usado abaixo:
+// - window é o objeto global do navegador: representa a janela/aba aberta.
+// - Tudo que é do navegador mora nele: document (a página), localStorage
+//   (guardar dados), fetch (requisições) e location (o endereço da aba).
+// - window.location.href é o endereço escrito na barra do navegador.
+//   LER dá a página atual; ATRIBUIR um valor novo faz o navegador NAVEGAR
+//   para lá (como clicar num link). É assim que trocamos de tela após o
+//   login e que barramos quem tenta abrir página protegida sem token.
+const TOKEN_KEY = 'token';
+const USUARIO_KEY = 'usuario';
+
+function salvarSessao(token, usuario) {
+  localStorage.setItem(TOKEN_KEY, token);
+  localStorage.setItem(USUARIO_KEY, JSON.stringify(usuario));
+}
+
+function obterToken() {
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+function obterUsuario() {
+  try {
+    return JSON.parse(localStorage.getItem(USUARIO_KEY));
+  } catch {
+    return null;
+  }
+}
+
+function sair() {
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(USUARIO_KEY);
+  // Apaga o login e navega de volta para a tela de login.
+  window.location.href = 'login.html';
+}
+
+// Sem token, volta pro login. Chame no topo das páginas protegidas.
+function exigirLogin() {
+  // Se não há token guardado, ninguém logou: manda para o login.
+  if (!obterToken()) window.location.href = 'login.html';
+}
+
+// 'administrador' tem escrita; 'comum' só lista (e compra pra si).
+function isAdmin() {
+  return (obterUsuario()?.perfil || 'comum') === 'administrador';
+}
+
+// Preenche o topo: nome + perfil, esconde Login, liga os botões Sair.
+function montarTopo() {
+  const usuario = obterUsuario();
+  const nome = document.getElementById('userName');
+  if (nome && usuario) {
+    nome.textContent = usuario.nome + ' (' + (usuario.perfil || 'comum') + ')';
+    nome.style.display = 'inline-flex';
+  }
+  const navLogin = document.getElementById('navLogin');
+  if (navLogin && usuario) navLogin.style.display = 'none';
+  const btnSair = document.getElementById('btnLogout');
+  if (btnSair) {
+    if (usuario) btnSair.style.display = 'inline-flex';
+    btnSair.addEventListener('click', (e) => { e.preventDefault(); sair(); });
+  }
+  document.querySelectorAll('[data-sair]').forEach((a) => {
+    a.addEventListener('click', (e) => { e.preventDefault(); sair(); });
+  });
+}
+
+// Se a API respondeu 401 (sem token / expirado), derruba a sessão.
+function sessaoExpirada(resposta) {
+  return !!resposta && resposta.success === false && /autorizado|token/i.test(resposta.message || '');
+}
+// participantes.js — CRUD de participantes (aulas 2–4: DOM, fetch, ApiService + JWT).
+// A senha nunca volta na listagem; no PUT ela é opcional (mantém o hash).
+
+document.addEventListener('DOMContentLoaded', () => {
+  exigirLogin();
+  montarTopo();
+
+  const api = new ApiService(obterToken());
+  const ADMIN = isAdmin();
+
+  const alerta = document.getElementById('alertGlobal');
+  const lista = document.getElementById('tbody');
+  const vazio = document.getElementById('empty');
+  const carregando = document.getElementById('loading');
+  const tabela = document.getElementById('tableWrapper');
+  const contador = document.getElementById('contador');
+  const modal = document.getElementById('modalEditar');
+
+  if (!ADMIN) {
+    const secao = document.getElementById('formCadastro').closest('section');
+    if (secao) secao.style.display = 'none';
+    mostrar('Perfil comum: você pode listar. Só administradores cadastram, editam ou excluem.', 'info');
+  }
+
+  carregar();
+  document.getElementById('formCadastro').addEventListener('submit', cadastrar);
+  document.getElementById('formEditar').addEventListener('submit', salvarEdicao);
+  document.getElementById('btnRecarregar').addEventListener('click', carregar);
+  document.querySelectorAll('.modal-close').forEach((b) => b.addEventListener('click', fecharModal));
+  document.querySelector('#modalEditar .modal-footer .btn-secondary')
+    ?.addEventListener('click', fecharModal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) fecharModal(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') fecharModal();
+  });
+
+  function mostrar(msg, tipo) {
+    alerta.textContent = msg;
+    alerta.className = 'alert alert-' + (tipo === 'error' ? 'danger' : tipo);
+    alerta.style.display = 'flex';
+  }
+
+  function esconder() {
+    alerta.style.display = 'none';
+    alerta.textContent = '';
+  }
+
+  function seloPerfil(perfil) {
+    return (perfil || 'comum') === 'administrador'
+      ? '<span class="badge badge-primary">admin</span>'
+      : '<span class="badge badge-neutral">comum</span>';
+  }
+
+  async function carregar() {
+    carregando.style.display = '';
+    tabela.style.display = 'none';
+    vazio.style.display = 'none';
+    esconder();
+    const res = await api.get('/participantes');
+    carregando.style.display = 'none';
+    if (!res || !res.success) {
+      if (sessaoExpirada(res)) { sair(); return; }
+      mostrar((res && res.message) || 'Erro ao carregar participantes.', 'error');
+      return;
+    }
+    desenhar(res.data.participantes || []);
+  }
+
+  function desenhar(participantes) {
+    lista.innerHTML = '';
+    contador.textContent = participantes.length + (participantes.length === 1 ? ' participante' : ' participantes');
+    if (!participantes.length) {
+      vazio.style.display = '';
+      return;
+    }
+    tabela.style.display = '';
+    for (const p of participantes) {
+      const tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td><span class="badge badge-neutral">#' + p.id_participante + '</span></td>' +
+        '<td><strong></strong></td>' +
+        '<td></td>' +
+        '<td></td>' +
+        '<td></td>' +
+        '<td>' + seloPerfil(p.perfil) + '</td>' +
+        '<td><div class="table-actions">' +
+        (ADMIN
+          ? '<button type="button" class="btn btn-secondary btn-sm">✎ Editar</button>' +
+            '<button type="button" class="btn btn-danger btn-sm">🗑 Excluir</button>'
+          : '<span class="muted">—</span>') +
+        '</div></td>';
+      tr.children[1].querySelector('strong').textContent = p.nome;
+      tr.children[2].textContent = p.email;
+      tr.children[3].textContent = p.cpf;
+      tr.children[4].textContent = p.telefone || '—';
+      if (ADMIN) {
+        const [btnEditar, btnExcluir] = tr.querySelectorAll('button');
+        btnEditar.addEventListener('click', () => abrirModal(p));
+        btnExcluir.addEventListener('click', () => excluir(p));
+      }
+      lista.appendChild(tr);
+    }
+  }
+
+  async function cadastrar(e) {
+    e.preventDefault();
+    const participante = {
+      nome: document.getElementById('nome').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      telefone: document.getElementById('telefone').value.trim(),
+      cpf: document.getElementById('cpf').value.trim(),
+      senha: document.getElementById('senha').value,
+      perfil: document.getElementById('perfil').value,
+    };
+    if (!participante.nome || !participante.email || !participante.cpf || !participante.senha) {
+      mostrar('Preencha nome, e-mail, CPF e senha.', 'error');
+      return;
+    }
+    const res = await api.post('/participantes', { participante });
+    if (res && res.success) {
+      e.target.reset();
+      await carregar();
+      mostrar('Participante "' + participante.nome + '" cadastrado com sucesso!', 'success');
+    } else {
+      if (sessaoExpirada(res)) { sair(); return; }
+      mostrar((res && res.message) || 'Erro ao cadastrar participante.', 'error');
+    }
+  }
+
+  function abrirModal(p) {
+    document.getElementById('editId').value = p.id_participante;
+    document.getElementById('editNome').value = p.nome || '';
+    document.getElementById('editEmail').value = p.email || '';
+    document.getElementById('editTelefone').value = p.telefone || '';
+    document.getElementById('editCpf').value = p.cpf || '';
+    document.getElementById('editSenha').value = '';
+    document.getElementById('editPerfil').value = p.perfil || 'comum';
+    modal.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function fecharModal() {
+    modal.classList.remove('is-open');
+    document.body.style.overflow = '';
+  }
+
+  async function salvarEdicao(e) {
+    e.preventDefault();
+    const id = document.getElementById('editId').value;
+    const senha = document.getElementById('editSenha').value;
+    const participante = {
+      nome: document.getElementById('editNome').value.trim(),
+      email: document.getElementById('editEmail').value.trim(),
+      telefone: document.getElementById('editTelefone').value.trim(),
+      cpf: document.getElementById('editCpf').value.trim(),
+      perfil: document.getElementById('editPerfil').value,
+    };
+    if (!id || !participante.nome || !participante.email || !participante.cpf) {
+      mostrar('Preencha nome, e-mail e CPF.', 'error');
+      return;
+    }
+    if (senha) {
+      if (senha.length < 6) {
+        mostrar('A nova senha deve ter no mínimo 6 caracteres.', 'error');
+        return;
+      }
+      participante.senha = senha; // em branco = mantém a atual
+    }
+    const res = await api.put('/participantes', id, { participante });
+    if (res && res.success) {
+      fecharModal();
+      await carregar();
+      mostrar('Participante atualizado com sucesso!', 'success');
+    } else {
+      if (sessaoExpirada(res)) { sair(); return; }
+      mostrar((res && res.message) || 'Erro ao atualizar participante.', 'error');
+    }
+  }
+
+  async function excluir(p) {
+    if (!confirm('Excluir o participante "' + p.nome + '" (ID ' + p.id_participante + ')?')) return;
+    const res = await api.delete('/participantes', p.id_participante);
+    if (res && res.success) {
+      carregar();
+      mostrar('Participante excluído com sucesso.', 'success');
+    } else {
+      if (sessaoExpirada(res)) { sair(); return; }
+      mostrar((res && res.message) || 'Erro ao excluir participante.', 'error');
+      carregar();
+    }
+  }
+});
+
+</script>
 </body>
 </html>

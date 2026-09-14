@@ -177,6 +177,411 @@
   <p>PAW 3BI · <a href="dashboard.html">Dashboard</a> · <a href="login.html">Login</a> · <a href="#" data-sair>Logout</a></p>
 </footer>
 
-<script type="module" src="js/eventos.js"></script>
+<script>
+/* ============================================================
+   JS embutido: ApiService (aula 4) + sessao.js + lógica desta página.
+   Sem 'import': tudo no mesmo <script> para a página funcionar
+   sozinha (inclusive abrindo o arquivo direto no navegador).
+   ============================================================ */
+/**
+ * ApiService.js — padrão da Aula 4 (3bi-resumo.md)
+ * Classe ES6 centralizando GET/POST/PUT/DELETE com Bearer Token.
+ * Uso com module: import ApiService from './ApiService.js';
+ * Uso legado: window.ApiService (carregado via <script src="js/ApiService.js">).
+ */
+class ApiService {
+  #token;
+
+  constructor(token = null) {
+    this.#token = token || (typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null);
+  }
+
+  #headers(extra = {}) {
+    const headers = { 'Content-Type': 'application/json', ...extra };
+    if (this.#token) headers['Authorization'] = `Bearer ${this.#token}`;
+    return headers;
+  }
+
+  // GET sem headers (APIs públicas) — padrão da aula
+  async simpleGet(uri) {
+    try {
+      const response = await fetch(uri);
+      return await response.json();
+    } catch (error) {
+      console.error('Erro:', error.message);
+      return [];
+    }
+  }
+
+  // GET autenticado (com token se existir)
+  async get(uri) {
+    try {
+      const response = await fetch(uri, { method: 'GET', headers: this.#headers() });
+      return await response.json();
+    } catch (error) {
+      console.error('Erro:', error.message);
+      return [];
+    }
+  }
+
+  // GET por id → uri/id
+  async getById(uri, id) {
+    try {
+      const response = await fetch(`${uri}/${encodeURIComponent(id)}`, {
+        method: 'GET',
+        headers: this.#headers(),
+      });
+      if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('Erro:', error.message);
+      return null;
+    }
+  }
+
+  // POST com corpo JSON
+  async post(uri, jsonObject) {
+    try {
+      const response = await fetch(uri, {
+        method: 'POST',
+        headers: this.#headers(),
+        body: JSON.stringify(jsonObject),
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Erro:', error.message);
+      return [];
+    }
+  }
+
+  // PUT para uri/id
+  async put(uri, id, jsonObject) {
+    try {
+      const response = await fetch(`${uri}/${encodeURIComponent(id)}`, {
+        method: 'PUT',
+        headers: this.#headers(),
+        body: JSON.stringify(jsonObject),
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Erro:', error.message);
+      return null;
+    }
+  }
+
+  // DELETE em uri/id
+  async delete(uri, id) {
+    try {
+      const response = await fetch(`${uri}/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        headers: this.#headers(),
+      });
+      if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+      return await response.json().catch(() => null); // pode não ter body
+    } catch (error) {
+      console.error('Erro:', error.message);
+      return null;
+    }
+  }
+
+  get token() {
+    return this.#token;
+  }
+
+  set token(value) {
+    this.#token = value;
+    try {
+      if (value) localStorage.setItem('token', value);
+    } catch (_e) { /* ignore */ }
+  }
+}
+
+// Expõe global para páginas sem type="module" (compat com api.js/auth.js)
+try {
+  if (typeof window !== 'undefined') window.ApiService = ApiService;
+} catch (_e) { /* ignore */ }
+
+// sessao.js — login guardado no navegador (aula: localStorage + JSON).
+// Usado por todas as páginas junto com ApiService.js (aula 4).
+//
+// Sobre o objeto 'window' usado abaixo:
+// - window é o objeto global do navegador: representa a janela/aba aberta.
+// - Tudo que é do navegador mora nele: document (a página), localStorage
+//   (guardar dados), fetch (requisições) e location (o endereço da aba).
+// - window.location.href é o endereço escrito na barra do navegador.
+//   LER dá a página atual; ATRIBUIR um valor novo faz o navegador NAVEGAR
+//   para lá (como clicar num link). É assim que trocamos de tela após o
+//   login e que barramos quem tenta abrir página protegida sem token.
+const TOKEN_KEY = 'token';
+const USUARIO_KEY = 'usuario';
+
+function salvarSessao(token, usuario) {
+  localStorage.setItem(TOKEN_KEY, token);
+  localStorage.setItem(USUARIO_KEY, JSON.stringify(usuario));
+}
+
+function obterToken() {
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+function obterUsuario() {
+  try {
+    return JSON.parse(localStorage.getItem(USUARIO_KEY));
+  } catch {
+    return null;
+  }
+}
+
+function sair() {
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(USUARIO_KEY);
+  // Apaga o login e navega de volta para a tela de login.
+  window.location.href = 'login.html';
+}
+
+// Sem token, volta pro login. Chame no topo das páginas protegidas.
+function exigirLogin() {
+  // Se não há token guardado, ninguém logou: manda para o login.
+  if (!obterToken()) window.location.href = 'login.html';
+}
+
+// 'administrador' tem escrita; 'comum' só lista (e compra pra si).
+function isAdmin() {
+  return (obterUsuario()?.perfil || 'comum') === 'administrador';
+}
+
+// Preenche o topo: nome + perfil, esconde Login, liga os botões Sair.
+function montarTopo() {
+  const usuario = obterUsuario();
+  const nome = document.getElementById('userName');
+  if (nome && usuario) {
+    nome.textContent = usuario.nome + ' (' + (usuario.perfil || 'comum') + ')';
+    nome.style.display = 'inline-flex';
+  }
+  const navLogin = document.getElementById('navLogin');
+  if (navLogin && usuario) navLogin.style.display = 'none';
+  const btnSair = document.getElementById('btnLogout');
+  if (btnSair) {
+    if (usuario) btnSair.style.display = 'inline-flex';
+    btnSair.addEventListener('click', (e) => { e.preventDefault(); sair(); });
+  }
+  document.querySelectorAll('[data-sair]').forEach((a) => {
+    a.addEventListener('click', (e) => { e.preventDefault(); sair(); });
+  });
+}
+
+// Se a API respondeu 401 (sem token / expirado), derruba a sessão.
+function sessaoExpirada(resposta) {
+  return !!resposta && resposta.success === false && /autorizado|token/i.test(resposta.message || '');
+}
+// eventos.js — CRUD de eventos (aulas 2–4: DOM, fetch, ApiService + JWT).
+
+document.addEventListener('DOMContentLoaded', () => {
+  exigirLogin();
+  montarTopo();
+
+  const api = new ApiService(obterToken());
+  const ADMIN = isAdmin();
+
+  const alerta = document.getElementById('alertGlobal');
+  const lista = document.getElementById('tbody');
+  const vazio = document.getElementById('empty');
+  const carregando = document.getElementById('loading');
+  const tabela = document.getElementById('tableWrapper');
+  const contador = document.getElementById('contador');
+  const modal = document.getElementById('modalEditar');
+  const comboLocal = document.getElementById('idLocal');
+  const comboEditar = document.getElementById('editIdLocal');
+  let locais = [];
+
+  if (!ADMIN) {
+    const secao = document.getElementById('formCadastro').closest('section');
+    if (secao) secao.style.display = 'none';
+    mostrar('Perfil comum: você pode listar. Só administradores cadastram, editam ou excluem.', 'info');
+  }
+
+  carregarTudo();
+  document.getElementById('formCadastro').addEventListener('submit', cadastrar);
+  document.getElementById('formEditar').addEventListener('submit', salvarEdicao);
+  document.getElementById('btnRecarregar').addEventListener('click', carregarTudo);
+  document.querySelectorAll('.modal-close').forEach((b) => b.addEventListener('click', fecharModal));
+  document.querySelector('#modalEditar .modal-footer .btn-secondary')
+    ?.addEventListener('click', fecharModal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) fecharModal(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') fecharModal();
+  });
+
+  // datetime-local (2026-09-15T08:00) <-> API (2026-09-15 08:00:00)
+  const paraApi = (v) => (v.length === 16 ? v.replace('T', ' ') + ':00' : v.replace('T', ' '));
+  const paraInput = (v) => (v || '').slice(0, 16).replace(' ', 'T');
+  const nomeLocal = (id) => (locais.find((l) => l.id_local === id)?.nome || '#' + id);
+
+  function mostrar(msg, tipo) {
+    alerta.textContent = msg;
+    alerta.className = 'alert alert-' + (tipo === 'error' ? 'danger' : tipo);
+    alerta.style.display = 'flex';
+  }
+
+  function esconder() {
+    alerta.style.display = 'none';
+    alerta.textContent = '';
+  }
+
+  async function carregarTudo() {
+    carregando.style.display = '';
+    tabela.style.display = 'none';
+    vazio.style.display = 'none';
+    esconder();
+    const resLocais = await api.get('/locais');
+    if (!resLocais || !resLocais.success) {
+      if (sessaoExpirada(resLocais)) { sair(); return; }
+      mostrar('Erro ao carregar locais.', 'error');
+      return;
+    }
+    locais = resLocais.data.locais || [];
+    encherCombo(comboLocal, '');
+    await carregar();
+  }
+
+  function encherCombo(select, selecionado) {
+    select.innerHTML = '';
+    const vazio = document.createElement('option');
+    vazio.value = '';
+    vazio.textContent = 'Selecione um local...';
+    select.appendChild(vazio);
+    for (const l of locais) {
+      const op = document.createElement('option');
+      op.value = l.id_local;
+      op.textContent = '#' + l.id_local + ' — ' + l.nome;
+      if (String(l.id_local) === String(selecionado)) op.selected = true;
+      select.appendChild(op);
+    }
+  }
+
+  async function carregar() {
+    const res = await api.get('/eventos');
+    carregando.style.display = 'none';
+    if (!res || !res.success) {
+      if (sessaoExpirada(res)) { sair(); return; }
+      mostrar((res && res.message) || 'Erro ao carregar eventos.', 'error');
+      return;
+    }
+    desenhar(res.data.eventos || []);
+  }
+
+  function desenhar(eventos) {
+    lista.innerHTML = '';
+    contador.textContent = eventos.length + (eventos.length === 1 ? ' evento' : ' eventos');
+    if (!eventos.length) {
+      vazio.style.display = '';
+      return;
+    }
+    tabela.style.display = '';
+    for (const e of eventos) {
+      const tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td><span class="badge badge-neutral">#' + e.id_evento + '</span></td>' +
+        '<td><strong></strong><br><small class="text-muted"></small></td>' +
+        '<td><span class="badge badge-primary">' + e.status + '</span></td>' +
+        '<td></td>' +
+        '<td><div class="table-actions">' +
+        (ADMIN
+          ? '<button type="button" class="btn btn-secondary btn-sm">✎ Editar</button>' +
+            '<button type="button" class="btn btn-danger btn-sm">🗑 Excluir</button>'
+          : '<span class="muted">—</span>') +
+        '</div></td>';
+      tr.children[1].querySelector('strong').textContent = e.titulo;
+      tr.children[1].querySelector('small').textContent = e.data_evento;
+      tr.children[3].textContent = nomeLocal(e.id_local);
+      if (ADMIN) {
+        const [btnEditar, btnExcluir] = tr.querySelectorAll('button');
+        btnEditar.addEventListener('click', () => abrirModal(e));
+        btnExcluir.addEventListener('click', () => excluir(e));
+      }
+      lista.appendChild(tr);
+    }
+  }
+
+  async function cadastrar(e) {
+    e.preventDefault();
+    const evento = {
+      titulo: document.getElementById('titulo').value.trim(),
+      descricao: document.getElementById('descricao').value.trim(),
+      data_evento: paraApi(document.getElementById('dataEvento').value),
+      status: document.getElementById('status').value,
+      id_local: Number(document.getElementById('idLocal').value),
+    };
+    if (!evento.titulo || !evento.data_evento || !evento.id_local) {
+      mostrar('Preencha título, data e local.', 'error');
+      return;
+    }
+    const res = await api.post('/eventos', { evento });
+    if (res && res.success) {
+      e.target.reset();
+      await carregar();
+      mostrar('Evento cadastrado com sucesso!', 'success');
+    } else {
+      if (sessaoExpirada(res)) { sair(); return; }
+      mostrar((res && res.message) || 'Erro ao cadastrar evento.', 'error');
+    }
+  }
+
+  function abrirModal(e) {
+    document.getElementById('editId').value = e.id_evento;
+    document.getElementById('editTitulo').value = e.titulo || '';
+    document.getElementById('editDescricao').value = e.descricao || '';
+    document.getElementById('editDataEvento').value = paraInput(e.data_evento);
+    document.getElementById('editStatus').value = e.status;
+    encherCombo(comboEditar, e.id_local);
+    modal.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function fecharModal() {
+    modal.classList.remove('is-open');
+    document.body.style.overflow = '';
+  }
+
+  async function salvarEdicao(e) {
+    e.preventDefault();
+    const id = document.getElementById('editId').value;
+    const evento = {
+      titulo: document.getElementById('editTitulo').value.trim(),
+      descricao: document.getElementById('editDescricao').value.trim(),
+      data_evento: paraApi(document.getElementById('editDataEvento').value),
+      status: document.getElementById('editStatus').value,
+      id_local: Number(document.getElementById('editIdLocal').value),
+    };
+    if (!id || !evento.titulo || !evento.data_evento || !evento.id_local) {
+      mostrar('Preencha todos os campos obrigatórios.', 'error');
+      return;
+    }
+    const res = await api.put('/eventos', id, { evento });
+    if (res && res.success) {
+      fecharModal();
+      await carregar();
+      mostrar('Evento atualizado com sucesso!', 'success');
+    } else {
+      if (sessaoExpirada(res)) { sair(); return; }
+      mostrar((res && res.message) || 'Erro ao atualizar evento.', 'error');
+    }
+  }
+
+  async function excluir(e) {
+    if (!confirm('Excluir o evento "' + e.titulo + '" (ID ' + e.id_evento + ')?')) return;
+    const res = await api.delete('/eventos', e.id_evento);
+    if (res && res.success) {
+      carregar();
+      mostrar('Evento excluído com sucesso.', 'success');
+    } else {
+      if (sessaoExpirada(res)) { sair(); return; }
+      mostrar((res && res.message) || 'Erro ao excluir evento.', 'error');
+      carregar();
+    }
+  }
+});
+
+</script>
 </body>
 </html>

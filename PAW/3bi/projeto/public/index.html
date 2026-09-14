@@ -12,12 +12,17 @@
     <p class="muted">Redirecionando para <a href="login.html">login.html</a>...</p>
   </main>
   <script>
+    // Página de entrada: decide para onde mandar o visitante.
+    // window.location.replace(url) navega para a url, como o href, mas SEM
+    // guardar esta página no histórico (o botão "voltar" não retorna para cá).
     var t = localStorage.getItem('token');
     if (t) {
+      // Há token: pergunta à API se ele ainda vale (GET /auth/me com Bearer).
       fetch('/auth/me', { headers: { 'Authorization': 'Bearer ' + t } })
         .then(function(r){ return r.ok ? window.location.replace('dashboard.html') : window.location.replace('login.html'); })
         .catch(function(){ window.location.replace('login.html'); });
     } else {
+      // Sem token: ninguém logou, vai para o login.
       window.location.replace('login.html');
     }
   </script>
