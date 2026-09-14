@@ -76,9 +76,9 @@ enviam `Authorization: Bearer {{ _.token }}` — cole o token na variável
 public/login.html, dashboard.html, locais|eventos|ingressos|participantes|compras.html
 public/css/style.css                design system do projeto anterior (git e1d71da^)
 public/js/ApiService.js             aula paw03x04: GET/POST/PUT/DELETE com Bearer
-                                (original da aula; uma copia vai embutida em cada
-                                HTML, junto com as funcoes de sessao e da pagina, para
-                                cada pagina funcionar sozinha, sem import)
+public/js/sessao.js                 login no localStorage, guarda, perfil, 401
+                                (compartilhados via <script src>; cada HTML tem só
+                                a logica da propria pagina no <script> final)
 src/api/Http/MeuTokenJWT.php        aula paw03x01: gerar/validar JWT
 src/api/Middlewares/Participante/ValidateParticipanteToken.php  barreira 401
 src/api/Middlewares/Participante/ValidateParticipanteLoginBody.php  valida body do login

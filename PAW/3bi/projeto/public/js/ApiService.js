@@ -1,10 +1,11 @@
 /**
  * ApiService.js — padrão da Aula 4 (3bi-resumo.md)
  * Classe ES6 centralizando GET/POST/PUT/DELETE com Bearer Token.
- * Uso com module: import ApiService from './ApiService.js';
- * Uso legado: window.ApiService (carregado via <script src="js/ApiService.js">).
+ * Arquivo compartilhado: carregado via <script src="js/ApiService.js"> em todas
+ * as páginas (script clássico, sem import — a classe fica visível para o
+ * <script> de cada página que vem depois).
  */
-export default class ApiService {
+class ApiService {
   #token;
 
   constructor(token = null) {
