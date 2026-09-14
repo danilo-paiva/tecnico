@@ -90,6 +90,24 @@ class ParticipanteDAO
         return $stmt->rowCount() > 0;
     }
 
+    // Atualiza tudo menos a senha (mantem o hash atual).
+    public function updateSemSenha(Participante $participante): bool
+    {
+        $sql = "UPDATE participantes
+                SET nome = :nome, email = :email, cpf = :cpf, telefone = :telefone, perfil = :perfil
+                WHERE id_participante = :id";
+        $stmt = $this->database->getConnection()->prepare($sql);
+        $stmt->execute([
+            ':nome' => $participante->getNome(),
+            ':email' => $participante->getEmail(),
+            ':cpf' => $participante->getCpf(),
+            ':telefone' => $participante->getTelefone(),
+            ':perfil' => $participante->getPerfil(),
+            ':id' => $participante->getIdParticipante()
+        ]);
+        return $stmt->rowCount() > 0;
+    }
+
     public function delete(int $id): bool
     {
         $stmt = $this->database->getConnection()->prepare("DELETE FROM participantes WHERE id_participante = :id");

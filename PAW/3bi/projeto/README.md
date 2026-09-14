@@ -44,11 +44,13 @@ Continuação do projeto do 2º bimestre (API REST Slim 4 + MySQL), acrescentand
 
 | Perfil | Leitura (GET) | Escrita (POST/PUT/PATCH/DELETE) |
 |---|---|---|
-| `comum` | ✅ com token | ❌ `403 Acesso negado` |
+| `comum` | ✅ com token | ❌ `403`, exceto **comprar** (`POST /compras` ✅) |
 | `administrador` | ✅ com token | ✅ com token |
 
-O perfil aparece no topo das páginas e o frontend esconde o formulário e
-os botões de quem é comum (a API barra com 403 de qualquer jeito).
+Comprar ingresso (`POST /compras`) é a ação do usuário comum, então vale para
+todo logado; editar/excluir compra continua só de admin. No frontend, o comum
+vê o formulário de compra mas não os botões Editar/Excluir (a API barra com
+403 de qualquer jeito).
 Um admin promove/rebaixa pelo campo `perfil` em `participantes.html`.
 Banco novo: `docs/banco.sql` já vem com a coluna; banco antigo: rode
 `docs/migracao-admin.sql`.
@@ -70,7 +72,8 @@ enviam `Authorization: Bearer {{ _.token }}` — cole o token na variável
 
 ```
 public/login.html, dashboard.html, locais|eventos|ingressos|participantes|compras.html
-public/css/style.css                estilos das telas
+public/css/style.css                design system do projeto anterior (git e1d71da^)
+                                + camada de compatibilidade p/ o HTML atual
 public/js/config.js                 URL base da API
 public/js/ApiService.js             aula paw03x04: GET/POST/PUT/DELETE com Bearer
 public/js/auth.js                   guarda token, protege paginas, trata 401

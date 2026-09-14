@@ -119,4 +119,24 @@ class ParticipanteController
         $response->getBody()->write(json_encode($resposta, JSON_UNESCAPED_UNICODE));
         return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
     }
+
+    // GET /auth/me — devolve o dono do token (plano, p/ o verifyAuth do frontend).
+    public function meController(Request $request, Response $response, array $args): Response
+    {
+        $payload = $request->getAttribute('jwtPayload');
+        $participante = $this->participanteService->findByIdService(
+            (int) ($payload->participante->id_participante ?? 0));
+        $resposta = [
+            'success' => true,
+            'message' => 'Autenticado',
+            'data' => [
+                'id_participante' => $participante->getIdParticipante(),
+                'nome' => $participante->getNome(),
+                'email' => $participante->getEmail(),
+                'perfil' => $participante->getPerfil(),
+            ]
+        ];
+        $response->getBody()->write(json_encode($resposta, JSON_UNESCAPED_UNICODE));
+        return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
+    }
 }

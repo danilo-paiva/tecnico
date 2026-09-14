@@ -2,26 +2,24 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="refresh" content="0; url=login.html">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gestão de Eventos — PAW 3º Bimestre</title>
+  <title>Redirecionando...</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <div class="login-wrap">
-    <div class="card login-card" style="text-align:center">
-      <h2>🎟️ Gestão de Eventos</h2>
-      <p class="muted">Projeto do 3º bimestre de PAW — API REST (Slim + JWT) com frontend HTML/JavaScript.</p>
-      <div class="acoes" style="justify-content:center">
-        <a class="btn btn-primario" href="login.html">Entrar</a>
-        <a class="btn btn-neutro" href="dashboard.html">Painel</a>
-      </div>
-    </div>
-  </div>
+  <main class="auth-wrapper">
+    <p class="muted">Redirecionando para <a href="login.html">login.html</a>...</p>
+  </main>
   <script>
-    // Quem já tem token vai direto ao painel; quem não tem, ao login.
-    document.addEventListener("DOMContentLoaded", () => {
-      window.location.href = localStorage.getItem("token") ? "dashboard.html" : "login.html";
-    });
+    var t = localStorage.getItem('token');
+    if (t) {
+      fetch('/auth/me', { headers: { 'Authorization': 'Bearer ' + t } })
+        .then(function(r){ return r.ok ? window.location.replace('dashboard.html') : window.location.replace('login.html'); })
+        .catch(function(){ window.location.replace('login.html'); });
+    } else {
+      window.location.replace('login.html');
+    }
   </script>
 </body>
 </html>

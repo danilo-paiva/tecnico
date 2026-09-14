@@ -8,7 +8,9 @@ use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 use Psr\Http\Server\MiddlewareInterface;
 use Api\Http\ErrorResponse;
 
-// Garante o formato {"participante": {"nome", "email", "cpf", "senha", ...}}.
+// Garante o formato {"participante": {"nome", "email", "cpf", ...}}.
+// A senha e obrigatoria so na criacao (POST); na atualizacao (PUT/PATCH)
+// ela e opcional — ausente/vazia mantem o hash atual.
 // O detalhe de cada campo (email, cpf, senha) e validado no Model.
 class ValidateParticipanteBody implements MiddlewareInterface
 {
@@ -22,7 +24,12 @@ class ValidateParticipanteBody implements MiddlewareInterface
             ]);
         }
 
-        foreach (['nome', 'email', 'cpf', 'senha'] as $campo) {
+        $obrigatorios = ['nome', 'email', 'cpf'];
+        if (strtoupper($request->getMethod()) === 'POST') {
+            $obrigatorios[] = 'senha';
+        }
+
+        foreach ($obrigatorios as $campo) {
             if (!isset($objPHP->participante->$campo) || $objPHP->participante->$campo === "" || $objPHP->participante->$campo === null) {
                 throw new ErrorResponse(400, "Erro na validacao de dados", [
                     "message" => "O campo '{$campo}' e obrigatorio"

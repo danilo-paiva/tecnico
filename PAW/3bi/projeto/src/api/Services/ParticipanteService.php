@@ -90,7 +90,12 @@ class ParticipanteService
         $this->checkEmailUnico($participante->getEmail(), $id);
         $this->checkCpfUnico($participante->getCpf(), $id);
 
-        $this->participanteDAO->update($participante);
+        // Sem senha no body, mantem o hash atual.
+        if ($participante->getSenha() === '') {
+            $this->participanteDAO->updateSemSenha($participante);
+        } else {
+            $this->participanteDAO->update($participante);
+        }
         return $this->findByIdService($id);
     }
 
@@ -124,7 +129,11 @@ class ParticipanteService
             if (isset($dados->perfil)) {
                 $participante->setPerfil((string) $dados->perfil);
             }
-            $participante->setSenha((string) $dados->senha);
+            // Senha ausente/vazia: create barra no middleware; update mantem o hash.
+            // O Model comeca com senha "" = sinal de "nao trocar".
+            if (isset($dados->senha) && trim((string) $dados->senha) !== '') {
+                $participante->setSenha((string) $dados->senha);
+            }
             return $participante;
         } catch (Throwable $e) {
             throw new ErrorResponse(400, "Dados invalidos", ["message" => $e->getMessage()]);

@@ -13,6 +13,7 @@ use Api\Http\MeuTokenJWT;
 use Api\Http\ErrorResponse;
 use Api\Middlewares\Participante\ValidateParticipanteToken;
 use Api\Middlewares\Participante\ValidateParticipanteLoginBody;
+use Api\Middlewares\Participante\ValidateParticipanteBody;
 use Api\Middlewares\Participante\ValidateAdministrador;
 
 // Handler falso: so devolve 200 (ou o atributo jwtPayload, para conferir).
@@ -200,5 +201,33 @@ class MiddlewaresTest extends TestCase
             $this->assertEquals(401, $e->getHttpCode());
             throw $e;
         }
+    }
+
+    // ---- ValidateParticipanteBody: senha so obrigatoria no POST ----
+
+    private function corpoParticipante(bool $comSenha = true): string
+    {
+        $p = ['nome' => 'Diego', 'email' => 'diego@email.com', 'cpf' => '444.555.666-77'];
+        if ($comSenha) $p['senha'] = 'secreta123';
+        return json_encode(['participante' => $p]);
+    }
+
+    public function testPostSemSenhaDa400(): void
+    {
+        $this->expectException(ErrorResponse::class);
+        try {
+            (new ValidateParticipanteBody())->process(
+                $this->pedido('POST', $this->corpoParticipante(false)), new EchoHandler());
+        } catch (ErrorResponse $e) {
+            $this->assertEquals(400, $e->getHttpCode());
+            throw $e;
+        }
+    }
+
+    public function testPutSemSenhaPassa(): void
+    {
+        $resposta = (new ValidateParticipanteBody())->process(
+            $this->pedido('PUT', $this->corpoParticipante(false)), new EchoHandler());
+        $this->assertEquals(200, $resposta->getStatusCode());
     }
 }

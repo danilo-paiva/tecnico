@@ -11,7 +11,9 @@ use Api\Middlewares\Participante\ValidateAdministrador;
 
 // POST /compras | GET /compras | GET /compras/count | GET /compras/{id}
 // PUT+PATCH /compras/{id} | DELETE /compras/{id}
-// TODAS exigem "Authorization: Bearer <token>" (ficha item 2).
+// Tudo exige "Authorization: Bearer <token>" (ficha item 2).
+// Excecao: POST /compras (COMPRAR) vale para todo logado — e a acao
+// do usuario comum. Editar/excluir compra continua so de admin.
 class CompraRouter
 {
     private App $app;
@@ -25,7 +27,6 @@ class CompraRouter
     {
         $this->app->post('/compras', [CompraController::class, 'createController'])
             ->add(ValidateCompraBody::class)
-            ->add(ValidateAdministrador::class)
             ->add(ValidateParticipanteToken::class);
 
         $this->app->get('/compras', [CompraController::class, 'findAllController'])
