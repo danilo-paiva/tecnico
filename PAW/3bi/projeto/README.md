@@ -35,7 +35,7 @@ Continuação do projeto do 2º bimestre (API REST Slim 4 + MySQL), acrescentand
 
 1. O navegador envia `POST /login` com `{"participante": {"email", "senha"}}`.
 2. A API confere a senha com `password_verify` e devolve `{"participante", "token"}`.
-3. O frontend guarda o token no `localStorage` (`js/auth.js`).
+3. O frontend guarda o token no `localStorage` (`js/sessao.js`).
 4. Toda chamada seguinte envia `Authorization: Bearer <token>` (`js/ApiService.js`).
 5. Sem token, ou com token inválido/expirado, a API responde `401`.
 6. O token dura 30 dias e carrega `{id_participante, nome, email, perfil}` (claims públicas).
@@ -75,10 +75,10 @@ enviam `Authorization: Bearer {{ _.token }}` — cole o token na variável
 ```
 public/login.html, dashboard.html, locais|eventos|ingressos|participantes|compras.html
 public/css/style.css                design system do projeto anterior (git e1d71da^)
-                                + camada de compatibilidade p/ o HTML atual
-public/js/config.js                 URL base da API
 public/js/ApiService.js             aula paw03x04: GET/POST/PUT/DELETE com Bearer
-public/js/auth.js                   guarda token, protege paginas, trata 401
+public/js/sessao.js                 login no localStorage, guarda, perfil, 401
+public/js/login|dashboard|locais|eventos|ingressos|participantes|compras.js
+                                um modulo por pagina (DOM + async/await, aulas 2-4)
 src/api/Http/MeuTokenJWT.php        aula paw03x01: gerar/validar JWT
 src/api/Middlewares/Participante/ValidateParticipanteToken.php  barreira 401
 src/api/Middlewares/Participante/ValidateParticipanteLoginBody.php  valida body do login

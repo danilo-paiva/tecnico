@@ -118,7 +118,7 @@
   <div class="modal">
     <div class="modal-header">
       <h3 id="modalTitulo">Editar local</h3>
-      <button type="button" class="modal-close" aria-label="Fechar" onclick="fecharModal()">×</button>
+      <button type="button" class="modal-close" aria-label="Fechar">×</button>
     </div>
     <form id="formEditar" novalidate>
       <div class="modal-body">
@@ -137,7 +137,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
+        <button type="button" class="btn btn-secondary">Cancelar</button>
         <button type="submit" id="btnSalvarEdicao" class="btn btn-primary">Salvar alterações</button>
       </div>
     </form>
@@ -145,220 +145,9 @@
 </div>
 
 <footer class="footer" role="contentinfo">
-  <p>PAW 3BI · <a href="dashboard.html">Dashboard</a> · <a href="login.html">Login</a> · <a href="#" onclick="logout();return false">Logout</a></p>
+  <p>PAW 3BI · <a href="dashboard.html">Dashboard</a> · <a href="login.html">Login</a> · <a href="#" data-sair>Logout</a></p>
 </footer>
 
-<script src="js/api.js"></script>
-<script src="js/auth.js"></script>
-<script>
-(function(){
-  'use strict';
-
-  // ---- Proteção JWT ----
-  (function guard(){
-    var token = (typeof getToken==='function' ? getToken() : localStorage.getItem('token'));
-    if(!token){ window.location.href='login.html'; return; }
-    if(typeof checkAuth==='function'){ checkAuth({redirectTo:'login.html', verifyServer:true}); }
-    // exibe usuário e controla nav
-    setTimeout(function(){
-      if(typeof displayUser==='function') displayUser();
-      var hasToken = token && String(token).trim()!=='';
-      var elLogin=document.getElementById('navLogin'), elReg=document.getElementById('navRegister'), elOut=document.getElementById('btnLogout'), elName=document.getElementById('userName');
-      if(elLogin) elLogin.style.display = hasToken ? 'none':'';
-      if(elReg) elReg.style.display = hasToken ? 'none':'';
-      if(elOut) elOut.style.display = hasToken ? 'inline-flex':'none';
-      if(elName && hasToken){
-        try{ var u=getUser?getUser():null; if(u){ elName.textContent=(u.nome||u.email||'Logado')+' ('+(u.perfil||'comum')+')'; elName.style.display='inline-flex'; } }catch(e){}
-      }
-    },120);
-  })();
-
-  document.getElementById('btnLogout').addEventListener('click', function(e){ e.preventDefault(); if(typeof logout==='function') logout('login.html'); else { localStorage.removeItem('token'); location.href='login.html'; } });
-
-  // ---- Helpers UI ----
-  var alertEl=document.getElementById('alertGlobal');
-  var loadingEl=document.getElementById('loading');
-  var tableWrapper=document.getElementById('tableWrapper');
-  var emptyEl=document.getElementById('empty');
-  var tbody=document.getElementById('tbody');
-  var contadorEl=document.getElementById('contador');
-
-  function showAlert(msg, type){
-    type=type||'info';
-    var cls='alert alert-'+(type==='error'?'danger':type);
-    alertEl.className=cls;
-    alertEl.textContent=msg;
-    alertEl.style.display='flex';
-    alertEl.hidden=false;
-    alertEl.scrollIntoView({behavior:'smooth', block:'nearest'});
-    if(type==='success') setTimeout(hideAlert,3800);
-  }
-  function hideAlert(){ alertEl.style.display='none'; alertEl.hidden=true; alertEl.textContent=''; }
-  window.hideAlert=hideAlert; window.showAlert=showAlert;
-
-  // ---- Perfil: comum so lista (equivale ao ValidateAdministrador) ----
-  var ADMIN = (typeof isAdmin === 'function') ? isAdmin() : true;
-  function aplicarPerfil(){
-    if (ADMIN) return;
-    var f = document.getElementById('formCadastro');
-    var s = f ? f.closest('section') : null;
-    if (s) s.style.display = 'none';
-    showAlert('Perfil comum: voce pode listar. So administradores cadastram, editam ou excluem.', 'info');
-  }
-  function escapeHtml(s){
-    return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});
-  }
-  function extractList(res){
-    if(Array.isArray(res)) return res;
-    if(res && Array.isArray(res.data)) return res.data;
-    if(res && res.data && Array.isArray(res.data.data)) return res.data.data;
-    if(res && Array.isArray(res.locais)) return res.locais;
-    if(res && res.data && Array.isArray(res.data.locais)) return res.data.locais;
-    return [];
-  }
-  function setLoading(isLoading){
-    loadingEl.style.display = isLoading ? '' : 'none';
-    if(isLoading){ tableWrapper.style.display='none'; emptyEl.style.display='none'; }
-  }
-  function atualizarContador(n){
-    contadorEl.textContent = n + (n===1 ? ' local' : ' locais');
-  }
-
-  // ---- Modal ----
-  var modal=document.getElementById('modalEditar');
-  window.abrirModal=function abrirModal(local){
-    document.getElementById('editId').value = local.id_local || local.id || '';
-    document.getElementById('editNome').value = local.nome || '';
-    document.getElementById('editEndereco').value = local.endereco || '';
-    document.getElementById('editCapacidade').value = local.capacidade || '';
-    modal.classList.add('is-open');
-    document.body.style.overflow='hidden';
-  };
-  window.fecharModal=function fecharModal(){
-    modal.classList.remove('is-open');
-    document.body.style.overflow='';
-  };
-  modal.addEventListener('click', function(e){ if(e.target===modal) fecharModal(); });
-  document.addEventListener('keydown', function(e){ if(e.key==='Escape' && modal.classList.contains('is-open')) fecharModal(); });
-
-  // ---- Render tabela ----
-  function renderTabela(lista){
-    tbody.innerHTML='';
-    if(!lista.length){
-      tableWrapper.style.display='none';
-      emptyEl.style.display='';
-      atualizarContador(0);
-      return;
-    }
-    emptyEl.style.display='none';
-    tableWrapper.style.display='';
-    atualizarContador(lista.length);
-    var frag=document.createDocumentFragment();
-    lista.forEach(function(loc){
-      var id = loc.id_local || loc.id;
-      var tr=document.createElement('tr');
-      tr.innerHTML =
-        '<td><span class="badge badge-neutral">#'+escapeHtml(id)+'</span></td>'+
-        '<td><strong>'+escapeHtml(loc.nome)+'</strong></td>'+
-        '<td>'+escapeHtml(loc.endereco)+'</td>'+
-        '<td><span class="badge badge-primary">'+escapeHtml(loc.capacidade)+'</span></td>'+
-        '<td><div class="table-actions">'+
-          (ADMIN?'<button type="button" class="btn btn-secondary btn-sm" data-edit="'+escapeHtml(id)+'">✎ Editar</button>'+
-          '<button type="button" class="btn btn-danger btn-sm" data-delete="'+escapeHtml(id)+'">🗑 Excluir</button>':'<span class="muted">—</span>')+
-        '</div></td>';
-      frag.appendChild(tr);
-    });
-    tbody.appendChild(frag);
-
-    // bind ações
-    tbody.querySelectorAll('[data-edit]').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        var id=btn.getAttribute('data-edit');
-        var item=lista.find(function(x){ return String(x.id_local||x.id)===String(id); });
-        if(item) abrirModal(item);
-      });
-    });
-    tbody.querySelectorAll('[data-delete]').forEach(function(btn){
-      btn.addEventListener('click', async function(){
-        var id=btn.getAttribute('data-delete');
-        var nomeBtn=btn.closest('tr').querySelector('strong')?.textContent || ('#'+id);
-        if(!confirm('Excluir o local "'+nomeBtn+'" (ID '+id+')? Esta ação não pode ser desfeita.')) return;
-        btn.disabled=true; btn.textContent='Excluindo...';
-        try{
-          await Api.deleteLocal(id);
-          showAlert('Local excluído com sucesso.', 'success');
-          await carregar();
-        }catch(err){
-          showAlert(err.message || 'Erro ao excluir local.', 'error');
-          btn.disabled=false; btn.textContent='🗑 Excluir';
-        }
-      });
-    });
-  }
-
-  // ---- Carregar dados ----
-  async function carregar(){
-    setLoading(true); hideAlert();
-    try{
-      var res = await Api.getLocais();
-      var lista = extractList(res);
-      // fallback count endpoint para validação
-      try{ var c=await Api.countLocais(); if(c && (c.data!=null||c.count!=null)) { /* opcional */ } }catch(e){}
-      renderTabela(lista);
-    }catch(err){
-      showAlert(err.message || 'Erro ao carregar locais. Verifique se a API está rodando e seu token é válido.', 'error');
-      tableWrapper.style.display='none';
-      emptyEl.style.display='none';
-      atualizarContador(0);
-    }finally{
-      setLoading(false);
-    }
-  }
-
-  // ---- Cadastro (POST) ----
-  document.getElementById('formCadastro').addEventListener('submit', async function(e){
-    e.preventDefault(); hideAlert();
-    var nome=document.getElementById('nome').value.trim();
-    var endereco=document.getElementById('endereco').value.trim();
-    var capacidade=parseInt(document.getElementById('capacidade').value,10);
-    if(!nome || !endereco || !capacidade || capacidade<1){ showAlert('Preencha nome, endereço e capacidade válida (≥1).','error'); return; }
-    var btn=document.getElementById('btnCadastrar');
-    btn.disabled=true; var old=btn.textContent; btn.textContent='Cadastrando...';
-    try{
-      await Api.createLocal({ nome:nome, endereco:endereco, capacidade:capacidade });
-      showAlert('Local "'+nome+'" cadastrado com sucesso!', 'success');
-      e.target.reset();
-      await carregar();
-    }catch(err){
-      showAlert(err.message || 'Erro ao cadastrar local.', 'error');
-    }finally{ btn.disabled=false; btn.textContent=old; }
-  });
-
-  // ---- Edição (PUT) ----
-  document.getElementById('formEditar').addEventListener('submit', async function(e){
-    e.preventDefault(); hideAlert();
-    var id=document.getElementById('editId').value;
-    var nome=document.getElementById('editNome').value.trim();
-    var endereco=document.getElementById('editEndereco').value.trim();
-    var capacidade=parseInt(document.getElementById('editCapacidade').value,10);
-    if(!id || !nome || !endereco || !capacidade || capacidade<1){ showAlert('Preencha todos os campos para editar.','error'); return; }
-    var btn=document.getElementById('btnSalvarEdicao');
-    btn.disabled=true; var old=btn.textContent; btn.textContent='Salvando...';
-    try{
-      await Api.updateLocal(id, { nome:nome, endereco:endereco, capacidade:capacidade });
-      showAlert('Local atualizado com sucesso!', 'success');
-      fecharModal();
-      await carregar();
-    }catch(err){
-      showAlert(err.message || 'Erro ao atualizar local.', 'error');
-    }finally{ btn.disabled=false; btn.textContent=old; }
-  });
-
-  document.getElementById('btnRecarregar').addEventListener('click', carregar);
-
-  // init
-  carregar().then(aplicarPerfil);
-})();
-</script>
+<script type="module" src="js/locais.js"></script>
 </body>
 </html>

@@ -72,61 +72,6 @@
   <p>PAW 3BI · <a href="dashboard.html">Dashboard</a> · <a href="login.html">Login</a> · <a href="locais.html">Locais</a> · <a href="eventos.html">Eventos</a> · Gerenciado com JWT</p>
 </footer>
 
-<script src="js/api.js"></script>
-<script src="js/auth.js"></script>
-<script>
-(function () {
-  var form = document.getElementById('loginForm');
-  // Flag lida por js/auth.js:initLoginPage para evitar duplo POST /auth/login
-  window.__loginFormHandled = true;
-  if (form.dataset.authJsBound === '1') return;
-  var alertEl = document.getElementById('alert');
-  var btn = document.getElementById('btnSubmit');
-  var btnText = document.getElementById('btnText');
-
-  // Se já autenticado, vai para dashboard
-  Auth.redirectIfAuthenticated('/dashboard.html');
-
-  // Mostra usuário se já logado (header)
-  setTimeout(function(){
-    if(typeof displayUser==='function') displayUser();
-    var token = (typeof getToken==='function' ? getToken() : localStorage.getItem('token'));
-    var hasToken = token && String(token).trim()!=='';
-    var elLogin=document.getElementById('navLogin'), elReg=document.getElementById('navRegister') || document.querySelector('a[href="register.html"]'), elOut=document.getElementById('btnLogout'), elName=document.getElementById('userName');
-    // header-actions já controlado por displayUser, mas garante
-    if(hasToken){
-      try{ var u=getUser?getUser():null; if(u && elName){ elName.textContent=(u.nome||u.email||'Logado')+' ('+(u.perfil||'comum')+')'; elName.style.display='inline-flex'; } }catch(e){}
-      if(elOut) elOut.style.display='inline-flex';
-    }
-    if(elOut) elOut.addEventListener('click', function(e){ e.preventDefault(); if(typeof logout==='function') logout('login.html'); else { localStorage.removeItem('token'); location.href='login.html'; } });
-  },120);
-
-  form.addEventListener('submit', async function (e) {
-    e.preventDefault();
-    hideAlert(alertEl);
-
-    var email = document.getElementById('email').value.trim();
-    var senha = document.getElementById('senha').value;
-
-    if (!email || !senha) {
-      showAlert(alertEl, 'Preencha e-mail e senha.', 'error');
-      return;
-    }
-
-    btn.disabled = true;
-    btnText.innerHTML = '<span class="spinner" aria-hidden="true"></span> Entrando...';
-
-    try {
-      await Auth.login(email, senha);
-      showAlert(alertEl, 'Login realizado! Redirecionando...', 'success');
-      setTimeout(function () { window.location.href = 'dashboard.html'; }, 600);
-    } catch (err) {
-      showAlert(alertEl, err.message || 'Credenciais inválidas.', 'error');
-      btn.disabled = false;
-      btnText.textContent = 'Entrar';
-    }
-  });
-})();
-</script>
+<script type="module" src="js/login.js"></script>
 </body>
 </html>

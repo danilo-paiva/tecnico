@@ -135,7 +135,7 @@
   <div class="modal">
     <div class="modal-header">
       <h3 id="modalTitulo">Editar participante</h3>
-      <button type="button" class="modal-close" aria-label="Fechar" onclick="fecharModal()">×</button>
+      <button type="button" class="modal-close" aria-label="Fechar">×</button>
     </div>
     <form id="formEditar" novalidate>
       <div class="modal-body">
@@ -173,7 +173,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
+        <button type="button" class="btn btn-secondary">Cancelar</button>
         <button type="submit" id="btnSalvarEdicao" class="btn btn-primary">Salvar alterações</button>
       </div>
     </form>
@@ -181,166 +181,9 @@
 </div>
 
 <footer class="footer" role="contentinfo">
-  <p>PAW 3BI · <a href="dashboard.html">Dashboard</a> · <a href="login.html">Login</a> · <a href="#" onclick="logout();return false">Logout</a></p>
+  <p>PAW 3BI · <a href="dashboard.html">Dashboard</a> · <a href="login.html">Login</a> · <a href="#" data-sair>Logout</a></p>
 </footer>
 
-<script src="js/api.js"></script>
-<script src="js/auth.js"></script>
-<script>
-(function(){
-  'use strict';
-  (function guard(){
-    var t=(typeof getToken==='function'?getToken():localStorage.getItem('token'));
-    if(!t){ location.href='login.html'; return; }
-    if(typeof checkAuth==='function') checkAuth({redirectTo:'login.html', verifyServer:true});
-    setTimeout(function(){
-      if(typeof displayUser==='function') displayUser();
-      var has=t&&String(t).trim()!=='';
-      var a=document.getElementById('navLogin'), b=document.getElementById('navRegister'), c=document.getElementById('btnLogout'), d=document.getElementById('userName');
-      if(a) a.style.display=has?'none':''; if(b) b.style.display=has?'none':''; if(c) c.style.display=has?'inline-flex':'none';
-      if(d&&has){ try{var u=getUser?getUser():null; if(u){d.textContent=(u.nome||u.email||'Logado')+' ('+(u.perfil||'comum')+')'; d.style.display='inline-flex';}}catch(e){}}
-    },120);
-  })();
-  document.getElementById('btnLogout').addEventListener('click',function(e){e.preventDefault(); if(typeof logout==='function') logout('login.html'); else{localStorage.removeItem('token');location.href='login.html';}});
-
-  var alertEl=document.getElementById('alertGlobal'), loadingEl=document.getElementById('loading'), tableWrapper=document.getElementById('tableWrapper'), emptyEl=document.getElementById('empty'), tbody=document.getElementById('tbody'), contadorEl=document.getElementById('contador');
-
-  function showAlert(msg,type){ type=type||'info'; alertEl.className='alert alert-'+(type==='error'?'danger':type); alertEl.textContent=msg; alertEl.style.display='flex'; alertEl.hidden=false; alertEl.scrollIntoView({behavior:'smooth',block:'nearest'}); if(type==='success') setTimeout(hideAlert,3800); }
-  function hideAlert(){ alertEl.style.display='none'; alertEl.hidden=true; alertEl.textContent=''; }
-  window.hideAlert=hideAlert; window.showAlert=showAlert;
-  // ---- Perfil: comum so lista (equivale ao ValidateAdministrador) ----
-  var ADMIN = (typeof isAdmin === 'function') ? isAdmin() : true;
-  function aplicarPerfil(){
-    if (ADMIN) return;
-    var f = document.getElementById('formCadastro');
-    var s = f ? f.closest('section') : null;
-    if (s) s.style.display = 'none';
-    showAlert('Perfil comum: voce pode listar. So administradores cadastram, editam ou excluem.', 'info');
-  }
-  function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
-  function extractList(res){
-    if(Array.isArray(res)) return res;
-    if(res && Array.isArray(res.data)) return res.data;
-    if(res && res.data && Array.isArray(res.data.data)) return res.data.data;
-    if(res && Array.isArray(res.participantes)) return res.participantes;
-    if(res && res.data && Array.isArray(res.data.participantes)) return res.data.participantes;
-    return [];
-  }
-  function atualizarContador(n){ contadorEl.textContent=n+(n===1?' participante':' participantes'); }
-  function setLoading(v){ loadingEl.style.display=v?'':'none'; if(v){tableWrapper.style.display='none'; emptyEl.style.display='none';} }
-  function maskCpfRealtime(input){
-    input.addEventListener('input', function(){
-      var v=this.value.replace(/\D/g,'').slice(0,11);
-      if(v.length>9) v=v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/,'$1.$2.$3-$4');
-      else if(v.length>6) v=v.replace(/(\d{3})(\d{3})(\d{1,3})/,'$1.$2.$3');
-      else if(v.length>3) v=v.replace(/(\d{3})(\d{1,3})/,'$1.$2');
-      this.value=v;
-    });
-  }
-  maskCpfRealtime(document.getElementById('cpf'));
-  maskCpfRealtime(document.getElementById('editCpf'));
-
-  var modal=document.getElementById('modalEditar');
-  window.abrirModal=function(item){
-    document.getElementById('editId').value=item.id_participante||item.id||'';
-    document.getElementById('editNome').value=item.nome||'';
-    document.getElementById('editEmail').value=item.email||'';
-    document.getElementById('editTelefone').value=item.telefone||'';
-    document.getElementById('editCpf').value=item.cpf||'';
-    document.getElementById('editSenha').value=''; document.getElementById('editPerfil').value=item.perfil||'comum';
-    modal.classList.add('is-open'); document.body.style.overflow='hidden';
-  };
-  window.fecharModal=function(){ modal.classList.remove('is-open'); document.body.style.overflow=''; };
-  modal.addEventListener('click',function(e){ if(e.target===modal) fecharModal(); });
-  document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&modal.classList.contains('is-open')) fecharModal(); });
-
-  function maskCpfDisplay(cpf){ if(!cpf) return '—'; var d=String(cpf).replace(/\D/g,''); if(d.length===11) return d.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4'); return cpf; }
-
-  function renderTabela(lista){
-    tbody.innerHTML='';
-    if(!lista.length){ tableWrapper.style.display='none'; emptyEl.style.display=''; atualizarContador(0); return; }
-    emptyEl.style.display='none'; tableWrapper.style.display=''; atualizarContador(lista.length);
-    var frag=document.createDocumentFragment();
-    lista.forEach(function(p){
-      var id=p.id_participante||p.id;
-      var tr=document.createElement('tr');
-      tr.innerHTML=
-        '<td><span class="badge badge-neutral">#'+escapeHtml(id)+'</span></td>'+
-        '<td><strong>'+escapeHtml(p.nome)+'</strong></td>'+
-        '<td>'+escapeHtml(p.email)+'</td>'+
-        '<td><span class="badge badge-neutral">'+escapeHtml(maskCpfDisplay(p.cpf))+'</span></td>'+
-        '<td>'+escapeHtml(p.telefone||'—')+'</td>'+
-        '<td>'+((p.perfil||'comum')==='administrador'?'<span class="badge badge-primary">admin</span>':'<span class="badge badge-neutral">comum</span>')+'</td>'+
-        '<td><div class="table-actions">'+(ADMIN?'<button type="button" class="btn btn-secondary btn-sm" data-edit="'+escapeHtml(id)+'">✎ Editar</button><button type="button" class="btn btn-danger btn-sm" data-delete="'+escapeHtml(id)+'">🗑 Excluir</button>':'<span class="muted">—</span>')+'</div></td>';
-      frag.appendChild(tr);
-    });
-    tbody.appendChild(frag);
-    tbody.querySelectorAll('[data-edit]').forEach(function(btn){
-      btn.addEventListener('click',function(){
-        var id=btn.getAttribute('data-edit');
-        var item=lista.find(function(x){ return String(x.id_participante||x.id)===String(id); });
-        if(item) abrirModal(item);
-      });
-    });
-    tbody.querySelectorAll('[data-delete]').forEach(function(btn){
-      btn.addEventListener('click',async function(){
-        var id=btn.getAttribute('data-delete');
-        var nome=btn.closest('tr').querySelector('strong')?.textContent||('#'+id);
-        if(!confirm('Excluir participante "'+nome+'" (ID '+id+')?')) return;
-        btn.disabled=true; btn.textContent='Excluindo...';
-        try{ await Api.deleteParticipante(id); showAlert('Participante excluído com sucesso.','success'); await carregar(); }catch(err){ showAlert(err.message||'Erro ao excluir participante.','error'); btn.disabled=false; btn.textContent='🗑 Excluir'; }
-      });
-    });
-  }
-
-  async function carregar(){
-    setLoading(true); hideAlert();
-    try{
-      var res=await Api.getParticipantes();
-      var lista=extractList(res);
-      renderTabela(lista);
-    }catch(err){
-      showAlert(err.message||'Erro ao carregar participantes.','error'); tableWrapper.style.display='none'; emptyEl.style.display='none'; atualizarContador(0);
-    }finally{ setLoading(false); }
-  }
-
-  document.getElementById('formCadastro').addEventListener('submit', async function(e){
-    e.preventDefault(); hideAlert();
-    var nome=document.getElementById('nome').value.trim();
-    var email=document.getElementById('email').value.trim();
-    var telefone=document.getElementById('telefone').value.trim();
-    var cpf=document.getElementById('cpf').value.trim();
-    var senha=document.getElementById('senha').value; var perfil=document.getElementById('perfil').value;
-    if(!nome||!email||!telefone||!cpf||!senha){ showAlert('Preencha todos os campos.','error'); return; }
-    if(senha.length<6){ showAlert('Senha deve ter no mínimo 6 caracteres.','error'); return; }
-    var btn=document.getElementById('btnCadastrar'); btn.disabled=true; var old=btn.textContent; btn.textContent='Cadastrando...';
-    try{
-      await Api.createParticipante({ nome:nome, email:email, cpf:cpf, telefone:telefone, senha:senha, perfil:perfil });
-      showAlert('Participante "'+nome+'" cadastrado com sucesso!','success'); e.target.reset(); await carregar();
-    }catch(err){ showAlert(err.message||'Erro ao cadastrar participante.','error'); }finally{ btn.disabled=false; btn.textContent=old; }
-  });
-
-  document.getElementById('formEditar').addEventListener('submit', async function(e){
-    e.preventDefault(); hideAlert();
-    var id=document.getElementById('editId').value;
-    var nome=document.getElementById('editNome').value.trim();
-    var email=document.getElementById('editEmail').value.trim();
-    var telefone=document.getElementById('editTelefone').value.trim();
-    var cpf=document.getElementById('editCpf').value.trim();
-    var senha=document.getElementById('editSenha').value;
-    if(!id||!nome||!email||!telefone||!cpf){ showAlert('Preencha nome, e-mail, telefone e CPF.','error'); return; }
-    var payload={ nome:nome, email:email, telefone:telefone, cpf:cpf, perfil:document.getElementById('editPerfil').value };
-    if(senha && senha.trim()!==''){ if(senha.length<6){ showAlert('Senha deve ter no mínimo 6 caracteres.','error'); return; } payload.senha=senha; }
-    var btn=document.getElementById('btnSalvarEdicao'); btn.disabled=true; var old=btn.textContent; btn.textContent='Salvando...';
-    try{
-      await Api.updateParticipante(id, payload);
-      showAlert('Participante atualizado com sucesso!','success'); fecharModal(); await carregar();
-    }catch(err){ showAlert(err.message||'Erro ao atualizar participante.','error'); }finally{ btn.disabled=false; btn.textContent=old; }
-  });
-
-  document.getElementById('btnRecarregar').addEventListener('click', carregar);
-  carregar().then(aplicarPerfil);
-})();
-</script>
+<script type="module" src="js/participantes.js"></script>
 </body>
 </html>

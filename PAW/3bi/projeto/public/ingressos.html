@@ -136,7 +136,7 @@
   <div class="modal">
     <div class="modal-header">
       <h3 id="modalTitulo">Editar ingresso</h3>
-      <button type="button" class="modal-close" aria-label="Fechar" onclick="fecharModal()">×</button>
+      <button type="button" class="modal-close" aria-label="Fechar">×</button>
     </div>
     <form id="formEditar" novalidate>
       <div class="modal-body">
@@ -171,7 +171,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
+        <button type="button" class="btn btn-secondary">Cancelar</button>
         <button type="submit" id="btnSalvarEdicao" class="btn btn-primary">Salvar alterações</button>
       </div>
     </form>
@@ -179,202 +179,9 @@
 </div>
 
 <footer class="footer" role="contentinfo">
-  <p>PAW 3BI · <a href="dashboard.html">Dashboard</a> · <a href="login.html">Login</a> · <a href="#" onclick="logout();return false">Logout</a></p>
+  <p>PAW 3BI · <a href="dashboard.html">Dashboard</a> · <a href="login.html">Login</a> · <a href="#" data-sair>Logout</a></p>
 </footer>
 
-<script src="js/api.js"></script>
-<script src="js/auth.js"></script>
-<script>
-(function(){
-  'use strict';
-  (function guard(){
-    var t=(typeof getToken==='function'?getToken():localStorage.getItem('token'));
-    if(!t){ location.href='login.html'; return; }
-    if(typeof checkAuth==='function') checkAuth({redirectTo:'login.html', verifyServer:true});
-    setTimeout(function(){
-      if(typeof displayUser==='function') displayUser();
-      var has=t&&String(t).trim()!=='';
-      var a=document.getElementById('navLogin'), b=document.getElementById('navRegister'), c=document.getElementById('btnLogout'), d=document.getElementById('userName');
-      if(a) a.style.display=has?'none':''; if(b) b.style.display=has?'none':''; if(c) c.style.display=has?'inline-flex':'none';
-      if(d&&has){ try{var u=getUser?getUser():null; if(u){d.textContent=(u.nome||u.email||'Logado')+' ('+(u.perfil||'comum')+')'; d.style.display='inline-flex';}}catch(e){}}
-    },120);
-  })();
-  document.getElementById('btnLogout').addEventListener('click',function(e){e.preventDefault(); if(typeof logout==='function') logout('login.html'); else{localStorage.removeItem('token');location.href='login.html';}});
-
-  var alertEl=document.getElementById('alertGlobal'), loadingEl=document.getElementById('loading'), tableWrapper=document.getElementById('tableWrapper'), emptyEl=document.getElementById('empty'), tbody=document.getElementById('tbody'), contadorEl=document.getElementById('contador');
-  var selectEvento=document.getElementById('idEvento'), selectEditEvento=document.getElementById('editIdEvento');
-  var eventosCache=[];
-
-  function showAlert(msg,type){ type=type||'info'; alertEl.className='alert alert-'+(type==='error'?'danger':type); alertEl.textContent=msg; alertEl.style.display='flex'; alertEl.hidden=false; alertEl.scrollIntoView({behavior:'smooth',block:'nearest'}); if(type==='success') setTimeout(hideAlert,3800); }
-  function hideAlert(){ alertEl.style.display='none'; alertEl.hidden=true; alertEl.textContent=''; }
-  window.hideAlert=hideAlert; window.showAlert=showAlert;
-  // ---- Perfil: comum so lista (equivale ao ValidateAdministrador) ----
-  var ADMIN = (typeof isAdmin === 'function') ? isAdmin() : true;
-  function aplicarPerfil(){
-    if (ADMIN) return;
-    var f = document.getElementById('formCadastro');
-    var s = f ? f.closest('section') : null;
-    if (s) s.style.display = 'none';
-    showAlert('Perfil comum: voce pode listar. So administradores cadastram, editam ou excluem.', 'info');
-  }
-  function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
-  // Aceita qualquer lista da API: array direto, res.data array ou
-  // res.data.{entidade} (locais, eventos, ingressos, participantes, compras).
-  function extractList(res){
-    if(Array.isArray(res)) return res;
-    if(res && Array.isArray(res.data)) return res.data;
-    if(res && res.data && typeof res.data === 'object'){
-      var chaves = Object.keys(res.data);
-      for (var i = 0; i < chaves.length; i++){
-        if (Array.isArray(res.data[chaves[i]])) return res.data[chaves[i]];
-      }
-    }
-    return [];
-  }
-  function formatPreco(v){
-    var n=Number(v); if(isNaN(n)) return escapeHtml(v);
-    return n.toLocaleString('pt-BR',{style:'currency', currency:'BRL'});
-  }
-  function atualizarContador(n){ contadorEl.textContent=n+(n===1?' ingresso':' ingressos'); }
-  function setLoading(v){ loadingEl.style.display=v?'':'none'; if(v){tableWrapper.style.display='none'; emptyEl.style.display='none';} }
-
-  var modal=document.getElementById('modalEditar');
-  window.abrirModal=function(item){
-    document.getElementById('editId').value=item.id_ingresso||item.id||'';
-    document.getElementById('editTipo').value=(item.tipo||'Inteira');
-    document.getElementById('editPreco').value=item.preco!=null?item.preco:'';
-    document.getElementById('editQuantidadeTotal').value=item.quantidadeTotal||item.quantidade_total||'';
-    preencherSelectEventos(selectEditEvento, item.id_evento||'');
-    modal.classList.add('is-open'); document.body.style.overflow='hidden';
-  };
-  window.fecharModal=function(){ modal.classList.remove('is-open'); document.body.style.overflow=''; };
-  modal.addEventListener('click',function(e){ if(e.target===modal) fecharModal(); });
-  document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&modal.classList.contains('is-open')) fecharModal(); });
-
-  function preencherSelectEventos(selectEl, selectedId){
-    selectEl.innerHTML='';
-    if(!eventosCache.length){
-      var opt=document.createElement('option'); opt.value=''; opt.textContent='Nenhum evento disponível — cadastre em Eventos'; opt.disabled=true; opt.selected=true;
-      selectEl.appendChild(opt); selectEl.disabled=true; return;
-    }
-    selectEl.disabled=false;
-    var ph=document.createElement('option'); ph.value=''; ph.textContent='Selecione um evento...'; ph.disabled=true; if(!selectedId) ph.selected=true;
-    selectEl.appendChild(ph);
-    eventosCache.forEach(function(ev){
-      var id=ev.id_evento||ev.id;
-      var opt=document.createElement('option'); opt.value=id; opt.textContent=ev.titulo+' — ID '+id;
-      if(String(id)===String(selectedId)) opt.selected=true;
-      selectEl.appendChild(opt);
-    });
-  }
-
-  async function carregarEventos(){
-    try{
-      var res=await Api.getEventos();
-      var lista=extractList(res);
-      eventosCache=lista;
-      preencherSelectEventos(selectEvento,'');
-      preencherSelectEventos(selectEditEvento,'');
-    }catch(err){
-      eventosCache=[];
-      selectEvento.innerHTML='<option value="">Erro ao carregar eventos</option>';
-      selectEditEvento.innerHTML='<option value="">Erro ao carregar eventos</option>';
-    }
-  }
-  function nomeEventoPorId(id){
-    var f=eventosCache.find(function(e){ return String(e.id_evento||e.id)===String(id); });
-    return f ? f.titulo : ('Evento #'+id);
-  }
-
-  function renderTabela(lista){
-    tbody.innerHTML='';
-    if(!lista.length){ tableWrapper.style.display='none'; emptyEl.style.display=''; atualizarContador(0); return; }
-    emptyEl.style.display='none'; tableWrapper.style.display=''; atualizarContador(lista.length);
-    var frag=document.createDocumentFragment();
-    lista.forEach(function(ing){
-      var id=ing.id_ingresso||ing.id;
-      var idEvento=ing.id_evento||ing.id_evento;
-      var preco=ing.preco;
-      var qtdTotal=ing.quantidadeTotal||ing.quantidade_total;
-      var qtdDisp=ing.quantidadeDisponivel||ing.quantidade_disponivel;
-      var tipo=ing.tipo||'—';
-      var estoqueBadge = (Number(qtdDisp)===0 ? 'badge-danger' : Number(qtdDisp)<10 ? 'badge-warning' : 'badge-success');
-      var tr=document.createElement('tr');
-      tr.innerHTML=
-        '<td><span class="badge badge-neutral">#'+escapeHtml(id)+'</span></td>'+
-        '<td><span class="badge badge-primary">'+escapeHtml(tipo)+'</span></td>'+
-        '<td>'+formatPreco(preco)+'</td>'+
-        '<td>'+escapeHtml(qtdTotal)+'</td>'+
-        '<td><span class="badge '+estoqueBadge+'">'+escapeHtml(qtdDisp)+'</span></td>'+
-        '<td>'+escapeHtml(nomeEventoPorId(idEvento))+'<br><small class="text-muted">ID '+escapeHtml(idEvento||'—')+'</small></td>'+
-        '<td><div class="table-actions">'+(ADMIN?'<button type="button" class="btn btn-secondary btn-sm" data-edit="'+escapeHtml(id)+'">✎ Editar</button><button type="button" class="btn btn-danger btn-sm" data-delete="'+escapeHtml(id)+'">🗑 Excluir</button>':'<span class="muted">—</span>')+'</div></td>';
-      frag.appendChild(tr);
-    });
-    tbody.appendChild(frag);
-    tbody.querySelectorAll('[data-edit]').forEach(function(btn){
-      btn.addEventListener('click',function(){
-        var id=btn.getAttribute('data-edit');
-        var item=lista.find(function(x){ return String(x.id_ingresso||x.id)===String(id); });
-        if(item) abrirModal(item);
-      });
-    });
-    tbody.querySelectorAll('[data-delete]').forEach(function(btn){
-      btn.addEventListener('click', async function(){
-        var id=btn.getAttribute('data-delete');
-        var tipo=btn.closest('tr').querySelector('td:nth-child(2)')?.textContent?.trim() || ('#'+id);
-        if(!confirm('Excluir ingresso "'+tipo+'" (ID '+id+')?')) return;
-        btn.disabled=true; btn.textContent='Excluindo...';
-        try{ await Api.deleteIngresso(id); showAlert('Ingresso excluído com sucesso.','success'); await carregar(); }catch(err){ showAlert(err.message||'Erro ao excluir ingresso.','error'); btn.disabled=false; btn.textContent='🗑 Excluir'; }
-      });
-    });
-  }
-
-  async function carregar(){
-    setLoading(true); hideAlert();
-    try{
-      if(!eventosCache.length) await carregarEventos();
-      var res=await Api.getIngressos();
-      var lista=extractList(res);
-      renderTabela(lista);
-    }catch(err){ showAlert(err.message||'Erro ao carregar ingressos.','error'); tableWrapper.style.display='none'; emptyEl.style.display='none'; atualizarContador(0); }
-    finally{ setLoading(false); }
-  }
-
-  // Cadastro POST
-  document.getElementById('formCadastro').addEventListener('submit', async function(e){
-    e.preventDefault(); hideAlert();
-    var tipo=document.getElementById('tipo').value;
-    var preco=parseFloat(document.getElementById('preco').value);
-    var qTotal=parseInt(document.getElementById('quantidadeTotal').value,10);
-    var idEvento=document.getElementById('idEvento').value;
-    if(!tipo || isNaN(preco) || isNaN(qTotal) || !idEvento){ showAlert('Preencha todos os campos corretamente.','error'); return; }
-    var btn=document.getElementById('btnCadastrar'); btn.disabled=true; var old=btn.textContent; btn.textContent='Cadastrando...';
-    try{
-      await Api.createIngresso({ tipo:tipo, preco:preco, quantidade_total:qTotal, id_evento:parseInt(idEvento,10) });
-      showAlert('Ingresso "'+tipo+'" cadastrado com sucesso!','success'); e.target.reset(); await carregar();
-    }catch(err){ showAlert(err.message||'Erro ao cadastrar ingresso.','error'); }finally{ btn.disabled=false; btn.textContent=old; }
-  });
-
-  // Edição PUT
-  document.getElementById('formEditar').addEventListener('submit', async function(e){
-    e.preventDefault(); hideAlert();
-    var id=document.getElementById('editId').value;
-    var tipo=document.getElementById('editTipo').value;
-    var preco=parseFloat(document.getElementById('editPreco').value);
-    var qTotal=parseInt(document.getElementById('editQuantidadeTotal').value,10);
-    var idEvento=document.getElementById('editIdEvento').value;
-    if(!id||!tipo||isNaN(preco)||isNaN(qTotal)||!idEvento){ showAlert('Preencha todos os campos corretamente.','error'); return; }
-    var btn=document.getElementById('btnSalvarEdicao'); btn.disabled=true; var old=btn.textContent; btn.textContent='Salvando...';
-    try{
-      await Api.updateIngresso(id, { tipo:tipo, preco:preco, quantidade_total:qTotal, id_evento:parseInt(idEvento,10) });
-      showAlert('Ingresso atualizado com sucesso!','success'); fecharModal(); await carregar();
-    }catch(err){ showAlert(err.message||'Erro ao atualizar ingresso.','error'); }finally{ btn.disabled=false; btn.textContent=old; }
-  });
-
-  document.getElementById('btnRecarregar').addEventListener('click', async function(){ await carregarEventos(); await carregar(); });
-
-  (async function init(){ await carregarEventos(); await carregar(); aplicarPerfil(); })();
-})();
-</script>
+<script type="module" src="js/ingressos.js"></script>
 </body>
 </html>
