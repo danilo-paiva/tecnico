@@ -1,0 +1,64 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Página-1" id="pvb3bi001">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="i" parent="1" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;" value="&lt;b&gt;inicio&lt;/b&gt;" vertex="1">
+          <mxGeometry height="60" width="100" x="363" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="a" parent="1" style="html=1;strokeWidth=2;shape=manualInput;whiteSpace=wrap;rounded=1;size=26;arcSize=11;" value="nascimento" vertex="1">
+          <mxGeometry height="60" width="90" x="368" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="p0" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;" value="hoje = data atual" vertex="1">
+          <mxGeometry height="30" width="180" x="323" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="p1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;" value="idade = ano(hoje) - ano(nascimento)" vertex="1">
+          <mxGeometry height="30" width="280" x="273" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="d" parent="1" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;" value="ja fez aniversario?" vertex="1">
+          <mxGeometry height="80" width="220" x="303" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="p2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;" value="idade = idade - 1" vertex="1">
+          <mxGeometry height="30" width="180" x="75" y="385" as="geometry" />
+        </mxCell>
+        <mxCell id="out" parent="1" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.display;whiteSpace=wrap;" value="idade" vertex="1">
+          <mxGeometry height="60" width="150" x="338" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="f" parent="1" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;" value="&lt;b&gt;fim&lt;/b&gt;" vertex="1">
+          <mxGeometry height="60" width="100" x="363" y="640" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="i" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="a">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="a" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="p0">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="p0" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="p1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="p1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="d">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="d" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="p2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" parent="e5" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="N" vertex="1" connectable="0">
+          <mxGeometry x="0" y="0" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="d" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="out">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" parent="e7" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="S" vertex="1" connectable="0">
+          <mxGeometry x="0" y="0" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="p2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="out">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="out" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="f">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

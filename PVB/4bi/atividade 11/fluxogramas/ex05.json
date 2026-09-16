@@ -1,0 +1,19 @@
+{
+  "nome": "fluxograma",
+  "nos": [
+    {"id": "i", "tipo": "inicio", "x": 363, "y": 20, "l": 100},
+    {"id": "a", "tipo": "input", "texto": "ano", "x": 373, "y": 120, "l": 80},
+    {"id": "d", "tipo": "decision", "texto": "ano bissexto?", "x": 313, "y": 220, "l": 200},
+    {"id": "o1", "tipo": "display", "texto": "ano bissexto", "x": 90, "y": 230, "l": 170},
+    {"id": "o2", "tipo": "display", "texto": "ano nao bissexto", "x": 567, "y": 230, "l": 170},
+    {"id": "f", "tipo": "fim", "x": 363, "y": 400, "l": 100}
+  ],
+  "arestas": [
+    {"de": "i", "para": "a"},
+    {"de": "a", "para": "d"},
+    {"de": "d", "para": "o1", "rotulo": "S", "saida": "esq", "entrada": "dir"},
+    {"de": "d", "para": "o2", "rotulo": "N", "saida": "dir", "entrada": "esq"},
+    {"de": "o1", "para": "f", "entradaPonto": [0.25, 0]},
+    {"de": "o2", "para": "f", "entradaPonto": [0.75, 0]}
+  ]
+}

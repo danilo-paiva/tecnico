@@ -1,0 +1,14 @@
+{
+  "nome": "fluxograma",
+  "nos": [
+    ["inicio", "", 100],
+    ["input", "inicio", 80],
+    ["input", "fim", 80],
+    ["proc", "duracao = fim - inicio", 175],
+    ["proc", "dias = duracao em dias", 185],
+    ["proc", "horas = duracao em horas", 195],
+    ["display", "dias", 150],
+    ["display", "horas", 150],
+    ["fim", "", 100]
+  ]
+}

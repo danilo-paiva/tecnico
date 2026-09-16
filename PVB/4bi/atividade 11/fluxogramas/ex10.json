@@ -1,0 +1,26 @@
+{
+  "nome": "fluxograma",
+  "nos": [
+    {"id": "i", "tipo": "inicio", "x": 363, "y": 20, "l": 100},
+    {"id": "a", "tipo": "input", "texto": "data1", "x": 373, "y": 120, "l": 80},
+    {"id": "b", "tipo": "input", "texto": "data2", "x": 373, "y": 220, "l": 80},
+    {"id": "d1", "tipo": "decision", "texto": "data1 = data2?", "x": 313, "y": 320, "l": 200},
+    {"id": "o1", "tipo": "display", "texto": "datas identicas", "x": 20, "y": 330, "l": 130},
+    {"id": "d2", "tipo": "decision", "texto": "data1 depois de data2?", "x": 293, "y": 480, "l": 240},
+    {"id": "o2", "tipo": "display", "texto": "data1", "x": 100, "y": 600, "l": 150},
+    {"id": "o3", "tipo": "display", "texto": "data2", "x": 580, "y": 600, "l": 150},
+    {"id": "f", "tipo": "fim", "x": 363, "y": 760, "l": 100}
+  ],
+  "arestas": [
+    {"de": "i", "para": "a"},
+    {"de": "a", "para": "b"},
+    {"de": "b", "para": "d1"},
+    {"de": "d1", "para": "o1", "rotulo": "S", "saida": "esq", "entrada": "dir"},
+    {"de": "d1", "para": "d2", "rotulo": "N"},
+    {"de": "d2", "para": "o2", "rotulo": "S", "saida": "esq", "entrada": "dir"},
+    {"de": "d2", "para": "o3", "rotulo": "N", "saida": "dir", "entrada": "esq"},
+    {"de": "o1", "para": "f", "saida": "baixo", "entrada": "esq"},
+    {"de": "o2", "para": "f", "entradaPonto": [0.25, 0]},
+    {"de": "o3", "para": "f", "saida": "baixo", "entrada": "dir"}
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "nome": "fluxograma",
+  "nos": [
+    {"id": "i", "tipo": "inicio", "x": 363, "y": 20, "l": 100},
+    {"id": "a", "tipo": "input", "texto": "data", "x": 373, "y": 120, "l": 80},
+    {"id": "b", "tipo": "input", "texto": "n", "x": 383, "y": 220, "l": 60},
+    {"id": "c", "tipo": "proc", "texto": "contagem = 0", "x": 343, "y": 320, "l": 140},
+    {"id": "g", "tipo": "decision", "texto": "contagem < n?", "x": 323, "y": 390, "l": 180},
+    {"id": "p1", "tipo": "proc", "texto": "data = data + 1 dia", "x": 323, "y": 510, "l": 180},
+    {"id": "d2", "tipo": "decision", "texto": "sabado ou domingo?", "x": 313, "y": 580, "l": 200},
+    {"id": "p2", "tipo": "proc", "texto": "contagem = contagem + 1", "x": 318, "y": 710, "l": 190},
+    {"id": "out", "tipo": "display", "texto": "data", "x": 338, "y": 830, "l": 150},
+    {"id": "f", "tipo": "fim", "x": 363, "y": 930, "l": 100}
+  ],
+  "arestas": [
+    {"de": "i", "para": "a"},
+    {"de": "a", "para": "b"},
+    {"de": "b", "para": "c"},
+    {"de": "c", "para": "g"},
+    {"de": "g", "para": "p1", "rotulo": "S"},
+    {"de": "p1", "para": "d2"},
+    {"de": "d2", "para": "p2", "rotulo": "N"},
+    {"de": "d2", "para": "g", "rotulo": "S", "saida": "esq", "pontos": [[230, 620], [230, 418]], "entradaPonto": [0, 0.35]},
+    {"de": "p2", "para": "g", "saida": "esq", "pontos": [[190, 725], [190, 442]], "entradaPonto": [0, 0.65]},
+    {"de": "g", "para": "out", "rotulo": "N", "saida": "dir", "pontos": [[600, 430], [600, 860]], "entrada": "dir"},
+    {"de": "out", "para": "f"}
+  ]
+}

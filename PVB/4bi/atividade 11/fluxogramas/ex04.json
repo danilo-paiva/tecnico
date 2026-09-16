@@ -1,0 +1,18 @@
+{
+  "nome": "fluxograma",
+  "nos": [
+    ["inicio", "", 100],
+    ["input", "nascimento", 100],
+    ["proc", "ano = ano(nascimento)", 175],
+    ["proc", "mes = mes(nascimento)", 175],
+    ["proc", "dia = dia(nascimento)", 175],
+    ["proc", "hora = hora(nascimento)", 185],
+    ["proc", "minuto = minuto(nascimento)", 200],
+    ["display", "ano", 150],
+    ["display", "mes (extenso)", 150],
+    ["display", "dia", 150],
+    ["display", "hora", 150],
+    ["display", "minuto", 150],
+    ["fim", "", 100]
+  ]
+}

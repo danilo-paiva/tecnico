@@ -1,0 +1,11 @@
+{
+  "nome": "fluxograma",
+  "nos": [
+    ["inicio", "", 100],
+    ["proc", "agora = data e hora atuais", 210],
+    ["display", "agora (dd/MM/yyyy HH:mm:ss)", 200],
+    ["display", "agora (dd/MM/yyyy)", 150],
+    ["display", "agora (HH:mm)", 120],
+    ["fim", "", 100]
+  ]
+}

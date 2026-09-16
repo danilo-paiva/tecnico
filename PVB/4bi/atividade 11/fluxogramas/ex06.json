@@ -1,0 +1,23 @@
+{
+  "nome": "fluxograma",
+  "nos": [
+    {"id": "i", "tipo": "inicio", "x": 363, "y": 20, "l": 100},
+    {"id": "a", "tipo": "input", "texto": "nascimento", "x": 368, "y": 120, "l": 90},
+    {"id": "p0", "tipo": "proc", "texto": "hoje = data atual", "x": 323, "y": 220, "l": 180},
+    {"id": "p1", "tipo": "proc", "texto": "idade = ano(hoje) - ano(nascimento)", "x": 273, "y": 290, "l": 280},
+    {"id": "d", "tipo": "decision", "texto": "ja fez aniversario?", "x": 303, "y": 360, "l": 220},
+    {"id": "p2", "tipo": "proc", "texto": "idade = idade - 1", "x": 75, "y": 385, "l": 180},
+    {"id": "out", "tipo": "display", "texto": "idade", "x": 338, "y": 540, "l": 150},
+    {"id": "f", "tipo": "fim", "x": 363, "y": 640, "l": 100}
+  ],
+  "arestas": [
+    {"de": "i", "para": "a"},
+    {"de": "a", "para": "p0"},
+    {"de": "p0", "para": "p1"},
+    {"de": "p1", "para": "d"},
+    {"de": "d", "para": "p2", "rotulo": "N", "saida": "esq", "entrada": "dir"},
+    {"de": "d", "para": "out", "rotulo": "S"},
+    {"de": "p2", "para": "out", "saida": "baixo", "entrada": "esq"},
+    {"de": "out", "para": "f"}
+  ]
+}

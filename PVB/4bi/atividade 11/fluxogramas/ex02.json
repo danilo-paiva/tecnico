@@ -1,0 +1,10 @@
+{
+  "nome": "fluxograma",
+  "nos": [
+    ["inicio", "", 100],
+    ["proc", "natal = 25/12/2026 20:00", 200],
+    ["display", "natal (dia da semana em ingles)", 240],
+    ["display", "natal (dia da semana em portugues)", 250],
+    ["fim", "", 100]
+  ]
+}

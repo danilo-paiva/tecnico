@@ -23,7 +23,9 @@ Gerar fluxogramas no MESMO estilo visual que o aluno cria manualmente no draw.io
    - `Console.WriteLine`/`label.Content` -> entrada/saida (shapes proprios)
 3. **Atribuicao com `=`**: `variavel = expressao` (estilo do projeto do 1bi).
 4. **Entrada e saida mostram so variaveis**: entrada `r1` (um por figura);
-   saida `dias` (uma por figura). Sem textos de rotulo nas saidas.
+   saida `dias` (uma por figura). Sem textos de rotulo nas saidas — quando o
+   formato/valor exibido importar, use complemento curto entre parenteses
+   (ex.: `agora (dd/MM/yyyy HH:mm:ss)`, `mes (extenso)`).
 5. **Tipos de figura** (shapes usados nos projetos anteriores):
 
 | Tipo | Shape draw.io (style) | Uso | Altura |
@@ -38,9 +40,11 @@ Gerar fluxogramas no MESMO estilo visual que o aluno cria manualmente no draw.io
    (vertical, de baixo da figura anterior pra cima da seguinte). Para rotulo S/N,
    filho da edge com style `edgeLabel;html=1;...` e value `S`/`N`.
 7. **Largura por conteudo** (evita distorcao): terminais 100; entradas ~80-90;
-   processos proporcionais ao texto (curtos ~140, longos ~240); saidas uniformes
-   (150). Tudo centralizado em uma coluna unica, espacamento vertical 40, coluna
-   no centro da pagina A4 (pageWidth 827, x = 413 - largura/2).
+   processos proporcionais ao texto (curtos ~140, longos ~240); decisoes ~180-240;
+   saidas uniformes (150). Fluxo principal em uma coluna unica no centro da pagina
+   A4 (pageWidth 827, x = 413 - largura/2), espacamento vertical 40. Com decisao,
+   os desvios vao para colunas laterais e voltam a coluna central depois do
+   merge (ver formato v2).
 8. **Estrutura do algoritmo**: `inicio` -> entradas -> atribuicoes (na ordem do
    codigo) -> saidas (na ordem exibida) -> `fim`. Decisoes so quando existirem
    no codigo. Loop = repete a sequencia com edge de volta (estilo 2bi).
@@ -51,7 +55,7 @@ Gerar fluxogramas no MESMO estilo visual que o aluno cria manualmente no draw.io
 node scripts/gera_fluxo.js <especificacao.json>
 ```
 
-O JSON de especificacao:
+O JSON de especificacao (cadeia sequencial):
 
 ```json
 {
@@ -68,40 +72,89 @@ O JSON de especificacao:
 ```
 
 Tipos validos: `inicio`, `fim`, `input`, `proc` (altura 30), `proc2` (altura 40),
-`display`. [tipo, texto, largura].
+`decision` (altura 80), `display`. [tipo, texto, largura].
 
 Saida: `<nome>.drawio` (fonte, abre no app.diagrams.net ou VS Code) e
 `<nome>_render.html` (pagina limpa para conferencia/exportacao).
 
+### Formato v2 (decisoes e loops)
+
+Para codigo com `if` (decisao) e `while`/`for` (repeticao), use o grafo explicito:
+
+```json
+{
+  "nome": "fluxograma",
+  "nos": [
+    {"id": "i", "tipo": "inicio", "x": 363, "y": 20, "l": 100},
+    {"id": "a", "tipo": "input", "texto": "ano", "x": 373, "y": 120, "l": 80},
+    {"id": "d", "tipo": "decision", "texto": "ano bissexto?", "x": 313, "y": 220, "l": 200},
+    {"id": "o1", "tipo": "display", "texto": "ano bissexto", "x": 90, "y": 230, "l": 170},
+    {"id": "o2", "tipo": "display", "texto": "ano nao bissexto", "x": 567, "y": 230, "l": 170},
+    {"id": "f", "tipo": "fim", "x": 363, "y": 400, "l": 100}
+  ],
+  "arestas": [
+    {"de": "i", "para": "a"},
+    {"de": "d", "para": "o1", "rotulo": "S", "saida": "esq", "entrada": "dir"},
+    {"de": "d", "para": "o2", "rotulo": "N", "saida": "dir", "entrada": "esq"},
+    {"de": "o1", "para": "f", "entradaPonto": [0.25, 0]},
+    {"de": "o2", "para": "f", "entradaPonto": [0.75, 0]}
+  ]
+}
+```
+
+- `x`, `y` = canto superior esquerdo da figura (como no draw.io); `l` = largura,
+  `h` = altura (opcionais; sem eles usam-se os padroes por tipo).
+- `saida`/`entrada`: `esq`, `dir`, `cima` ou `baixo` (padrao: sai por baixo,
+  entra por cima).
+- `saidaPonto`/`entradaPonto`: `[fx, fy]` de 0 a 1 para fixar o ponto exato na
+  borda (use quando varias setas chegam na mesma figura).
+- `pontos`: waypoints `[[x, y], ...]` do roteamento — use para o retorno do loop
+  passar por fora das figuras.
+- `rotulo`: texto da seta (S/N); `rotuloPos`: `[dx, dy]` desloca o rotulo.
+- Loop: seta de volta com `saida: "esq"`, `pontos` de desvio e `entradaPonto` na
+  figura de repeticao (a decisao do loop ou a entrada lida de novo).
+- Specs de referencia com decisoes/loops: `PVB/4bi/atividade 11/fluxogramas/`
+  (ex05, ex06, ex10..ex13).
+
 ## Conferencia visual
 
 Abrir o render no browser (tool browser, action `open` com URL
-`file:///<caminho>/fluxo_render.html`), aguardar ~6s, e tirar screenshot para
-conferir alinhamento/textos antes de exportar.
+`file:///<caminho>/<nome>_render.html`), aguardar ~6s, e tirar screenshot para
+conferir alinhamento/textos antes de exportar. Alternativa headless:
+
+```powershell
+& "C:\Program Files\Google\Chrome\Application\chrome.exe" --headless --disable-gpu `
+  --hide-scrollbars --screenshot="<caminho>\shot.png" --window-size=900,<altura> `
+  --virtual-time-budget=15000 "file:///<caminho>/<nome>_render.html"
+```
+
+`<altura>` = maior `y + height` do .drawio + ~60 (evita sobra branca). Conferir:
+textos sem corte, setas ligadas nas figuras certas, rotulos S/N visiveis.
 
 ## Exportar PDF
 
 Como o export do draw.io: pagina A4, diagrama no TAMANHO NATURAL (sem escala,
-fonte legivel) e fluxo quebrando em quantas paginas forem necessarias (tipicamente 2):
+fonte legivel) e fluxo quebrando em quantas paginas forem necessarias (tipicamente 2).
+O `_render.html` gerado ja inclui `@page A4`, margens zero e centralizacao
+automatica quando o SVG carrega — nao e preciso injetar estilo/transform de novo.
 
-```js
-await wait(6000); // aguarda o viewer carregar o SVG
-await tab.evaluate(() => {
-  const st = document.createElement('style');
-  st.textContent = '@page { size: A4 portrait; margin: 0; } body { margin: 0; padding: 0; }';
-  document.head.appendChild(st);
-  const d = document.querySelector('.mxgraph');
-  const r = d.getBoundingClientRect();
-  const delta = (793.7 - r.width) / 2 - r.left; // centraliza na largura da A4
-  d.style.transform = 'translateX(' + delta.toFixed(1) + 'px)';
-});
-await tab.pdf({ path: '<caminho>/<nome>.pdf' });
+Opcao A — browser tool com `tab.pdf` (se disponivel): abrir o render, aguardar o
+viewer carregar (~6s) e chamar `tab.pdf({ path: '<caminho>/<nome>.pdf' })`.
+
+Opcao B — Chrome/Edge headless (Windows):
+
+```powershell
+& "C:\Program Files\Google\Chrome\Application\chrome.exe" --headless --disable-gpu `
+  --no-pdf-header-footer --virtual-time-budget=15000 `
+  --print-to-pdf="<caminho>\<nome>.pdf" "file:///<caminho>/<nome>_render.html"
 ```
 
-Verificar: `/Count 2` no PDF (2 paginas). NAO escalar o diagrama nem gerar
-pagina unica do tamanho do diagrama — o texto fica miudo e a visibilidade cai.
+Verificar: `/Count N` no PDF e tamanho do arquivo compativel com o conteudo
+(ex.: 30-40 KB por fluxograma; um PDF vazio fica ~14 KB). NAO escalar o diagrama
+nem gerar pagina unica do tamanho do diagrama — o texto fica miudo e a
+visibilidade cai.
 
-Depois limpar os temporarios (`fluxo_render.html`, screenshots) e manter apenas
+Depois limpar os temporarios (`<nome>_render.html`, screenshots) e manter apenas
 `<nome>.drawio` e `<nome>.pdf` junto ao projeto.
 
 ## Observacoes
@@ -109,5 +162,5 @@ Depois limpar os temporarios (`fluxo_render.html`, screenshots) e manter apenas
 - XML do draw.io: `<mxfile>` > `<diagram>` > `<mxGraphModel ... pageWidth="827" pageHeight="1169">` > `<root>` com `<mxCell id="0"/>`, `<mxCell id="1" parent="0"/>` e as celulas.
 - `value` com HTML usa entidades (`&lt;b&gt;inicio&lt;/b&gt;`).
 - Arquivo gerado sem BOM; o draw.io abre normalmente.
-- Se o projeto mudar muito, ajuste a tabela `seq` no JSON de especificacao —
-  o script nao precisa ser editado.
+- Se o projeto mudar muito, ajuste as figuras no JSON de especificacao (formato
+  legado ou v2) — o script nao precisa ser editado.

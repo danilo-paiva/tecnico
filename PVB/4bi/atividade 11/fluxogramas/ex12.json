@@ -1,0 +1,19 @@
+{
+  "nome": "fluxograma",
+  "nos": [
+    {"id": "i", "tipo": "inicio", "x": 363, "y": 20, "l": 100},
+    {"id": "a", "tipo": "input", "texto": "validade (MM/yy)", "x": 343, "y": 120, "l": 140},
+    {"id": "d", "tipo": "decision", "texto": "formato MM/yy valido?", "x": 303, "y": 220, "l": 220},
+    {"id": "o1", "tipo": "display", "texto": "validade", "x": 338, "y": 360, "l": 150},
+    {"id": "o2", "tipo": "display", "texto": "erro: formato invalido", "x": 585, "y": 230, "l": 220},
+    {"id": "f", "tipo": "fim", "x": 363, "y": 460, "l": 100}
+  ],
+  "arestas": [
+    {"de": "i", "para": "a"},
+    {"de": "a", "para": "d"},
+    {"de": "d", "para": "o1", "rotulo": "S"},
+    {"de": "d", "para": "o2", "rotulo": "N", "saida": "dir", "entrada": "esq"},
+    {"de": "o2", "para": "a", "saida": "cima", "pontos": [[695, 80], [540, 80], [540, 150]], "entrada": "dir"},
+    {"de": "o1", "para": "f"}
+  ]
+}

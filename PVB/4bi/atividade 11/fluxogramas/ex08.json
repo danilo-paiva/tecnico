@@ -1,0 +1,12 @@
+{
+  "nome": "fluxograma",
+  "nos": [
+    ["inicio", "", 100],
+    ["input", "data", 80],
+    ["proc", "primeiro = primeiro dia do mes", 230],
+    ["proc", "ultimo = ultimo dia do mes", 205],
+    ["display", "primeiro", 150],
+    ["display", "ultimo", 150],
+    ["fim", "", 100]
+  ]
+}

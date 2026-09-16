@@ -1,0 +1,11 @@
+{
+  "nome": "fluxograma",
+  "nos": [
+    ["inicio", "", 100],
+    ["proc", "hoje = data atual", 150],
+    ["proc", "fimAno = 31/12/ano(hoje)", 200],
+    ["proc", "dias = fimAno - hoje", 170],
+    ["display", "dias", 150],
+    ["fim", "", 100]
+  ]
+}

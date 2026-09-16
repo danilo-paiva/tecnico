@@ -1,0 +1,65 @@
+Atividade 11 - DateTime (C#)
+
+Exercicio de Fixacao
+Fazer o fluxograma de todos os exercicios.
+
+Iniciante
+1. Data e Hora Atuais
+Crie um programa que exiba a data e a hora atuais no console nos seguintes formatos:
+Formatado: dd/MM/yyyy HH:mm:ss
+Apenas a data: dd/MM/yyyy
+Apenas a hora: HH:mm
+
+2. Criando uma Data Especifica
+Instancie um objeto DateTime representando o dia 25 de Dezembro de 2026 as 20:00.
+Imprima o dia da semana correspondente a essa data em ingles e/ou portugues.
+
+3. Adicionando e Subtraindo Dias
+Receba do usuario uma data no formato dd/MM/yyyy. Calcule e exiba no console:
+A data de exatamente 15 dias depois.
+A data de exatamente 45 dias antes.
+
+4. Extracao de Componentes
+Peca para o usuario digitar a data e hora do seu nascimento. O programa deve extrair e exibir separadamente:
+Ano
+Mes (por extenso)
+Dia do mes
+Hora e Minuto
+
+5. Verificacao de Ano Bissexto
+Escreva um programa que peca ao usuario para digitar um ano (ex: 2024 ou 2026) e informe
+se o ano digitado e bissexto ou nao utilizando o metodo DateTime.IsLeapYear.
+
+Intermediario
+6. Calculando a Idade Exata
+Crie um programa que receba a data de nascimento do usuario e informe a idade exata em anos.
+Dica: Lembre-se de verificar se o usuario ja fez aniversario no ano atual.
+
+7. Diferenca Entre Datas (TimeSpan)
+Peca duas datas ao usuario: o inicio e o fim de um projeto. Calcule e exiba a duracao total entre essas datas em:
+Total de dias
+Total de horas
+
+8. Primeiro e Ultimo Dia do Mes
+Dada uma data fornecida pelo usuario, crie uma funcao que retorne o primeiro dia e o ultimo dia do mes dessa data.
+
+9. Quantos Dias Faltam para o Fim do Ano?
+Escreva um metodo que calcule e informe quantos dias restam entre a data atual e o dia 31 de dezembro do ano corrente.
+
+10. Comparacao de Datas
+Solicite duas datas ao usuario. O programa deve dizer qual data e mais recente ou se ambas sao identicas.
+
+Avancado
+11. Contagem de Dias Uteis
+Crie um programa que receba uma data inicial e um numero de dias uteis (ex: 10 dias uteis).
+O programa deve calcular a data final desconsiderando sabados e domingos.
+
+12. Validacao e TryParseExact
+Crie um metodo de validacao de entrada de dados que solicite a data de validade de um cartao de
+credito no formato estrito MM/yy. Use DateTime.TryParseExact e exiba uma mensagem de erro ate que
+o usuario digite um formato valido.
+
+13. Calculadora de Pagamento (Prazo de Vencimento)
+Uma empresa emite faturas que vencem sempre no dia 10 do mes seguinte ao da emissao. Se o dia 10
+cair em um fim de semana (sabado ou domingo), o vencimento deve ser adiado para a proxima segunda-feira.
+Escreva uma funcao que receba a data de emissao de uma fatura e determine a data exata do vencimento.
