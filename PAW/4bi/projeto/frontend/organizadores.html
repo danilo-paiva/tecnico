@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <title>Organizadores · Pulse Eventos</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="organizadores">
+    <div id="app"></div>
+
+    <template id="conteudo">
+        <div class="page-head">
+            <div>
+                <h2>Equipe de organizadores</h2>
+                <p>Quem pode criar eventos e lotes. Perfis definem permissões.</p>
+            </div>
+            <div class="actions">
+                <button type="button" class="btn btn-accent" id="btnNovo">+ Novo organizador</button>
+            </div>
+        </div>
+
+        <section class="card" style="margin-bottom:18px">
+            <div class="card-body">
+                <form class="filters" id="formFiltros">
+                    <div class="field">
+                        <label for="fNome">Nome</label>
+                        <input class="input" id="fNome" type="text" placeholder="Buscar por nome">
+                    </div>
+                    <div class="field">
+                        <label for="fEmail">E-mail</label>
+                        <input class="input" id="fEmail" type="text" placeholder="Buscar por e-mail">
+                    </div>
+                    <div class="field">
+                        <label for="fPerfil">Perfil</label>
+                        <select class="select" id="fPerfil">
+                            <option value="">Todos</option>
+                            <option value="administrador">Administrador</option>
+                            <option value="comum">Comum</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label aria-hidden="true">&nbsp;</label>
+                        <div class="actions">
+                            <button class="btn btn-primary" type="submit">Filtrar</button>
+                            <button class="btn" type="button" id="btnLimpar">Limpar</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="card-head">
+                <h3>Organizadores cadastrados</h3>
+                <small id="contador">—</small>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Organizador</th>
+                            <th>Contato</th>
+                            <th>Perfil</th>
+                            <th>Criado em</th>
+                            <th style="text-align:right">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody"></tbody>
+                </table>
+            </div>
+            <p class="table-scroll-hint">Deslize a tabela para o lado para ver todas as colunas.</p>
+        </section>
+
+        <p class="footer-note">
+            Endpoint: <code>GET /api/v1/organizadores?nome=&amp;email=&amp;perfil=</code> · exclusão restrita a administradores.
+        </p>
+
+        <div class="modal" id="modalForm" aria-hidden="true">
+            <div class="modal-backdrop" data-fechar></div>
+            <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
+                <div class="modal-head">
+                    <div>
+                        <h3 id="modalTitulo">Novo organizador</h3>
+                        <p id="modalDescricao">Cadastre alguém para operar os eventos.</p>
+                    </div>
+                    <button type="button" class="modal-close" data-fechar aria-label="Fechar">✕</button>
+                </div>
+                <form id="formOrganizador" novalidate>
+                    <div class="modal-body">
+                        <input type="hidden" id="idOrganizador">
+
+                        <div class="field">
+                            <label for="nome">Nome completo</label>
+                            <input class="input" id="nome" type="text" placeholder="Ex.: Ana Souza" minlength="3" maxlength="120" required>
+                        </div>
+
+                        <div class="grid-2">
+                            <div class="field">
+                                <label for="email">E-mail</label>
+                                <input class="input" id="email" type="email" placeholder="nome@email.com" maxlength="150" required>
+                            </div>
+                            <div class="field">
+                                <label for="telefone">Telefone</label>
+                                <input class="input" id="telefone" type="text" placeholder="(47) 99999-0000" maxlength="20">
+                            </div>
+                        </div>
+
+                        <div class="grid-2">
+                            <div class="field">
+                                <label for="perfil">Perfil</label>
+                                <select class="select" id="perfil">
+                                    <option value="comum">Comum</option>
+                                    <option value="administrador">Administrador</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label for="senha">Senha</label>
+                                <input class="input" id="senha" type="password" placeholder="Mínimo 6 caracteres" minlength="6" maxlength="72" autocomplete="new-password">
+                                <span class="hint" id="dicaSenha">Obrigatória no cadastro.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-foot">
+                        <button type="button" class="btn" data-fechar>Cancelar</button>
+                        <button type="submit" class="btn btn-accent" id="btnSalvar">Salvar organizador</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </template>
+
+    <script src="js/ApiService.js"></script>
+    <script src="js/sessao.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/paginas/organizadores.js"></script>
+</body>
+</html>

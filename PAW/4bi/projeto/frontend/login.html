@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <title>Entrar · Pulse Eventos</title>
+    <meta name="description" content="Painel de gestão de eventos — PAW 4º bimestre">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="login-page">
+        <aside class="login-aside">
+            <div class="login-brand">
+                <span class="brand-mark">P</span>
+                <span class="brand-text">pulse<small>eventos</small></span>
+            </div>
+
+            <div class="login-hero">
+                <p class="kicker">REST API · MVCS · JWT</p>
+                <h1>Organize eventos com <em>duas APIs</em> e um painel só.</h1>
+                <p>
+                    Mesmo frontend, mesmo contrato: alterne entre a API em
+                    <strong>Node.js</strong> e a API em <strong>Flask</strong> e continue de onde parou.
+                    Organizadores, eventos e lotes — com autenticação por token.
+                </p>
+            </div>
+
+            <div class="login-aside-foot">
+                <span>PAW · 4º bimestre</span>
+                <div class="segmented" id="seletorApi" aria-label="Selecionar API">
+                    <button type="button" data-api="js">Node</button>
+                    <button type="button" data-api="flask">Flask</button>
+                </div>
+            </div>
+        </aside>
+
+        <main class="login-main">
+            <div class="login-box">
+                <h2 id="tituloAcao">Entrar no painel</h2>
+                <p id="subtituloAcao">Use uma conta de organizador para acessar o painel.</p>
+
+                <div class="tabs" id="tabsAuth">
+                    <button type="button" data-modo="login" class="active">Entrar</button>
+                    <button type="button" data-modo="registrar">Criar conta</button>
+                </div>
+
+                <form class="login-form" id="formAuth" novalidate>
+                    <div class="field" id="campoNome" hidden>
+                        <label for="nome">Nome completo</label>
+                        <input class="input" id="nome" name="nome" type="text" placeholder="Seu nome" autocomplete="name">
+                    </div>
+
+                    <div class="field">
+                        <label for="email">E-mail</label>
+                        <input class="input" id="email" name="email" type="email" placeholder="voce@email.com" autocomplete="email" required>
+                    </div>
+
+                    <div class="field" id="campoTelefone" hidden>
+                        <label for="telefone">Telefone <span class="hint" style="text-transform:none;letter-spacing:0">(opcional)</span></label>
+                        <input class="input" id="telefone" name="telefone" type="text" placeholder="(47) 99999-0000" autocomplete="tel">
+                    </div>
+
+                    <div class="field">
+                        <label for="senha">Senha</label>
+                        <input class="input" id="senha" name="senha" type="password" placeholder="Mínimo de 6 caracteres" autocomplete="current-password" required>
+                    </div>
+
+                    <div class="form-msg" id="mensagem"></div>
+
+                    <button class="btn btn-accent" type="submit" id="btnEnviar">Entrar</button>
+                </form>
+
+                <div class="login-hint">
+                    <strong>Conta de demonstração</strong><br>
+                    Administrador: <code>ana@email.com</code> · senha <code>123456</code><br>
+                    Comum: <code>bruno@email.com</code> · senha <code>123456</code><br>
+                    API selecionada: <b id="apiEscolhida">—</b>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/ApiService.js"></script>
+    <script src="js/sessao.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/login.js"></script>
+</body>
+</html>

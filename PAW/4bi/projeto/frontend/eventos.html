@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <title>Eventos · Pulse Eventos</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="eventos">
+    <div id="app"></div>
+
+    <template id="conteudo">
+        <div class="page-head">
+            <div>
+                <h2>Agenda de eventos</h2>
+                <p>Cadastre, filtre e acompanhe os eventos de cada organizador.</p>
+            </div>
+            <div class="actions">
+                <button type="button" class="btn btn-accent" id="btnNovo">+ Novo evento</button>
+            </div>
+        </div>
+
+        <section class="card" style="margin-bottom:18px">
+            <div class="card-body">
+                <form class="filters" id="formFiltros">
+                    <div class="field">
+                        <label for="fTitulo">Título</label>
+                        <input class="input" id="fTitulo" type="text" placeholder="Buscar por título">
+                    </div>
+                    <div class="field">
+                        <label for="fStatus">Status</label>
+                        <select class="select" id="fStatus">
+                            <option value="">Todos</option>
+                            <option value="planejado">Planejado</option>
+                            <option value="confirmado">Confirmado</option>
+                            <option value="realizado">Realizado</option>
+                            <option value="cancelado">Cancelado</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="fOrganizador">Organizador</label>
+                        <select class="select" id="fOrganizador">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="fDe">De</label>
+                        <input class="input" id="fDe" type="date">
+                    </div>
+                    <div class="field">
+                        <label for="fAte">Até</label>
+                        <input class="input" id="fAte" type="date">
+                    </div>
+                    <div class="field">
+                        <label aria-hidden="true">&nbsp;</label>
+                        <div class="actions">
+                            <button class="btn btn-primary" type="submit">Filtrar</button>
+                            <button class="btn" type="button" id="btnLimpar">Limpar</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="card-head">
+                <h3>Todos os eventos</h3>
+                <small id="contador">—</small>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Evento</th>
+                            <th>Data</th>
+                            <th>Organizador</th>
+                            <th>Status</th>
+                            <th style="text-align:right">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody"></tbody>
+                </table>
+            </div>
+            <p class="table-scroll-hint">Deslize a tabela para o lado para ver todas as colunas.</p>
+        </section>
+
+        <p class="footer-note">
+            Endpoint: <code>GET /api/v1/eventos?titulo=&amp;status=&amp;idOrganizador=&amp;de=&amp;ate=</code>
+        </p>
+
+        <div class="modal" id="modalForm" aria-hidden="true">
+            <div class="modal-backdrop" data-fechar></div>
+            <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
+                <div class="modal-head">
+                    <div>
+                        <h3 id="modalTitulo">Novo evento</h3>
+                        <p id="modalDescricao">Eventos precisam de data futura e organizador existente.</p>
+                    </div>
+                    <button type="button" class="modal-close" data-fechar aria-label="Fechar">✕</button>
+                </div>
+                <form id="formEvento" novalidate>
+                    <div class="modal-body">
+                        <input type="hidden" id="idEvento">
+
+                        <div class="field">
+                            <label for="titulo">Título</label>
+                            <input class="input" id="titulo" type="text" placeholder="Ex.: Semana de Tecnologia 2027" minlength="3" maxlength="150" required>
+                        </div>
+
+                        <div class="field">
+                            <label for="descricao">Descrição</label>
+                            <textarea class="input" id="descricao" placeholder="O que acontece neste evento?" maxlength="2000"></textarea>
+                        </div>
+
+                        <div class="grid-2">
+                            <div class="field">
+                                <label for="dataEvento">Data e hora</label>
+                                <input class="input" id="dataEvento" type="datetime-local" required>
+                            </div>
+                            <div class="field">
+                                <label for="status">Status</label>
+                                <select class="select" id="status">
+                                    <option value="planejado">Planejado</option>
+                                    <option value="confirmado">Confirmado</option>
+                                    <option value="realizado">Realizado</option>
+                                    <option value="cancelado">Cancelado</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label for="organizador">Organizador responsável</label>
+                            <select class="select" id="organizador" required></select>
+                            <span class="hint" id="dicaOrganizador"></span>
+                        </div>
+                    </div>
+                    <div class="modal-foot">
+                        <button type="button" class="btn" data-fechar>Cancelar</button>
+                        <button type="submit" class="btn btn-accent" id="btnSalvar">Salvar evento</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </template>
+
+    <script src="js/ApiService.js"></script>
+    <script src="js/sessao.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/paginas/eventos.js"></script>
+</body>
+</html>

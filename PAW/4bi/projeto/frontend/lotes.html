@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <title>Lotes · Pulse Eventos</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="lotes">
+    <div id="app"></div>
+
+    <template id="conteudo">
+        <div class="page-head">
+            <div>
+                <h2>Catálogo de lotes</h2>
+                <p>Preço, quantidade e disponibilidade de cada lote por evento.</p>
+            </div>
+            <div class="actions">
+                <button type="button" class="btn btn-accent" id="btnNovo">+ Novo lote</button>
+            </div>
+        </div>
+
+        <section class="card" style="margin-bottom:18px">
+            <div class="card-body">
+                <form class="filters" id="formFiltros">
+                    <div class="field">
+                        <label for="fNome">Lote</label>
+                        <input class="input" id="fNome" type="text" placeholder="Buscar por nome">
+                    </div>
+                    <div class="field">
+                        <label for="fEvento">Evento</label>
+                        <select class="select" id="fEvento">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="fPrecoMin">Preço mínimo</label>
+                        <input class="input" id="fPrecoMin" type="number" min="0" step="0.01" placeholder="0,00">
+                    </div>
+                    <div class="field">
+                        <label for="fPrecoMax">Preço máximo</label>
+                        <input class="input" id="fPrecoMax" type="number" min="0" step="0.01" placeholder="999,99">
+                    </div>
+                    <div class="field">
+                        <label aria-hidden="true">&nbsp;</label>
+                        <div class="actions">
+                            <button class="btn btn-primary" type="submit">Filtrar</button>
+                            <button class="btn" type="button" id="btnLimpar">Limpar</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="card-head">
+                <h3>Lotes cadastrados</h3>
+                <small id="contador">—</small>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Lote</th>
+                            <th>Evento</th>
+                            <th>Preço</th>
+                            <th>Disponibilidade</th>
+                            <th style="text-align:right">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody"></tbody>
+                </table>
+            </div>
+            <p class="table-scroll-hint">Deslize a tabela para o lado para ver todas as colunas.</p>
+        </section>
+
+        <p class="footer-note">
+            Endpoint: <code>GET /api/v1/lotes?nome=&amp;idEvento=&amp;precoMin=&amp;precoMax=</code>
+        </p>
+
+        <div class="modal" id="modalForm" aria-hidden="true">
+            <div class="modal-backdrop" data-fechar></div>
+            <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
+                <div class="modal-head">
+                    <div>
+                        <h3 id="modalTitulo">Novo lote</h3>
+                        <p id="modalDescricao">O lote pertence a um evento e não pode repetir o nome nele.</p>
+                    </div>
+                    <button type="button" class="modal-close" data-fechar aria-label="Fechar">✕</button>
+                </div>
+                <form id="formLote" novalidate>
+                    <div class="modal-body">
+                        <input type="hidden" id="idLote">
+
+                        <div class="field">
+                            <label for="nome">Nome do lote</label>
+                            <input class="input" id="nome" type="text" placeholder="Ex.: 1º lote, Pista, VIP" minlength="2" maxlength="80" required>
+                        </div>
+
+                        <div class="field">
+                            <label for="evento">Evento</label>
+                            <select class="select" id="evento" required></select>
+                            <span class="hint" id="dicaEvento"></span>
+                        </div>
+
+                        <div class="grid-2">
+                            <div class="field">
+                                <label for="preco">Preço (R$)</label>
+                                <input class="input" id="preco" type="number" min="0" step="0.01" placeholder="0,00" required>
+                            </div>
+                            <div class="field">
+                                <label for="quantidadeTotal">Quantidade total</label>
+                                <input class="input" id="quantidadeTotal" type="number" min="1" step="1" placeholder="100" required>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label for="quantidadeDisponivel">Quantidade disponível</label>
+                            <input class="input" id="quantidadeDisponivel" type="number" min="0" step="1" placeholder="Padrão: igual à total">
+                            <span class="hint">Não pode ser maior que a quantidade total.</span>
+                        </div>
+                    </div>
+                    <div class="modal-foot">
+                        <button type="button" class="btn" data-fechar>Cancelar</button>
+                        <button type="submit" class="btn btn-accent" id="btnSalvar">Salvar lote</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </template>
+
+    <script src="js/ApiService.js"></script>
+    <script src="js/sessao.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/paginas/lotes.js"></script>
+</body>
+</html>

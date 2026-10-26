@@ -1,0 +1,716 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-10-26T11:18:02.964Z",
+  "__export_source": "insomnia.desktop.app:v2023.5.8",
+  "resources": [
+    {
+      "_id": "wrk_paw4bi",
+      "parentId": null,
+      "modified": 1793013482964,
+      "created": 1793013482964,
+      "name": "PAW 4bi - Eventos (Node.js + Flask)",
+      "description": "Mesmo contrato nas duas APIs. Troque o ambiente (Ctrl+E) entre Node (3000) e Flask (8080).",
+      "scope": "collection",
+      "_type": "workspace"
+    },
+    {
+      "_id": "env_node",
+      "parentId": "wrk_paw4bi",
+      "modified": 1793013482964,
+      "created": 1793013482964,
+      "name": "Node (3000)",
+      "data": {
+        "base_url": "http://localhost:3000/api/v1",
+        "token": ""
+      },
+      "dataPropertyOrder": {
+        "&": [
+          "base_url",
+          "token"
+        ]
+      },
+      "color": "#7d69cb",
+      "isPrivate": false,
+      "metaSortKey": 1,
+      "_type": "environment"
+    },
+    {
+      "_id": "env_flask",
+      "parentId": "wrk_paw4bi",
+      "modified": 1793013482964,
+      "created": 1793013482964,
+      "name": "Flask (8080)",
+      "data": {
+        "base_url": "http://localhost:8080/api/v1",
+        "token": ""
+      },
+      "dataPropertyOrder": {
+        "&": [
+          "base_url",
+          "token"
+        ]
+      },
+      "color": "#3fa66b",
+      "isPrivate": false,
+      "metaSortKey": 2,
+      "_type": "environment"
+    },
+    {
+      "_id": "fld_auth",
+      "parentId": "wrk_paw4bi",
+      "modified": 1793013482964,
+      "created": 1793013482964,
+      "name": "Auth",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_login_admin",
+      "parentId": "fld_auth",
+      "modified": 1793013482964,
+      "created": 1793013482964,
+      "url": "{{ _.base_url }}/auth/login",
+      "name": "Login (admin ana@email.com)",
+      "description": "Copie o token da resposta para a variável de ambiente 'token'.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"organizador\": {\n    \"email\": \"ana@email.com\",\n    \"senha\": \"123456\"\n  }\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1010,
+      "isPrivate": false,
+      "settingStoreCookies": false,
+      "settingSendCookies": false,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_login_comum",
+      "parentId": "fld_auth",
+      "modified": 1793013482964,
+      "created": 1793013482964,
+      "url": "{{ _.base_url }}/auth/login",
+      "name": "Login (comum bruno@email.com)",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"organizador\": {\n    \"email\": \"bruno@email.com\",\n    \"senha\": \"123456\"\n  }\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1020,
+      "isPrivate": false,
+      "settingStoreCookies": false,
+      "settingSendCookies": false,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_registrar",
+      "parentId": "fld_auth",
+      "modified": 1793013482964,
+      "created": 1793013482964,
+      "url": "{{ _.base_url }}/auth/registrar",
+      "name": "Registrar (cadastro público, perfil comum)",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"organizador\": {\n    \"nome\": \"Novo Usuario\",\n    \"email\": \"novo@email.com\",\n    \"senha\": \"123456\",\n    \"telefone\": \"(47) 91234-5678\"\n  }\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1030,
+      "isPrivate": false,
+      "settingStoreCookies": false,
+      "settingSendCookies": false,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_perfil",
+      "parentId": "fld_auth",
+      "modified": 1793013482964,
+      "created": 1793013482964,
+      "url": "{{ _.base_url }}/auth/perfil",
+      "name": "Perfil do token",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": ""
+      },
+      "metaSortKey": -1040,
+      "isPrivate": false,
+      "settingStoreCookies": false,
+      "settingSendCookies": false,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_organizadores",
+      "parentId": "wrk_paw4bi",
+      "modified": 1793013482964,
+      "created": 1793013482964,
+      "name": "Organizadores",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -900,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_org_listar",
+      "parentId": "fld_organizadores",
+      "modified": 1793013482964,
+      "created": 1793013482964,
+      "url": "{{ _.base_url }}/organizadores?nome=&email=&perfil=",
+      "name": "Listar com filtros (nome, email, perfil)",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": ""
+      },
+      "metaSortKey": -1050,
+      "isPrivate": false,
+      "settingStoreCookies": false,
+      "settingSendCookies": false,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_org_buscar",
+      "parentId": "fld_organizadores",
+      "modified": 1793013482964,
+      "created": 1793013482964,
+      "url": "{{ _.base_url }}/organizadores/1",
+      "name": "Buscar por id",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": ""
+      },
+      "metaSortKey": -1060,
+      "isPrivate": false,
+      "settingStoreCookies": false,
+      "settingSendCookies": false,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_org_criar",
+      "parentId": "fld_organizadores",
+      "modified": 1793013482964,
+      "created": 1793013482964,
+      "url": "{{ _.base_url }}/organizadores",
+      "name": "Criar (admin)",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"organizador\": {\n    \"nome\": \"Diego Alves\",\n    \"email\": \"diego@email.com\",\n    \"senha\": \"123456\",\n    \"telefone\": \"(47) 90000-1111\",\n    \"perfil\": \"comum\"\n  }\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": ""
+      },
+      "metaSortKey": -1070,
+      "isPrivate": false,
+      "settingStoreCookies": false,
+      "settingSendCookies": false,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_org_atualizar",
+      "parentId": "fld_organizadores",
+      "modified": 1793013482964,
+      "created": 1793013482964,
+      "url": "{{ _.base_url }}/organizadores/1",
+      "name": "Atualizar (admin ou o próprio)",
+      "description": "",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"organizador\": {\n    \"nome\": \"Ana Souza\",\n    \"email\": \"ana@email.com\",\n    \"telefone\": \"(47) 99911-2233\",\n    \"perfil\": \"administrador\"\n  }\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": ""
+      },
+      "metaSortKey": -1080,
+      "isPrivate": false,
+      "settingStoreCookies": false,
+      "settingSendCookies": false,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_org_excluir",
+      "parentId": "fld_organizadores",
+      "modified": 1793013482964,
+      "created": 1793013482964,
+      "url": "{{ _.base_url }}/organizadores/4",
+      "name": "Excluir (admin, sem eventos)",
+      "description": "O seed tem os ids 1-3 (todos com eventos, respondem 409). Crie um organizador antes de testar a exclusão com sucesso.",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": ""
+      },
+      "metaSortKey": -1090,
+      "isPrivate": false,
+      "settingStoreCookies": false,
+      "settingSendCookies": false,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_eventos",
+      "parentId": "wrk_paw4bi",
+      "modified": 1793013482964,
+      "created": 1793013482964,
+      "name": "Eventos",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -800,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_ev_listar",
+      "parentId": "fld_eventos",
+      "modified": 1793013482964,
+      "created": 1793013482964,
+      "url": "{{ _.base_url }}/eventos?titulo=&status=confirmado&idOrganizador=&de=&ate=",
+      "name": "Listar com filtros (titulo, status, organizador, período)",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": ""
+      },
+      "metaSortKey": -1100,
+      "isPrivate": false,
+      "settingStoreCookies": false,
+      "settingSendCookies": false,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_ev_buscar",
+      "parentId": "fld_eventos",
+      "modified": 1793013482964,
+      "created": 1793013482964,
+      "url": "{{ _.base_url }}/eventos/1",
+      "name": "Buscar por id",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": ""
+      },
+      "metaSortKey": -1110,
+      "isPrivate": false,
+      "settingStoreCookies": false,
+      "settingSendCookies": false,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_ev_criar",
+      "parentId": "fld_eventos",
+      "modified": 1793013482964,
+      "created": 1793013482964,
+      "url": "{{ _.base_url }}/eventos",
+      "name": "Criar",
+      "description": "Data no passado responde 400; título repetido na mesma data/hora responde 409.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"evento\": {\n    \"titulo\": \"Workshop de Testes\",\n    \"descricao\": \"Criado pelo Insomnia\",\n    \"dataEvento\": \"2027-09-10T19:30\",\n    \"status\": \"planejado\",\n    \"idOrganizador\": 1\n  }\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": ""
+      },
+      "metaSortKey": -1120,
+      "isPrivate": false,
+      "settingStoreCookies": false,
+      "settingSendCookies": false,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_ev_atualizar",
+      "parentId": "fld_eventos",
+      "modified": 1793013482964,
+      "created": 1793013482964,
+      "url": "{{ _.base_url }}/eventos/1",
+      "name": "Atualizar",
+      "description": "PUT aceita atualização parcial. Atenção: altera o evento do seed.",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"evento\": {\n    \"status\": \"realizado\"\n  }\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": ""
+      },
+      "metaSortKey": -1130,
+      "isPrivate": false,
+      "settingStoreCookies": false,
+      "settingSendCookies": false,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_ev_excluir",
+      "parentId": "fld_eventos",
+      "modified": 1793013482964,
+      "created": 1793013482964,
+      "url": "{{ _.base_url }}/eventos/1",
+      "name": "Excluir",
+      "description": "Evento com lotes responde 409: exclua os lotes primeiro. Para excluir com sucesso, use um evento sem lotes.",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": ""
+      },
+      "metaSortKey": -1140,
+      "isPrivate": false,
+      "settingStoreCookies": false,
+      "settingSendCookies": false,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_lotes",
+      "parentId": "wrk_paw4bi",
+      "modified": 1793013482964,
+      "created": 1793013482964,
+      "name": "Lotes",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -700,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_lote_listar",
+      "parentId": "fld_lotes",
+      "modified": 1793013482964,
+      "created": 1793013482964,
+      "url": "{{ _.base_url }}/lotes?nome=&idEvento=&precoMin=&precoMax=100",
+      "name": "Listar com filtros (nome, evento, preço)",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": ""
+      },
+      "metaSortKey": -1150,
+      "isPrivate": false,
+      "settingStoreCookies": false,
+      "settingSendCookies": false,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_lote_buscar",
+      "parentId": "fld_lotes",
+      "modified": 1793013482964,
+      "created": 1793013482964,
+      "url": "{{ _.base_url }}/lotes/1",
+      "name": "Buscar por id",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": ""
+      },
+      "metaSortKey": -1160,
+      "isPrivate": false,
+      "settingStoreCookies": false,
+      "settingSendCookies": false,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_lote_criar",
+      "parentId": "fld_lotes",
+      "modified": 1793013482964,
+      "created": 1793013482964,
+      "url": "{{ _.base_url }}/lotes",
+      "name": "Criar (disponível = total quando omitido)",
+      "description": "quantidadeDisponivel maior que quantidadeTotal responde 400.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"lote\": {\n    \"nome\": \"Lote Insomnia\",\n    \"preco\": 120.5,\n    \"quantidadeTotal\": 80,\n    \"idEvento\": 1\n  }\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": ""
+      },
+      "metaSortKey": -1170,
+      "isPrivate": false,
+      "settingStoreCookies": false,
+      "settingSendCookies": false,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_lote_atualizar",
+      "parentId": "fld_lotes",
+      "modified": 1793013482964,
+      "created": 1793013482964,
+      "url": "{{ _.base_url }}/lotes/1",
+      "name": "Atualizar",
+      "description": "Atenção: altera o lote do seed (preço e quantidade disponível).",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"lote\": {\n    \"nome\": \"1º lote\",\n    \"preco\": 95,\n    \"quantidadeTotal\": 200,\n    \"quantidadeDisponivel\": 180,\n    \"idEvento\": 1\n  }\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": ""
+      },
+      "metaSortKey": -1180,
+      "isPrivate": false,
+      "settingStoreCookies": false,
+      "settingSendCookies": false,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_lote_excluir",
+      "parentId": "fld_lotes",
+      "modified": 1793013482964,
+      "created": 1793013482964,
+      "url": "{{ _.base_url }}/lotes/1",
+      "name": "Excluir",
+      "description": "",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": ""
+      },
+      "metaSortKey": -1190,
+      "isPrivate": false,
+      "settingStoreCookies": false,
+      "settingSendCookies": false,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_sistema",
+      "parentId": "wrk_paw4bi",
+      "modified": 1793013482964,
+      "created": 1793013482964,
+      "name": "Sistema",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -600,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_health",
+      "parentId": "fld_sistema",
+      "modified": 1793013482964,
+      "created": 1793013482964,
+      "url": "{{ _.base_url }}/health",
+      "name": "Health check (API + banco)",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1200,
+      "isPrivate": false,
+      "settingStoreCookies": false,
+      "settingSendCookies": false,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    }
+  ]
+}
