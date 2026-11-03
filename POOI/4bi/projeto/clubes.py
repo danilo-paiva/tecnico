@@ -48,13 +48,3 @@ def identidade(nome, indice=0):
     return (cor, '#FFFFFF', nome)
 
 
-def cor_de_fundo(cor):
-    """Escolhe preto ou branco para o texto ficar legível sobre a cor."""
-    cor = cor.lstrip('#')
-    r = int(cor[0:2], 16) / 255
-    g = int(cor[2:4], 16) / 255
-    b = int(cor[4:6], 16) / 255
-    brilho = 0.2126 * r + 0.7152 * g + 0.0722 * b
-    if brilho > 0.62:
-        return '#111111'
-    return '#FFFFFF'

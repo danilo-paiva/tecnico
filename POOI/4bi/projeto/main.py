@@ -9,21 +9,28 @@ ARQUIVO_HTML = 'classificacao.html'
 
 
 def escolher_planilha():
-    caminho = input(f'Planilha (.xlsx) [Enter = {PLANILHA_EXEMPLO}]: ').strip().strip('"')
+    caminho = input(f'Planilha (.xlsx) [Enter = {PLANILHA_EXEMPLO}]: ').strip()
+    caminho = caminho.replace('"', '')
     if caminho == '':
         caminho = PLANILHA_EXEMPLO
     return caminho
 
 
 def gerar_pagina_web(tabela):
-    pagina_web.gerar_pagina(tabela, ARQUIVO_HTML)
-    print(f'Página web criada: {ARQUIVO_HTML}')
+    try:
+        pagina_web.gerar_pagina(tabela, ARQUIVO_HTML)
+        print(f'Página web criada: {ARQUIVO_HTML}')
+    except Exception as erro:
+        print(f'Erro ao gerar a página: {erro}')
 
 
 def gerar_pdf(tabela):
     print('Gerando o relatório em PDF...')
-    arquivos = relatorios.gerar_todos(tabela)
-    print(f'{len(arquivos)} relatório(s) gerado(s).')
+    try:
+        arquivos = relatorios.gerar_todos(tabela)
+        print(f'{len(arquivos)} relatório(s) gerado(s).')
+    except Exception as erro:
+        print(f'Erro ao gerar o PDF: {erro}')
 
 
 def mostrar_menu():
@@ -45,6 +52,9 @@ def modo_interativo():
         tabela = dados.ler_planilha(caminho)
     except Exception as erro:
         print(f'Erro ao ler a planilha: {erro}')
+        return
+
+    if tabela == {}:
         return
 
     print(f'\nPlanilha lida: {tabela["arquivo"]}')
@@ -70,5 +80,4 @@ def modo_interativo():
             print('Opção inválida. Digite 0, 1, 2, 3 ou 4.')
 
 
-if __name__ == '__main__':
-    modo_interativo()
+modo_interativo()

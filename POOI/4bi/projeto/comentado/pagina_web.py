@@ -1,15 +1,20 @@
 # -*- coding: utf-8 -*-
+# VERSÃO COMENTADA PARA ESTUDO — o código principal é o da pasta anterior.
 """
-VERSÃO COMENTADA — pagina_web.py
-O Python monta uma string com HTML/CSS e grava o arquivo classificacao.html
-com open(). A tabela é criada por montar_linhas() e a galeria por
-montar_galeria(). Não há framework web nem JavaScript.
+Página web do projeto.
+
+O Python lê a planilha, calcula a classificação e ESCREVE o arquivo .html
+(conteúdo do 4º bimestre: arquivos texto). O botão de PDF é apenas um link
+para o arquivo que o relatorios.py já gerou com o reportlab.
+
+A galeria usa apenas HTML e CSS: cada card mostra a paleta do relatório e o
+seu número. Nenhuma biblioteca externa de imagem é necessária.
 """
 
 import relatorios
 
 
-# Troca caracteres especiais para não quebrar o HTML.
+# Protege o HTML contra caracteres especiais.
 def escapar(texto):
     """Evita que um nome de time quebre o HTML."""
     texto = str(texto)
@@ -20,13 +25,17 @@ def escapar(texto):
     return texto
 
 
-# Formata números no padrão brasileiro (vírgula decimal).
+# Formata número com vírgula decimal.
 def numero_br(valor, casas=1):
     """Formata 71.05 como 71,1 (padrão brasileiro)."""
-    return f'{valor:.{casas}f}'.replace('.', ',')
+    if casas == 2:
+        return f'{valor:.2f}'.replace('.', ',')
+    if casas == 1:
+        return f'{valor:.1f}'.replace('.', ',')
+    return f'{valor:.0f}'.replace('.', ',')
 
 
-# Cria uma <tr> para cada time, com classes g4/z4/empatado.
+# Monta o <tbody>: uma linha por time.
 def montar_linhas(dados):
     """Monta o <tbody> da classificação."""
     linhas = []
@@ -62,7 +71,7 @@ def montar_linhas(dados):
     return '\n'.join(linhas)
 
 
-# Cria o card do relatório com link para o PDF.
+# Monta o card do único relatório.
 def montar_galeria():
     """Monta o cartão do relatório."""
     cartoes = []
@@ -87,21 +96,37 @@ def montar_galeria():
     return '\n'.join(cartoes)
 
 
-# Monta o HTML completo e grava com open(..., 'w', encoding='utf-8').
+# Monta o HTML completo e grava o arquivo texto.
 def gerar_pagina(dados, caminho_html):
     """Cria o arquivo .html da classificação e devolve o caminho."""
     lider = dados['lider']
-    segundo = dados['times'][1]
-    diferenca = lider['pontos'] - segundo['pontos']
+    if len(dados['times']) > 1:
+        segundo = dados['times'][1]
+        diferenca = lider['pontos'] - segundo['pontos']
+    else:
+        segundo = lider
+        diferenca = 0
     titulo = 'Série A 2026 — Classificação'
-    data = dados['data_consulta'] or '14/10/2026'
-    fonte = dados['fonte'] or 'planilha da CBF'
-    rodada = dados['rodada'] or 30
+    data = dados['data_consulta']
+    if data == '':
+        data = 'data não informada'
+    fonte = dados['fonte']
+    if fonte == '':
+        fonte = 'planilha da CBF'
+    rodada = dados['rodada']
+    if rodada == 0:
+        rodada = '-'
 
+    if diferenca != 1:
+        sufixo = 's'
+    else:
+        sufixo = ''
+
+    # Todo o HTML/CSS é uma string; o Python grava o texto no arquivo.
     html = f'''<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8">
+<meta charset="windows-1252">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{titulo}</title>
 <style>
@@ -766,8 +791,8 @@ footer .assinatura {{ text-align: right; }}
           <span class="placar-pontos">{segundo['pontos']}<small>PTS</small></span>
         </div>
         <div class="placar-rodape">
-          <span><strong>{diferenca} ponto{'s' if diferenca != 1 else ''}</strong> de diferença</span>
-          <span>{numero_br(lider['aproveitamento'], 0)}% do líder</span>
+          <span><strong>{diferenca} ponto{sufixo}</strong> de diferença</span>
+          <span>{numero_br(lider['aproveitamento'], 0)}% de aproveitamento</span>
         </div>
       </aside>
     </section>
@@ -829,7 +854,7 @@ footer .assinatura {{ text-align: right; }}
   <footer>
     <div class="container">
       <div>
-        <p><strong>Como a posição é calculada:</strong> {escapar(rel_nota())} A zona de rebaixamento reúne as quatro últimas linhas da tabela; Corinthians e Internacional somam 32 pontos e dividem a 16ª posição, mas apenas o Internacional está no Z4.</p>
+        <p><strong>Como a posição é calculada:</strong> {escapar(rel_nota())} A zona de rebaixamento reúne as quatro últimas linhas da tabela.</p>
         <p>Fonte: {escapar(fonte)} · dados de {escapar(data)} · planilha lida pelo Python.</p>
       </div>
       <div class="assinatura">
@@ -842,8 +867,10 @@ footer .assinatura {{ text-align: right; }}
 </html>
 '''
 
-    with open(caminho_html, 'w', encoding='utf-8') as arquivo:
-        arquivo.write(html)
+    # Grava com open/write/close, como na apostila 38.
+    arquivo = open(caminho_html, 'w')
+    arquivo.write(html)
+    arquivo.close()
     return caminho_html
 
 

@@ -1,6 +1,6 @@
 # POOI — 4º bimestre · Brasileirão Série A 2026
 
-Página web + **1 relatório em PDF** com a classificação do Campeonato Brasileiro, lidos de uma planilha Excel.
+Página web + **1 relatório em PDF** com a classificação do Campeonato Brasileiro, lida de uma planilha Excel.
 
 O programa foi feito para o projeto do 4º bimestre de **Programação Orientada a Objetos**: usa arquivos texto (item 38), o canvas do **reportlab** (item 39) e **pandas/openpyxl** (item 40) da apostila.
 
@@ -56,14 +56,14 @@ Depois de gerar, abra o arquivo `classificacao.html` no navegador.
 
 - Pontos: `3 × vitórias + 1 × empates`.
 - A tabela é ordenada por pontos, do maior para o menor.
-- **Times com a mesma pontuação ocupam a mesma posição** (`1º`, `2º`, `2º`, `4º`…), como pede o projeto, sem os critérios oficiais de desempate da CBF. Dentro do empate, a ordem de exibição usa vitórias e, por fim, o nome — mas a posição continua igual.
+- **Times com a mesma pontuação ocupam a mesma posição** (`1º`, `2º`, `2º`, `4º`…), como pede o projeto, sem os critérios oficiais de desempate da CBF. Dentro do empate, a ordem de exibição usa apenas o nome do clube — mas a posição continua igual.
 - **G4**: as quatro primeiras linhas da tabela.
 - **Z4**: as quatro últimas linhas da tabela.
 - Como a planilha tem Vasco e Chapecoense com 29 jogos, o programa não faz média nem projeção: usa os números exatamente como estão na planilha.
 
 ### O caso da 16ª posição
 
-Corinthians e Internacional terminam com **32 pontos** e, pela regra do projeto, os dois ficam na **16ª posição**. Como o Z4 é definido pelas quatro últimas linhas, o **Internacional** aparece no Z4 e o Corinthians não. Os relatórios e a página web deixam isso explícito em uma nota. Se o professor preferir outra interpretação, basta mudar a linha que define `time['z4']` em `dados.py`.
+Corinthians e Internacional terminam com **32 pontos** e, pela regra do projeto, os dois ficam na **16ª posição**. Como o Z4 é definido pelas quatro últimas linhas, o **Internacional** aparece no Z4 e o Corinthians não. O Z4 usa sempre as quatro últimas linhas; o programa não aplica desempate por nome nessa borda. Se o professor preferir outra interpretação, basta mudar a linha que define `time['z4']` em `dados.py`.
 
 ---
 
@@ -86,17 +86,17 @@ Arquivo: **`classificacao.html`**
 
 # O relatório
 
-Todos usam os mesmos dados e o mesmo cálculo; muda a linguagem visual, o formato da página e a hierarquia da informação.
+O relatório usa os mesmos dados e o mesmo cálculo da página; muda apenas a linguagem visual.
 
 | # | Relatório | Página | Ideia visual |
 |---|---|---|---|
-| 07 | **Minimalista suíço** | A4 retrato | Grade rígida, faixas de zona verdes/vermelhas e distribuição V/E/D dos jogos. |
+| 07 | **Minimalista suíço** | A4 retrato | Grade rígida, posições do G4/Z4 coloridas e distribuição V/E/D dos jogos. |
 
 ### Prévia do layout
 
 | | |
 |---|---|
-| <img src="docs/relatorios/07.png" width="220"> | O layout 07 reúne a grade tipográfica, as faixas verdes do G4 e vermelhas do Z4 e a distribuição V/E/D de cada clube. |
+| <img src="docs/relatorios/07.png" width="220"> | O layout 07 reúne a grade tipográfica, as posições verdes do G4 e vermelhas do Z4 e a distribuição V/E/D de cada clube. Na página web, as linhas do G4 e do Z4 têm fundo verde/vermelho. |
 
 O PDF e o HTML ficam na pasta do programa e são gerados novamente a cada execução.
 
@@ -110,7 +110,7 @@ POOI/4bi/projeto/
 ├── main_comentado.py       # mesma versão, comentada para estudo
 ├── comentado/              # todos os módulos comentados (versão de estudo)
 ├── dados.py                # leitura do Excel, pontos, posições e estatísticas
-├── relatorios.py           # classe Relatorio + o layout em reportlab
+├── relatorios.py           # funções de desenho + layout em reportlab
 ├── pagina_web.py           # gera o HTML da classificação e a galeria
 ├── clubes.py               # cores e apelidos dos 20 clubes
 ├── planilha/
@@ -128,10 +128,9 @@ POOI/4bi/projeto/
 
 | Conteúdo da apostila | Onde aparece |
 |---|---|
-| **38 — Arquivos texto** (`open`, `write`, `close`, `try/except`) | `pagina_web.py` grava o HTML com `open(..., 'w', encoding='utf-8')`. |
+| **38 — Arquivos texto** (`open`, `write`, `close`) | `pagina_web.py` grava o HTML com `open(..., 'w')`, `write()` e `close()`. |
 | **39 — PDF com reportlab** (`Canvas`, `setFont`, `setFillColor`, `drawString`, `setTitle`, `save`) | O layout em `relatorios.py`. |
-| **40 — pandas / openpyxl** (`ExcelFile`, `parse`, `read_excel`, DataFrame) | `dados.py` lê a planilha, encontra a linha de cabeçalho e percorre as linhas. |
-| **Orientação a objetos** | Classe `Relatorio`, com métodos de desenho reaproveitados pelo layout. |
+| **40 — pandas / openpyxl** (`ExcelFile`, `parse`, `sheet_names`, `iloc`) | `dados.py` lê a planilha, encontra a linha de cabeçalho e percorre as linhas. |
 | **Funções, listas, dicionários, laços, f-strings** | Em todos os módulos. |
 
 ### Comandos de desenho usados no PDF
@@ -141,21 +140,19 @@ O layout 07 usa apenas a API básica do canvas apresentada na apostila:
 | Comando | Para que foi usado |
 |---|---|
 | `setFont` / `setFillColor` | Tipografia e cores do texto. |
-| `drawString` / `drawRightString` | Nomes dos clubes e colunas numéricas alinhadas à direita. |
-| `rect` | Fundos das faixas do G4 e do Z4. |
-| `line` / `setLineWidth` / `setStrokeColor` | Fios da tabela e separadores. |
+| `drawString` | Nomes dos clubes, números e legendas. |
 | `setTitle` / `save` | Metadados e fechamento do PDF. |
 
 Nenhuma biblioteca web é usada para gerar PDF. O único uso de HTML/CSS é na página que o Python escreve.
 
-Para organizar o projeto também é usado `open(..., encoding='utf-8')` para o HTML sair com os acentos corretos.
+O HTML é gravado com `open(..., 'w')`, `write()` e `close()`; a página declara `windows-1252` para os acentos.
 
 ---
 
 # Observações
 
 - **Outra planilha:** o leitor procura uma linha de cabeçalho que tenha `Time` e `Jogos`, e colunas com `Vitórias`, `Empates` e `Derrotas`. Linhas de título antes da tabela e linhas de fonte/observação depois são ignoradas. A planilha pode estar em qualquer aba.
-- **Fonte dos dados:** a planilha de exemplo é a fornecida pelo professor; a fonte citada nos relatórios é a que está na própria planilha.
+- **Fonte dos dados:** a planilha de exemplo é a fornecida pelo professor; a fonte citada no relatório é a que está na própria planilha.
 - **Galeria da página:** feita só com HTML/CSS, usando a paleta de cada relatório. Nenhuma biblioteca de imagem é necessária.
 - **Fontes:** o PDF usa as fontes internas do reportlab (Helvetica e Helvetica-Bold), sem depender de arquivos externos.
 - **Impressão:** a página web tem um bloco `@media print` que esconde botões e galeria e imprime a tabela.
@@ -171,6 +168,6 @@ Para organizar o projeto também é usado `open(..., encoding='utf-8')` para o H
 - [x] Times empatados ocupam a mesma posição.
 - [x] Destaca os 4 primeiros e os 4 últimos com cores de fundo diferentes.
 - [x] Página web com botão que abre a classificação em PDF.
-- [x] PDFs gerados exclusivamente por Python/reportlab.
+- [x] PDF gerado exclusivamente por Python/reportlab.
 - [x] **layout 07 (Minimalista suíço)**, além do layout da página web.
 - [x] Código comentado e organizado por assunto da apostila.

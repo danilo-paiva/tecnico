@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
+# VERSÃO COMENTADA PARA ESTUDO — o código principal é o da pasta anterior.
 """
-VERSÃO COMENTADA — clubes.py
-Guarda as cores e apelidos dos clubes. Se um time não estiver no dicionário,
-a função identidade() escolhe uma cor da paleta reserva. Nenhuma biblioteca
-externa é usada neste arquivo.
+Identidade visual dos 20 clubes da Série A.
+
+As cores são usadas apenas para deixar os relatórios com "cara de futebol".
+Se o professor trocar a planilha por outra com clubes diferentes, o programa
+continua funcionando: clubes desconhecidos recebem uma cor da PALETA_RESERVA.
 """
 
 # nome do time (como vem na planilha) -> (cor principal, cor secundária, apelido curto)
-# Dicionário: nome do time -> (cor principal, cor secundária, apelido).
+# DICIONÁRIO: nome do time -> (cor principal, cor secundária, apelido).
 CORES_TIMES = {
     'Athletico-PR':      ('#C4122E', '#111111', 'Athletico-PR'),
     'Atlético-MG':       ('#1A1A1A', '#FFFFFF', 'Atlético-MG'),
@@ -32,7 +34,7 @@ CORES_TIMES = {
 }
 
 # Cores usadas quando o time não está no dicionário acima.
-# Se o professor usar outro time, ele recebe uma destas cores.
+# Cores de reserva para times desconhecidos.
 PALETA_RESERVA = [
     '#1D4ED8', '#0E7C7B', '#B45309', '#7E22CE', '#BE123C',
     '#0F766E', '#4338CA', '#A16207', '#9D174D', '#155E75',
@@ -50,14 +52,3 @@ def identidade(nome, indice=0):
     return (cor, '#FFFFFF', nome)
 
 
-# Calcula o brilho da cor para escolher texto preto ou branco.
-def cor_de_fundo(cor):
-    """Escolhe preto ou branco para o texto ficar legível sobre a cor."""
-    cor = cor.lstrip('#')
-    r = int(cor[0:2], 16) / 255
-    g = int(cor[2:4], 16) / 255
-    b = int(cor[4:6], 16) / 255
-    brilho = 0.2126 * r + 0.7152 * g + 0.0722 * b
-    if brilho > 0.62:
-        return '#111111'
-    return '#FFFFFF'
