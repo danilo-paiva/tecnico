@@ -5,757 +5,101 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Série A 2026 — Classificação</title>
 <style>
-:root {
-  --pitch: #062A21;
-  --pitch-2: #0A3A2C;
-  --pitch-3: #041F19;
-  --chalk: #F4EFDF;
-  --chalk-2: #E6DEC8;
-  --canary: #F5D547;
-  --ink: #132019;
-  --muted: #9BB3A9;
-  --g4: #1E8E5A;
-  --z4: #C43D2F;
-  --linha: rgba(244, 239, 223, .16);
-  --display: "Bahnschrift Condensed", "DIN Condensed", "Arial Narrow", Impact, sans-serif;
-  --texto: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
-}
-
-* { box-sizing: border-box; }
-
-html { scroll-behavior: smooth; }
-
-body {
-  margin: 0;
-  background:
-    repeating-linear-gradient(90deg, rgba(255,255,255,.022) 0 90px, transparent 90px 180px),
-    linear-gradient(180deg, var(--pitch) 0%, var(--pitch-2) 62%, var(--pitch-3) 100%);
-  color: var(--chalk);
-  font-family: var(--texto);
-  font-size: 16px;
-  line-height: 1.55;
-  -webkit-font-smoothing: antialiased;
-}
-
-a { color: var(--canary); }
-a:focus-visible, button:focus-visible {
-  outline: 3px solid var(--canary);
-  outline-offset: 4px;
-}
-
-.page { overflow: hidden; }
-
-.container {
-  width: min(1180px, calc(100% - 48px));
-  margin: 0 auto;
-}
-
-/* ---------- barra superior ---------- */
-.topbar {
-  border-bottom: 1px solid var(--linha);
-  padding: 18px 0;
-  font-size: 11px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.topbar .container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-}
-.marca { display: flex; align-items: center; gap: 10px; color: var(--chalk); }
-.marca strong {
-  display: inline-grid;
-  place-items: center;
-  width: 30px; height: 30px;
-  background: var(--canary);
-  color: var(--ink);
-  font-family: var(--display);
-  font-size: 16px;
-  letter-spacing: 0;
-}
-.topbar .data { color: var(--chalk); }
-
-/* ---------- hero ---------- */
-.hero {
-  position: relative;
-  padding: 72px 0 64px;
-  display: grid;
-  grid-template-columns: 1.35fr .65fr;
-  gap: 56px;
-  align-items: end;
-}
-.hero::before {
-  content: "";
-  position: absolute;
-  z-index: 0;
-  right: -160px;
-  top: -170px;
-  width: 720px;
-  height: 720px;
-  border: 1px solid rgba(244, 239, 223, .14);
-  border-radius: 50%;
-  pointer-events: none;
-}
-.hero::after {
-  content: "";
-  position: absolute;
-  z-index: 0;
-  right: 336px;
-  top: 8px;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--canary);
-  opacity: .9;
-}
-.hero-copy, .placar { position: relative; z-index: 1; }
-
-.kicker {
-  margin: 0 0 22px;
-  color: var(--canary);
-  font-family: var(--display);
-  font-size: 15px;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-}
-
-h1 {
-  margin: 0;
-  font-family: var(--display);
-  font-size: clamp(70px, 11vw, 138px);
-  line-height: .82;
-  letter-spacing: -.01em;
-  text-transform: uppercase;
-  font-weight: 700;
-}
-h1 .linha-2 {
-  display: block;
-  color: transparent;
-  -webkit-text-stroke: 2px var(--canary);
-  text-stroke: 2px var(--canary);
-}
-@supports not (-webkit-text-stroke: 1px black) {
-  h1 .linha-2 { color: var(--canary); }
-}
-
-.hero-texto {
-  max-width: 56ch;
-  margin: 28px 0 0;
-  color: #D6DECD;
-  font-size: 16px;
-}
-.hero-texto strong { color: var(--chalk); font-weight: 600; }
-
-.hero-numeros {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0;
-  margin: 30px 0 0;
-  border-top: 1px solid var(--linha);
-  border-bottom: 1px solid var(--linha);
-}
-.hero-numeros div {
-  padding: 12px 22px 12px 0;
-  margin-right: 22px;
-  border-right: 1px solid var(--linha);
-}
-.hero-numeros div:last-child { border-right: 0; margin-right: 0; }
-.hero-numeros dt {
-  margin: 0;
-  font-family: var(--display);
-  font-size: 12px;
-  letter-spacing: .13em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.hero-numeros dd {
-  margin: 2px 0 0;
-  font-family: var(--display);
-  font-size: 30px;
-  line-height: 1;
-  color: var(--chalk);
-  font-variant-numeric: tabular-nums;
-}
-
-.acoes { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
-.botao {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 50px;
-  padding: 0 24px;
-  border: 1px solid var(--canary);
-  border-radius: 2px;
-  font-family: var(--display);
-  font-size: 17px;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  text-decoration: none;
-  transition: transform .18s ease, background .18s ease, color .18s ease;
-}
-.botao-principal { background: var(--canary); color: var(--ink); }
-.botao-principal:hover { transform: translateY(-2px); background: #FFE874; }
-.botao-vazio { color: var(--chalk); border-color: rgba(244,239,223,.45); }
-.botao-vazio:hover { transform: translateY(-2px); border-color: var(--chalk); }
-
-/* ---------- placar ---------- */
-.placar {
-  background: #031712;
-  border: 1px solid rgba(245, 213, 71, .55);
-  box-shadow: inset 0 0 90px rgba(0, 0, 0, .55), 0 30px 60px rgba(0, 0, 0, .28);
-  padding: 0 0 20px;
-}
-.placar-topo {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 13px 20px;
-  background: var(--canary);
-  color: var(--ink);
-  font-family: var(--display);
-  font-size: 12px;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-}
-.placar-linha {
-  display: grid;
-  grid-template-columns: 28px 1fr auto;
-  align-items: center;
-  gap: 10px;
-  padding: 24px 20px;
-  border-bottom: 1px dashed rgba(244,239,223,.2);
-}
-.placar-linha:last-of-type { border-bottom: 0; }
-.placar-rank {
-  font-family: var(--display);
-  font-size: 18px;
-  color: var(--muted);
-}
-.placar-time {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-family: var(--display);
-  font-size: 26px;
-  letter-spacing: .02em;
-}
-.placar-time i {
-  width: 12px; height: 12px;
-  border: 1px solid rgba(244,239,223,.5);
-  flex: none;
-}
-.placar-pontos {
-  font-family: var(--display);
-  font-size: 72px;
-  line-height: .85;
-  color: var(--canary);
-  font-variant-numeric: tabular-nums;
-}
-.placar-pontos small {
-  font-size: 12px;
-  letter-spacing: .12em;
-  color: var(--muted);
-  margin-left: 4px;
-}
-.placar-rodape {
-  margin: 6px 18px 0;
-  padding-top: 12px;
-  border-top: 1px solid rgba(245,213,71,.25);
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  color: var(--muted);
-  font-size: 11px;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-}
-.placar-rodape strong { color: var(--chalk); }
-
-/* ---------- seções ---------- */
-.secao { padding: 34px 0 0; }
-.secao-topo {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 18px;
-}
-.secao-topo h2 {
-  margin: 0;
-  font-family: var(--display);
-  font-size: clamp(34px, 5vw, 54px);
-  line-height: .95;
-  text-transform: uppercase;
-  letter-spacing: .01em;
-}
-.secao-topo p {
-  margin: 6px 0 0;
-  max-width: 52ch;
-  color: var(--muted);
-  font-size: 14px;
-}
-.legenda {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  align-items: center;
-  color: var(--muted);
-  font-size: 11px;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-.legenda span { display: inline-flex; align-items: center; gap: 7px; }
-.legenda i { width: 12px; height: 12px; display: inline-block; }
-.legenda .g4 { background: var(--canary); }
-.legenda .z4 { background: var(--z4); }
-
-/* ---------- tabela ---------- */
-.painel {
-  background: var(--chalk);
-  color: var(--ink);
-  border-top: 8px solid var(--canary);
-  box-shadow: 0 34px 70px rgba(0, 0, 0, .38);
-}
-.tabela-scroll { overflow-x: auto; }
-table {
-  width: 100%;
-  min-width: 760px;
-  border-collapse: collapse;
-  font-variant-numeric: tabular-nums;
-}
-caption {
-  position: absolute;
-  width: 1px; height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-}
-thead th {
-  padding: 14px 12px;
-  background: #0B3B2E;
-  color: var(--chalk-2);
-  font-family: var(--display);
-  font-size: 12px;
-  font-weight: 400;
-  letter-spacing: .15em;
-  text-transform: uppercase;
-  text-align: right;
-}
-thead th:nth-child(1), thead th:nth-child(2) { text-align: left; }
-thead th:nth-child(1) { width: 78px; }
-thead th:nth-child(2) { width: auto; }
-
-tbody td {
-  padding: 13px 12px;
-  border-bottom: 1px solid rgba(19, 32, 25, .12);
-  text-align: right;
-  font-size: 15px;
-  color: #2A3A31;
-}
-tbody td.pos, tbody td.clube { text-align: left; }
-tbody tr { transition: background .15s ease; }
-tbody tr:hover { background: #EDE6D2; }
-tbody td.pos {
-  font-family: var(--display);
-  font-size: 22px;
-  line-height: 1;
-  color: var(--ink);
-  padding-left: 22px;
-  white-space: nowrap;
-}
-tbody td.clube {
-  font-weight: 600;
-  font-size: 16px;
-  color: var(--ink);
-  white-space: nowrap;
-}
-.chip {
-  display: inline-block;
-  width: 10px; height: 10px;
-  margin-right: 10px;
-  border: 1px solid rgba(19, 32, 25, .38);
-  vertical-align: 1px;
-}
-tbody td.pts {
-  font-family: var(--display);
-  font-size: 28px;
-  line-height: 1;
-  color: var(--ink);
-  width: 90px;
-}
-tbody td.aproveitamento { color: #6A776E; font-size: 13px; }
-.mini-stats { display: none; }
-tbody tr.g4 { background: #E7F0DF; box-shadow: inset 6px 0 0 var(--canary); }
-tbody tr.g4:hover { background: #DEEBD3; }
-tbody tr.z4 { background: #F8E3DE; box-shadow: inset 6px 0 0 var(--z4); }
-tbody tr.z4:hover { background: #F3D7D0; }
-tbody tr.g4 td.pos { padding-left: 26px; }
-tbody tr.z4 td.pos { padding-left: 26px; }
-.sinal-empate {
-  font-family: var(--texto);
-  font-size: 17px;
-  font-weight: 700;
-  line-height: 1;
-  color: #8A5A00;
-  vertical-align: .45em;
-  margin-left: 2px;
-}
-.legenda .sinal-legenda {
-  font-family: var(--texto);
-  font-weight: 700;
-  color: var(--canary);
-  font-size: 15px;
-}
-
-.tabela-pe {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 20px;
-  padding: 18px 22px;
-  background: #EFE8D5;
-  border-top: 1px solid rgba(19,32,25,.14);
-  font-size: 12px;
-  color: #5C6A60;
-}
-.tabela-pe .botao {
-  min-height: 42px;
-  font-size: 14px;
-  padding: 0 18px;
-}
-.botao-escuro {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: var(--chalk);
-}
-.botao-escuro:hover { background: #0B3B2E; border-color: #0B3B2E; transform: translateY(-2px); }
-
-/* ---------- galeria ---------- */
-.relatorios { padding: 84px 0 30px; }
-.grade-relatorios {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 26px;
-  margin-top: 30px;
-}
-.relatorio {
-  border-top: 3px solid var(--destaque);
-  background: rgba(3, 23, 18, .55);
-  border-left: 1px solid var(--linha);
-  border-right: 1px solid var(--linha);
-  border-bottom: 1px solid var(--linha);
-  display: flex;
-  flex-direction: column;
-  transition: transform .18s ease, border-color .18s ease;
-}
-.relatorio:hover { transform: translateY(-3px); border-color: rgba(245,213,71,.5); }
-.relatorio:last-child {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: 1.05fr .95fr;
-}
-.relatorio:last-child .thumb { height: 360px; }
-.relatorio:last-child .rel-info {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 28px 36px;
-}
-.relatorio:last-child .rel-info h3 { font-size: 32px; }
-.relatorio:last-child .rel-info p { max-width: 38ch; font-size: 15px; }
-.relatorio:last-child .rel-abrir { align-self: flex-start; }
-.thumb {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 300px;
-  padding: 16px;
-  background: var(--cor);
-  overflow: hidden;
-}
-.thumb img {
-  max-width: 100%;
-  max-height: 100%;
-  width: auto;
-  height: auto;
-  object-fit: contain;
-  box-shadow: 0 10px 24px rgba(0,0,0,.28);
-  background: #FFF;
-}
-.sem-miniatura {
-  font-family: var(--display);
-  font-size: 84px;
-  line-height: 1;
-}
-.rel-info { padding: 18px 20px 20px; }
-.rel-num {
-  display: block;
-  font-family: var(--display);
-  font-size: 13px;
-  letter-spacing: .16em;
-  color: var(--canary);
-}
-.rel-info h3 {
-  margin: 5px 0 6px;
-  font-family: var(--display);
-  font-size: 25px;
-  line-height: 1.05;
-  font-weight: 600;
-}
-.rel-info p {
-  margin: 0 0 14px;
-  color: var(--muted);
-  font-size: 13.5px;
-  line-height: 1.5;
-}
-.rel-abrir {
-  color: var(--canary);
-  font-size: 12px;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  text-decoration: none;
-  border-bottom: 1px solid rgba(245,213,71,.55);
-  padding-bottom: 2px;
-}
-.rel-abrir:hover { border-color: var(--canary); }
-
-/* ---------- rodapé ---------- */
-footer {
-  margin-top: 70px;
-  border-top: 1px solid var(--linha);
-  padding: 30px 0 44px;
-  color: var(--muted);
-  font-size: 12px;
-}
-footer .container {
-  display: grid;
-  grid-template-columns: 1.4fr .6fr;
-  gap: 30px;
-}
-footer strong { color: var(--chalk); font-weight: 600; }
-footer p { margin: 0 0 8px; max-width: 62ch; }
-footer .assinatura { text-align: right; }
-
-/* ---------- animação única de entrada ---------- */
-@keyframes subir {
-  from { transform: translateY(14px); }
-  to { transform: translateY(0); }
-}
-.hero-copy { animation: subir .6s ease both; }
-.placar { animation: subir .6s .1s ease both; }
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  .hero-copy, .placar { animation: none; }
-  .botao, .relatorio { transition: none; }
-}
-
-/* ---------- responsivo ---------- */
-@media (max-width: 1000px) {
-  .hero { grid-template-columns: 1fr; gap: 36px; padding-top: 54px; }
-  .placar { max-width: 460px; }
-  .grade-relatorios { grid-template-columns: repeat(2, 1fr); }
-  .relatorio:last-child { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; }
-  .relatorio:last-child .thumb { height: 300px; }
-  .relatorio:last-child .rel-info { display: block; padding: 18px 20px 20px; }
-  .relatorio:last-child .rel-info h3 { font-size: 25px; }
-  .relatorio:last-child .rel-info p { font-size: 13.5px; }
-  footer .container { grid-template-columns: 1fr; }
-  footer .assinatura { text-align: left; }
-}
-@media (max-width: 820px) {
-  table { min-width: 0; }
-  .tabela-scroll { overflow-x: visible; }
-  thead th:nth-child(3), thead th:nth-child(4), thead th:nth-child(5),
-  thead th:nth-child(6), thead th:nth-child(8),
-  tbody td:nth-child(3), tbody td:nth-child(4), tbody td:nth-child(5),
-  tbody td:nth-child(6), tbody td:nth-child(8) { display: none; }
-  thead th:nth-child(1) { width: 64px; }
-  tbody td { padding: 11px 10px; }
-  tbody td.pos { padding-left: 22px; }
-  tbody tr.g4 td.pos, tbody tr.z4 td.pos { padding-left: 26px; }
-  tbody td.clube { white-space: normal; }
-  .mini-stats {
-    display: block;
-    margin: 3px 0 0 20px;
-    color: #6A776E;
-    font-size: 10.5px;
-    font-weight: 400;
-    letter-spacing: .01em;
-    white-space: nowrap;
+  body { font-family: Arial, Helvetica, sans-serif; background: #FFFFFF; color: #111111;
+         max-width: 860px; margin: 40px auto; padding: 0 22px; }
+  .cabecalho { border-bottom: 2px solid #111111; padding-bottom: 20px; }
+  .kicker { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: #777777; }
+  h1 { font-size: 72px; line-height: .9; margin: 10px 0 0; letter-spacing: -2px; }
+  h1 span { color: #BBBBBB; }
+  .sub { font-size: 14px; color: #777777; margin: 16px 0 0; }
+  .meta { display: flex; gap: 44px; margin: 24px 0 26px; }
+  .meta div { font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: #777777; }
+  .meta strong { display: block; font-size: 24px; letter-spacing: 0; color: #111111; margin-top: 3px; }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  th { text-align: left; font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase;
+        color: #777777; padding: 10px 6px; border-bottom: 1px solid #111111; }
+  td { padding: 11px 6px; border-bottom: 1px solid #E5E5E5; }
+  .num { text-align: right; }
+  .pos { width: 54px; font-weight: bold; }
+  .pts { font-weight: bold; }
+  .g4 { background: #E5EBDC; }
+  .z4 { background: #F3DFD8; }
+  .g4 .pos { color: #2F4A32; }
+  .z4 .pos { color: #8E1B1B; }
+  .empate { color: #999999; font-weight: normal; }
+  .nota { font-size: 12px; line-height: 1.5; color: #777777; margin: 18px 0 0; max-width: 680px; }
+  .acoes { margin-top: 24px; }
+  .botao { display: inline-block; background: #111111; color: #FFFFFF; padding: 12px 18px;
+            text-decoration: none; font-size: 13px; }
+  footer { margin-top: 34px; border-top: 1px solid #E5E5E5; padding-top: 14px;
+            font-size: 12px; color: #777777; }
+  @media (max-width: 600px) {
+    body { margin: 24px auto; padding: 0 14px; }
+    h1 { font-size: 48px; }
+    .meta { gap: 22px; }
+    table { font-size: 13px; }
+    th, td { padding: 8px 3px; }
+    .pos { width: 40px; }
   }
-}
-@media (max-width: 680px) {
-  .container { width: calc(100% - 32px); }
-  .topbar { padding: 12px 0; }
-  .topbar .container { flex-wrap: wrap; gap: 8px; font-size: 10px; }
-  .topbar .container > div:nth-child(2) { display: none; }
-  .hero { padding: 40px 0 44px; }
-  h1 { font-size: clamp(64px, 19vw, 100px); }
-  .hero-numeros div { padding-right: 14px; margin-right: 14px; }
-  .grade-relatorios { grid-template-columns: 1fr; }
-  .relatorio:last-child { grid-column: auto; display: flex; }
-  .relatorio:last-child .thumb { height: 260px; }
-  .relatorio:last-child .rel-info { display: block; padding: 18px 20px 20px; }
-  .relatorio:last-child .rel-info h3 { font-size: 25px; }
-  .relatorio:last-child .rel-info p { font-size: 13.5px; }
-  .thumb { height: 260px; }
-  .secao-topo { flex-direction: column; align-items: flex-start; gap: 12px; }
-  .tabela-pe { flex-direction: column; align-items: flex-start; }
-  .placar-pontos { font-size: 52px; }
-}
-
-@media print {
-  body { background: #FFF; color: #111; }
-  .topbar, .hero .acoes, .relatorios, footer, .tabela-pe .botao { display: none; }
-  .hero { padding: 10px 0; }
-  h1 { color: #111; font-size: 48px; }
-  h1 .linha-2 { color: #111; -webkit-text-stroke: 0; }
-  .hero-texto, .hero-numeros dd { color: #111; }
-  .placar { border-color: #111; box-shadow: none; background: #FFF; }
-  .placar-pontos { color: #111; }
-  .painel { box-shadow: none; border-top-color: #111; }
-}
 </style>
 </head>
 <body>
-<div class="page">
-  <header class="topbar">
-    <div class="container">
-      <div class="marca"><strong>P</strong><span>POOI · 4º bimestre</span></div>
-      <div>Projeto de Programação Orientada a Objetos</div>
-      <div class="data">Dados de 14/10/2026</div>
-    </div>
+  <header class="cabecalho">
+    <div class="kicker">Campeonato Brasileiro · Série A</div>
+    <h1>SÉRIE A <span>2026</span></h1>
+    <p class="sub">Classificação após 299 partidas · dados de 14/10/2026</p>
   </header>
 
-  <main class="container">
-    <section class="hero">
-      <div class="hero-copy">
-        <p class="kicker">Campeonato Brasileiro · Série A 2026</p>
-        <h1>Série A<span class="linha-2">2026</span></h1>
-        <p class="hero-texto">
-          A classificação completa depois de <strong>30 rodadas</strong>.
-          O programa lê a planilha da CBF, calcula <strong>3 pontos por vitória e 1 por empate</strong>
-          e ordena os clubes da maior para a menor pontuação.
-        </p>
-        <dl class="hero-numeros">
-          <div><dt>Clubes</dt><dd>20</dd></div>
-          <div><dt>Partidas</dt><dd>299</dd></div>
-          <div><dt>Pontos</dt><dd>813</dd></div>
-          <div><dt>Por jogo</dt><dd>2,72</dd></div>
-        </dl>
-        <div class="acoes">
-          <a class="botao botao-principal" href="relatorio.pdf" target="_blank" rel="noopener">Abrir classificação em PDF</a>
-          <a class="botao botao-vazio" href="#relatorios">Ver o relatório</a>
-        </div>
-      </div>
+  <div class="meta">
+    <div>Rodada<strong>30</strong></div>
+    <div>Clubes<strong>20</strong></div>
+    <div>Média<strong>2,72</strong></div>
+  </div>
 
-      <aside class="placar" aria-label="Placar da liderança">
-        <div class="placar-topo"><span>Placar da liderança</span><span>R30</span></div>
-        <div class="placar-linha">
-          <span class="placar-rank">1</span>
-          <span class="placar-time"><i style="background:#C8102E"></i>Flamengo</span>
-          <span class="placar-pontos">64<small>PTS</small></span>
-        </div>
-        <div class="placar-linha">
-          <span class="placar-rank">2</span>
-          <span class="placar-time"><i style="background:#006437"></i>Palmeiras</span>
-          <span class="placar-pontos">63<small>PTS</small></span>
-        </div>
-        <div class="placar-rodape">
-          <span><strong>1 ponto</strong> de diferença</span>
-          <span>71% de aproveitamento</span>
-        </div>
-      </aside>
-    </section>
+  <table>
+    <caption class="kicker">Classificação do Campeonato Brasileiro Série A 2026</caption>
+    <thead>
+      <tr>
+        <th>Pos</th>
+        <th>Clube</th>
+        <th class="num">J</th>
+        <th class="num">V</th>
+        <th class="num">E</th>
+        <th class="num">D</th>
+        <th class="num">Pts</th>
+      </tr>
+    </thead>
+    <tbody>
+<tr class="g4"><td class="pos">1º</td><td>Flamengo</td><td class="num">30</td><td class="num">19</td><td class="num">7</td><td class="num">4</td><td class="num pts">64</td></tr>
+<tr class="g4"><td class="pos">2º</td><td>Palmeiras</td><td class="num">30</td><td class="num">18</td><td class="num">9</td><td class="num">3</td><td class="num pts">63</td></tr>
+<tr class="g4"><td class="pos">3º</td><td>Athletico-PR</td><td class="num">30</td><td class="num">15</td><td class="num">8</td><td class="num">7</td><td class="num pts">53</td></tr>
+<tr class="g4"><td class="pos">4º</td><td>Fluminense</td><td class="num">30</td><td class="num">14</td><td class="num">9</td><td class="num">7</td><td class="num pts">51</td></tr>
+<tr class=""><td class="pos">5º</td><td>Bahia</td><td class="num">30</td><td class="num">13</td><td class="num">10</td><td class="num">7</td><td class="num pts">49</td></tr>
+<tr class=""><td class="pos">6º</td><td>Cruzeiro</td><td class="num">30</td><td class="num">14</td><td class="num">6</td><td class="num">10</td><td class="num pts">48</td></tr>
+<tr class=""><td class="pos">7º</td><td>Atlético-MG</td><td class="num">30</td><td class="num">13</td><td class="num">8</td><td class="num">9</td><td class="num pts">47</td></tr>
+<tr class=""><td class="pos">8º</td><td>Santos</td><td class="num">30</td><td class="num">11</td><td class="num">9</td><td class="num">10</td><td class="num pts">42</td></tr>
+<tr class=""><td class="pos">9º</td><td>Red Bull Bragantino</td><td class="num">30</td><td class="num">11</td><td class="num">7</td><td class="num">12</td><td class="num pts">40</td></tr>
+<tr class=""><td class="pos">10º<span class="empate">=</span></td><td>Coritiba</td><td class="num">30</td><td class="num">10</td><td class="num">9</td><td class="num">11</td><td class="num pts">39</td></tr>
+<tr class=""><td class="pos">10º<span class="empate">=</span></td><td>São Paulo</td><td class="num">30</td><td class="num">11</td><td class="num">6</td><td class="num">13</td><td class="num pts">39</td></tr>
+<tr class=""><td class="pos">12º<span class="empate">=</span></td><td>Botafogo</td><td class="num">30</td><td class="num">9</td><td class="num">9</td><td class="num">12</td><td class="num pts">36</td></tr>
+<tr class=""><td class="pos">12º<span class="empate">=</span></td><td>Vitória</td><td class="num">30</td><td class="num">10</td><td class="num">6</td><td class="num">14</td><td class="num pts">36</td></tr>
+<tr class=""><td class="pos">14º</td><td>Vasco</td><td class="num">29</td><td class="num">9</td><td class="num">8</td><td class="num">12</td><td class="num pts">35</td></tr>
+<tr class=""><td class="pos">15º</td><td>Mirassol</td><td class="num">30</td><td class="num">8</td><td class="num">9</td><td class="num">13</td><td class="num pts">33</td></tr>
+<tr class=""><td class="pos">16º<span class="empate">=</span></td><td>Corinthians</td><td class="num">30</td><td class="num">8</td><td class="num">8</td><td class="num">14</td><td class="num pts">32</td></tr>
+<tr class="z4"><td class="pos">16º<span class="empate">=</span></td><td>Internacional</td><td class="num">30</td><td class="num">7</td><td class="num">11</td><td class="num">12</td><td class="num pts">32</td></tr>
+<tr class="z4"><td class="pos">18º</td><td>Grêmio</td><td class="num">30</td><td class="num">7</td><td class="num">10</td><td class="num">13</td><td class="num pts">31</td></tr>
+<tr class="z4"><td class="pos">19º</td><td>Remo</td><td class="num">30</td><td class="num">5</td><td class="num">10</td><td class="num">15</td><td class="num pts">25</td></tr>
+<tr class="z4"><td class="pos">20º</td><td>Chapecoense</td><td class="num">29</td><td class="num">3</td><td class="num">9</td><td class="num">17</td><td class="num pts">18</td></tr>
+    </tbody>
+  </table>
 
-    <section class="secao" id="tabela">
-      <div class="secao-topo">
-        <div>
-          <h2>Classificação</h2>
-          <p>Ordenada por pontos. Clubes com a mesma pontuação ocupam a mesma posição, sem os critérios oficiais de desempate.</p>
-        </div>
-        <div class="legenda">
-          <span><i class="g4"></i>G4 · quatro primeiros</span>
-          <span><i class="z4"></i>Z4 · quatro últimos</span>
-          <span><b class="sinal-legenda">=</b> posição dividida</span>
-        </div>
-      </div>
-
-      <div class="painel">
-        <div class="tabela-scroll">
-          <table>
-            <caption>Classificação do Campeonato Brasileiro Série A 2026 após 30 rodadas</caption>
-            <thead>
-              <tr>
-                <th scope="col">Pos</th>
-                <th scope="col">Clube</th>
-                <th scope="col">J</th>
-                <th scope="col">V</th>
-                <th scope="col">E</th>
-                <th scope="col">D</th>
-                <th scope="col">Pts</th>
-                <th scope="col">Aproveitamento</th>
-              </tr>
-            </thead>
-            <tbody>
-<tr class="g4"><td class="pos">1º</td><td class="clube"><span class="chip" style="background:#C8102E"></span><span>Flamengo</span><span class="mini-stats">30J · 19V · 7E · 4D · 71,1%</span></td><td>30</td><td>19</td><td>7</td><td>4</td><td class="pts">64</td><td class="aproveitamento">71,1%</td></tr>
-<tr class="g4"><td class="pos">2º</td><td class="clube"><span class="chip" style="background:#006437"></span><span>Palmeiras</span><span class="mini-stats">30J · 18V · 9E · 3D · 70,0%</span></td><td>30</td><td>18</td><td>9</td><td>3</td><td class="pts">63</td><td class="aproveitamento">70,0%</td></tr>
-<tr class="g4"><td class="pos">3º</td><td class="clube"><span class="chip" style="background:#C4122E"></span><span>Athletico-PR</span><span class="mini-stats">30J · 15V · 8E · 7D · 58,9%</span></td><td>30</td><td>15</td><td>8</td><td>7</td><td class="pts">53</td><td class="aproveitamento">58,9%</td></tr>
-<tr class="g4"><td class="pos">4º</td><td class="clube"><span class="chip" style="background:#7A0C2E"></span><span>Fluminense</span><span class="mini-stats">30J · 14V · 9E · 7D · 56,7%</span></td><td>30</td><td>14</td><td>9</td><td>7</td><td class="pts">51</td><td class="aproveitamento">56,7%</td></tr>
-<tr class=""><td class="pos">5º</td><td class="clube"><span class="chip" style="background:#0057A0"></span><span>Bahia</span><span class="mini-stats">30J · 13V · 10E · 7D · 54,4%</span></td><td>30</td><td>13</td><td>10</td><td>7</td><td class="pts">49</td><td class="aproveitamento">54,4%</td></tr>
-<tr class=""><td class="pos">6º</td><td class="clube"><span class="chip" style="background:#003DA5"></span><span>Cruzeiro</span><span class="mini-stats">30J · 14V · 6E · 10D · 53,3%</span></td><td>30</td><td>14</td><td>6</td><td>10</td><td class="pts">48</td><td class="aproveitamento">53,3%</td></tr>
-<tr class=""><td class="pos">7º</td><td class="clube"><span class="chip" style="background:#1A1A1A"></span><span>Atlético-MG</span><span class="mini-stats">30J · 13V · 8E · 9D · 52,2%</span></td><td>30</td><td>13</td><td>8</td><td>9</td><td class="pts">47</td><td class="aproveitamento">52,2%</td></tr>
-<tr class=""><td class="pos">8º</td><td class="clube"><span class="chip" style="background:#1A1A1A"></span><span>Santos</span><span class="mini-stats">30J · 11V · 9E · 10D · 46,7%</span></td><td>30</td><td>11</td><td>9</td><td>10</td><td class="pts">42</td><td class="aproveitamento">46,7%</td></tr>
-<tr class=""><td class="pos">9º</td><td class="clube"><span class="chip" style="background:#D71920"></span><span>Red Bull Bragantino</span><span class="mini-stats">30J · 11V · 7E · 12D · 44,4%</span></td><td>30</td><td>11</td><td>7</td><td>12</td><td class="pts">40</td><td class="aproveitamento">44,4%</td></tr>
-<tr class="empatado"><td class="pos">10º<span class="sinal-empate" title="posição dividida">=</span></td><td class="clube"><span class="chip" style="background:#005C3B"></span><span>Coritiba</span><span class="mini-stats">30J · 10V · 9E · 11D · 43,3%</span></td><td>30</td><td>10</td><td>9</td><td>11</td><td class="pts">39</td><td class="aproveitamento">43,3%</td></tr>
-<tr class="empatado"><td class="pos">10º<span class="sinal-empate" title="posição dividida">=</span></td><td class="clube"><span class="chip" style="background:#C8102E"></span><span>São Paulo</span><span class="mini-stats">30J · 11V · 6E · 13D · 43,3%</span></td><td>30</td><td>11</td><td>6</td><td>13</td><td class="pts">39</td><td class="aproveitamento">43,3%</td></tr>
-<tr class="empatado"><td class="pos">12º<span class="sinal-empate" title="posição dividida">=</span></td><td class="clube"><span class="chip" style="background:#1A1A1A"></span><span>Botafogo</span><span class="mini-stats">30J · 9V · 9E · 12D · 40,0%</span></td><td>30</td><td>9</td><td>9</td><td>12</td><td class="pts">36</td><td class="aproveitamento">40,0%</td></tr>
-<tr class="empatado"><td class="pos">12º<span class="sinal-empate" title="posição dividida">=</span></td><td class="clube"><span class="chip" style="background:#C8102E"></span><span>Vitória</span><span class="mini-stats">30J · 10V · 6E · 14D · 40,0%</span></td><td>30</td><td>10</td><td>6</td><td>14</td><td class="pts">36</td><td class="aproveitamento">40,0%</td></tr>
-<tr class=""><td class="pos">14º</td><td class="clube"><span class="chip" style="background:#1A1A1A"></span><span>Vasco</span><span class="mini-stats">29J · 9V · 8E · 12D · 40,2%</span></td><td>29</td><td>9</td><td>8</td><td>12</td><td class="pts">35</td><td class="aproveitamento">40,2%</td></tr>
-<tr class=""><td class="pos">15º</td><td class="clube"><span class="chip" style="background:#B58900"></span><span>Mirassol</span><span class="mini-stats">30J · 8V · 9E · 13D · 36,7%</span></td><td>30</td><td>8</td><td>9</td><td>13</td><td class="pts">33</td><td class="aproveitamento">36,7%</td></tr>
-<tr class="empatado"><td class="pos">16º<span class="sinal-empate" title="posição dividida">=</span></td><td class="clube"><span class="chip" style="background:#1A1A1A"></span><span>Corinthians</span><span class="mini-stats">30J · 8V · 8E · 14D · 35,6%</span></td><td>30</td><td>8</td><td>8</td><td>14</td><td class="pts">32</td><td class="aproveitamento">35,6%</td></tr>
-<tr class="z4 empatado"><td class="pos">16º<span class="sinal-empate" title="posição dividida">=</span></td><td class="clube"><span class="chip" style="background:#C8102E"></span><span>Internacional</span><span class="mini-stats">30J · 7V · 11E · 12D · 35,6%</span></td><td>30</td><td>7</td><td>11</td><td>12</td><td class="pts">32</td><td class="aproveitamento">35,6%</td></tr>
-<tr class="z4"><td class="pos">18º</td><td class="clube"><span class="chip" style="background:#0D80BF"></span><span>Grêmio</span><span class="mini-stats">30J · 7V · 10E · 13D · 34,4%</span></td><td>30</td><td>7</td><td>10</td><td>13</td><td class="pts">31</td><td class="aproveitamento">34,4%</td></tr>
-<tr class="z4"><td class="pos">19º</td><td class="clube"><span class="chip" style="background:#002776"></span><span>Remo</span><span class="mini-stats">30J · 5V · 10E · 15D · 27,8%</span></td><td>30</td><td>5</td><td>10</td><td>15</td><td class="pts">25</td><td class="aproveitamento">27,8%</td></tr>
-<tr class="z4"><td class="pos">20º</td><td class="clube"><span class="chip" style="background:#006B3F"></span><span>Chapecoense</span><span class="mini-stats">29J · 3V · 9E · 17D · 20,7%</span></td><td>29</td><td>3</td><td>9</td><td>17</td><td class="pts">18</td><td class="aproveitamento">20,7%</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="tabela-pe">
-          <span>20 clubes · 299 partidas · 813 pontos · fonte: Só Futebol — classificação do Brasileirão Série A 2026</span>
-          <a class="botao botao-escuro" href="relatorio.pdf" target="_blank" rel="noopener">Abrir tabela em PDF</a>
-        </div>
-      </div>
-    </section>
-
-    <section class="relatorios" id="relatorios">
-      <div class="secao-topo">
-        <div>
-          <h2>Um relatório, uma identidade</h2>
-          <p>A classificação em uma única peça editorial. Cada PDF é gerado pelo programa Python com o reportlab — o botão apenas abre o arquivo pronto.</p>
-        </div>
-      </div>
-      <div class="grade-relatorios">
-<article class="relatorio" style="--cor:#FFFFFF;--destaque:#E2231A"><a class="thumb" href="relatorio.pdf" target="_blank" rel="noopener" aria-label="Abrir o relatório Minimalista suíço em PDF"><span class="sem-miniatura" style="background:#FFFFFF;color:#E2231A">07</span></a><div class="rel-info"><span class="rel-num">07</span><h3>Minimalista suíço</h3><p>Grade tipográfica com faixas de zona verdes/vermelhas e distribuição V/E/D.</p><a class="rel-abrir" href="relatorio.pdf" target="_blank" rel="noopener">Abrir PDF</a></div></article>
-      </div>
-    </section>
-  </main>
+  <p class="nota">cada vitória vale 3 pontos e cada empate vale 1. Times com a mesma pontuação ocupam a mesma colocação, sem os critérios oficiais de desempate da CBF. G4: quatro primeiros. Z4: quatro últimos.</p>
+  <div class="acoes">
+    <a class="botao" href="relatorio.pdf" target="_blank" rel="noopener">Abrir relatório em PDF</a>
+  </div>
 
   <footer>
-    <div class="container">
-      <div>
-        <p><strong>Como a posição é calculada:</strong> cada vitória vale 3 pontos e cada empate vale 1. Times com a mesma pontuação ocupam a mesma colocação, sem os critérios oficiais de desempate da CBF. A zona de rebaixamento reúne as quatro últimas linhas da tabela.</p>
-        <p>Fonte: Só Futebol — classificação do Brasileirão Série A 2026 · dados de 14/10/2026 · planilha lida pelo Python.</p>
-      </div>
-      <div class="assinatura">
-        <p>POOI · 4º bimestre · 2026</p>
-      </div>
-    </div>
+    <p>Fonte: Só Futebol — classificação do Brasileirão Série A 2026 · dados de 14/10/2026 · planilha lida pelo Python.</p>
   </footer>
-</div>
 </body>
 </html>

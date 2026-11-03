@@ -67,13 +67,12 @@ Corinthians e Internacional terminam com **32 pontos** e, pela regra do projeto,
 
 Arquivo: **`classificacao.html`**
 
-- Placar de liderança com Flamengo (64) e Palmeiras (63).
-- Tabela completa com posição, clube, jogos, vitórias, empates, derrotas, pontos e aproveitamento.
-- G4 com fundo verde-claro e faixa amarela; Z4 com fundo vermelho-claro e faixa vermelha.
-- Empates na pontuação marcados com `=` e com a legenda “posição dividida”.
-- **Botão “Abrir classificação em PDF”** e **“Abrir tabela em PDF”**: os dois são apenas links para o PDF que o Python já gerou com reportlab. Nenhuma biblioteca web gera o PDF.
-- Galeria com o layout, cada card abrindo o respectivo PDF.
-- Layout responsivo: no celular, a tabela vira uma versão compacta com os números de cada clube abaixo do nome e o total de pontos sempre visível.
+- Cabeçalho editorial igual ao do PDF: “SÉRIE A 2026”, rodada, clubes e média.
+- Tabela com posição, clube, jogos, vitórias, empates, derrotas e pontos.
+- G4 com fundo verde-claro; Z4 com fundo vermelho-claro.
+- Empates na pontuação marcados com `=`.
+- Um único botão, **“Abrir relatório em PDF”**, que apenas abre o arquivo já gerado pelo Python.
+- Layout simples e responsivo, com a mesma tipografia e as mesmas cores do PDF.
 - A página não depende de internet: fontes do sistema e CSS embutido.
 
 ![Versão mobile da página](docs/web-mobile.png)
@@ -143,9 +142,7 @@ O HTML é gravado com `open(..., 'w')`, `write()` e `close()`; a página declara
 
 - **Outra planilha:** o leitor procura uma linha de cabeçalho que tenha `Time` e `Jogos`, e colunas com `Vitórias`, `Empates` e `Derrotas`. Linhas de título antes da tabela e linhas de fonte/observação depois são ignoradas. A planilha pode estar em qualquer aba.
 - **Fonte dos dados:** a planilha de exemplo é a fornecida pelo professor; a fonte citada no relatório é a que está na própria planilha.
-- **Galeria da página:** feita só com HTML/CSS, usando a paleta de cada relatório. Nenhuma biblioteca de imagem é necessária.
 - **Fontes:** o PDF usa as fontes internas do reportlab (Helvetica e Helvetica-Bold), sem depender de arquivos externos.
-- **Impressão:** a página web tem um bloco `@media print` que esconde botões e galeria e imprime a tabela.
 
 ---
 
