@@ -75,7 +75,7 @@
 
   <p class="nota">@@NOTA@@ G4: quatro primeiros. Z4: quatro últimos.</p>
   <div class="acoes">
-    <a class="botao" href="relatorio.pdf" target="_blank" rel="noopener">Abrir relatório em PDF</a>
+    <form action="relatorio.pdf" target="_blank"><button class="botao" type="submit">Abrir relatório em PDF</button></form>
   </div>
 
   <footer>
