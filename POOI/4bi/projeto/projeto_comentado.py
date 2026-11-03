@@ -50,7 +50,7 @@ def numero(valor):
     # Tenta converter; se não for número, devolve zero.
     try:
         return int(float(texto))
-    except ValueError:
+    except Exception:
         return 0
 
 
@@ -85,18 +85,27 @@ def ler_planilha(caminho):
                 if not vazio(valor):
                     normalizados.append(str(valor).upper().strip())
 
-            # Marcadores para saber se a linha tem Time e Jogos.
+            # Marcadores para saber se a linha tem as cinco colunas da tabela.
             tem_time = False
             tem_jogos = False
+            tem_vit = False
+            tem_emp = False
+            tem_der = False
             # Confere cada célula da linha.
             for valor in normalizados:
                 if 'TIME' in valor:
                     tem_time = True
                 if 'JOGOS' in valor:
                     tem_jogos = True
+                if 'VIT' in valor:
+                    tem_vit = True
+                if 'EMP' in valor:
+                    tem_emp = True
+                if 'DER' in valor:
+                    tem_der = True
 
-            # Encontrou o cabeçalho: guarda a linha e para a busca.
-            if tem_time and tem_jogos:
+            # Só aceita a linha como cabeçalho se tiver as cinco colunas.
+            if tem_time and tem_jogos and tem_vit and tem_emp and tem_der:
                 linha_cabecalho = i
                 break
 
@@ -158,9 +167,6 @@ def ler_planilha(caminho):
                 break
             # Converte o número de jogos para inteiro.
             jogos = numero(valor_jogos)
-            # Time sem jogos não entra na classificação.
-            if jogos == 0:
-                break
 
             # Lê somente Vitórias, Empates e Derrotas.
             vitorias = numero(tabela.iloc[i, colunas['vitorias']])
@@ -234,13 +240,9 @@ def classificar(dados):
         else:
             time['posicao'] = i + 1
         time['indice'] = i
-        # Com pelo menos 8 times, marca 4 primeiros e 4 últimos.
-        if len(ordenados) >= 8:
-            time['g4'] = i < 4
-            time['z4'] = i >= len(ordenados) - 4
-        else:
-            time['g4'] = True
-            time['z4'] = False
+        # G4 tem prioridade; com menos de 8 times, o Z4 não invade o G4.
+        time['g4'] = i < 4
+        time['z4'] = i >= len(ordenados) - 4 and i >= 4
 
     # Descobre quais times estão empatados.
     for i in range(len(ordenados)):
@@ -538,7 +540,7 @@ def gerar_pagina(dados, caminho_html):
     media = f'{dados["media_pontos"]:.2f}'.replace('.', ',')
 
     # Abre o arquivo texto que contém o HTML.
-    modelo = open('modelo_pagina.txt')
+    modelo = open('modelo_pagina.txt', 'r')
     html = modelo.read()
     modelo.close()
 

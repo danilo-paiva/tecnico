@@ -53,6 +53,7 @@ Depois de gerar, abra o arquivo `classificacao.html` no navegador.
 - **Times com a mesma pontuação ocupam a mesma posição** (`1º`, `2º`, `2º`, `4º`…), como pede o projeto, sem os critérios oficiais de desempate da CBF. Dentro do empate, a ordem de exibição usa apenas o nome do clube — mas a posição continua igual.
 - **G4**: as quatro primeiras linhas da tabela.
 - **Z4**: as quatro últimas linhas da tabela.
+- Com menos de 8 times, o G4 tem prioridade e o Z4 só começa depois do 4º colocado.
 - Como a planilha tem Vasco e Chapecoense com 29 jogos, o programa não faz média nem projeção: usa os números exatamente como estão na planilha.
 
 ### O caso da 16ª posição
@@ -72,6 +73,7 @@ Arquivo: **`classificacao.html`**
 - Um único botão, **“Abrir relatório em PDF”**, que apenas abre o arquivo já gerado pelo Python.
 - Layout simples e responsivo, com a mesma tipografia e as mesmas cores do PDF.
 - A página não depende de internet: fontes do sistema e CSS embutido.
+- O HTML é gravado em cp1252, coerente com o `meta windows-1252`; execute no Windows para manter os acentos.
 
 ![Versão mobile da página](docs/web-mobile.png)
 
@@ -91,7 +93,7 @@ O relatório usa os mesmos dados e o mesmo cálculo da página; muda apenas a li
 |---|---|
 | <img src="docs/relatorios/07.png" width="220"> | O layout 07 reúne a grade tipográfica, as posições verdes do G4 e vermelhas do Z4 e a distribuição V/E/D de cada clube. Na página web, as linhas do G4 e do Z4 têm fundo verde/vermelho. |
 
-O PDF e o HTML ficam na pasta do programa e são gerados novamente a cada execução.
+O PDF e o HTML ficam no diretório de onde o programa é executado. Rode `python projeto.py` dentro da pasta do projeto para encontrar a planilha e o modelo.
 
 ---
 

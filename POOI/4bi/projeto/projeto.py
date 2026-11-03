@@ -40,7 +40,7 @@ def numero(valor):
     texto = str(valor).strip().replace(' ', '').replace(',', '.')
     try:
         return int(float(texto))
-    except ValueError:
+    except Exception:
         return 0
 
 
@@ -69,13 +69,22 @@ def ler_planilha(caminho):
 
             tem_time = False
             tem_jogos = False
+            tem_vit = False
+            tem_emp = False
+            tem_der = False
             for valor in normalizados:
                 if 'TIME' in valor:
                     tem_time = True
                 if 'JOGOS' in valor:
                     tem_jogos = True
+                if 'VIT' in valor:
+                    tem_vit = True
+                if 'EMP' in valor:
+                    tem_emp = True
+                if 'DER' in valor:
+                    tem_der = True
 
-            if tem_time and tem_jogos:
+            if tem_time and tem_jogos and tem_vit and tem_emp and tem_der:
                 linha_cabecalho = i
                 break
 
@@ -121,8 +130,6 @@ def ler_planilha(caminho):
             if vazio(valor_jogos):
                 break
             jogos = numero(valor_jogos)
-            if jogos == 0:
-                break
 
             vitorias = numero(tabela.iloc[i, colunas['vitorias']])
             empates = numero(tabela.iloc[i, colunas['empates']])
@@ -178,12 +185,8 @@ def classificar(dados):
         else:
             time['posicao'] = i + 1
         time['indice'] = i
-        if len(ordenados) >= 8:
-            time['g4'] = i < 4
-            time['z4'] = i >= len(ordenados) - 4
-        else:
-            time['g4'] = True
-            time['z4'] = False
+        time['g4'] = i < 4
+        time['z4'] = i >= len(ordenados) - 4 and i >= 4
 
     for i in range(len(ordenados)):
         time = ordenados[i]
@@ -423,7 +426,7 @@ def gerar_pagina(dados, caminho_html):
     """Lê o modelo txt e grava a página com os dados da classificação."""
     media = f'{dados["media_pontos"]:.2f}'.replace('.', ',')
 
-    modelo = open('modelo_pagina.txt')
+    modelo = open('modelo_pagina.txt', 'r')
     html = modelo.read()
     modelo.close()
 
