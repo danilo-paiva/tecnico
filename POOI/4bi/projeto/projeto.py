@@ -21,28 +21,6 @@ from reportlab.pdfgen import canvas
 # 1) LEITURA DA PLANILHA E CÁLCULO
 # ===========================================================================
 
-def sem_acento(texto):
-    """Remove acentos para comparar cabeçalhos e nomes."""
-    texto = str(texto)
-    trocas = [
-        ('á', 'a'), ('à', 'a'), ('â', 'a'), ('ã', 'a'), ('ä', 'a'),
-        ('é', 'e'), ('è', 'e'), ('ê', 'e'), ('ë', 'e'),
-        ('í', 'i'), ('ì', 'i'), ('î', 'i'), ('ï', 'i'),
-        ('ó', 'o'), ('ò', 'o'), ('ô', 'o'), ('õ', 'o'), ('ö', 'o'),
-        ('ú', 'u'), ('ù', 'u'), ('û', 'u'), ('ü', 'u'),
-        ('ç', 'c'), ('ñ', 'n'),
-        ('Á', 'A'), ('À', 'A'), ('Â', 'A'), ('Ã', 'A'), ('Ä', 'A'),
-        ('É', 'E'), ('È', 'E'), ('Ê', 'E'), ('Ë', 'E'),
-        ('Í', 'I'), ('Ì', 'I'), ('Î', 'I'), ('Ï', 'I'),
-        ('Ó', 'O'), ('Ò', 'O'), ('Ô', 'O'), ('Õ', 'O'), ('Ö', 'O'),
-        ('Ú', 'U'), ('Ù', 'U'), ('Û', 'U'), ('Ü', 'U'),
-        ('Ç', 'C'), ('Ñ', 'N'),
-    ]
-    for antigo, novo in trocas:
-        texto = texto.replace(antigo, novo)
-    return texto
-
-
 def vazio(valor):
     """True quando a célula está vazia."""
     texto = str(valor).strip()
@@ -66,35 +44,6 @@ def numero(valor):
         return 0
 
 
-def pegar_data(texto):
-    """Procura uma data dd/mm/aaaa dentro de um texto."""
-    palavras = str(texto).split()
-    for palavra in palavras:
-        palavra = palavra.replace('.', '').replace(',', '').replace(';', '').replace(':', '').replace('(', '').replace(')', '').replace('[', '').replace(']', '')
-        if len(palavra) == 10 and palavra[2] == '/' and palavra[5] == '/':
-            if palavra[0:2].isnumeric() and palavra[3:5].isnumeric() and palavra[6:10].isnumeric():
-                return palavra
-    return ''
-
-
-def pegar_rodada(texto):
-    """Procura 'rodada 30' dentro de um texto."""
-    texto = sem_acento(str(texto)).upper()
-    posicao = texto.find('RODADA')
-    if posicao == -1:
-        return 0
-    i = posicao + 6
-    while i < len(texto) and not texto[i].isnumeric():
-        i += 1
-    numero_texto = ''
-    while i < len(texto) and texto[i].isnumeric():
-        numero_texto += texto[i]
-        i += 1
-    if numero_texto != '':
-        return int(numero_texto)
-    return 0
-
-
 def ler_planilha(caminho):
     """Lê o .xlsx e devolve os dados da classificação."""
     try:
@@ -116,7 +65,7 @@ def ler_planilha(caminho):
             normalizados = []
             for valor in valores:
                 if not vazio(valor):
-                    normalizados.append(sem_acento(valor).upper().strip())
+                    normalizados.append(str(valor).upper().strip())
 
             tem_time = False
             tem_jogos = False
@@ -136,16 +85,16 @@ def ler_planilha(caminho):
         colunas = {'time': -1, 'jogos': -1, 'vitorias': -1, 'empates': -1, 'derrotas': -1}
         for i in range(len(tabela.columns)):
             valor = tabela.iloc[linha_cabecalho, i]
-            nome = sem_acento(valor).upper().strip()
+            nome = str(valor).upper().strip()
             if 'TIME' in nome and colunas['time'] == -1:
                 colunas['time'] = i
             if 'JOGOS' in nome and colunas['jogos'] == -1:
                 colunas['jogos'] = i
-            if 'VITORIA' in nome and colunas['vitorias'] == -1:
+            if 'VIT' in nome and colunas['vitorias'] == -1:
                 colunas['vitorias'] = i
-            if 'EMPATE' in nome and colunas['empates'] == -1:
+            if 'EMP' in nome and colunas['empates'] == -1:
                 colunas['empates'] = i
-            if 'DERROTA' in nome and colunas['derrotas'] == -1:
+            if 'DER' in nome and colunas['derrotas'] == -1:
                 colunas['derrotas'] = i
 
         if colunas['time'] == -1:
@@ -166,12 +115,6 @@ def ler_planilha(caminho):
         else:
             titulo = 'CAMPEONATO BRASILEIRO'
 
-        consulta = ''
-        for texto in textos_acima:
-            if 'DADOS' in sem_acento(texto).upper():
-                consulta = texto
-                break
-
         times = []
         linhas_vazias = 0
         for i in range(linha_cabecalho + 1, len(tabela)):
@@ -187,7 +130,7 @@ def ler_planilha(caminho):
             # A linha de fonte/observação pode estar em qualquer coluna.
             linha_tem_rotulo = False
             for j in range(len(tabela.columns)):
-                texto_linha = sem_acento(tabela.iloc[i, j]).upper()
+                texto_linha = str(tabela.iloc[i, j]).upper()
                 if 'FONTE' in texto_linha:
                     linha_tem_rotulo = True
                 if 'OBSERVACAO' in texto_linha:
@@ -228,7 +171,7 @@ def ler_planilha(caminho):
         for i in range(linha_cabecalho + 1, len(tabela)):
             for j in range(len(tabela.columns)):
                 valor = tabela.iloc[i, j]
-                if 'FONTE' in sem_acento(valor).upper():
+                if 'FONTE' in str(valor).upper():
                     for k in range(j + 1, len(tabela.columns)):
                         proximo = tabela.iloc[i, k]
                         if not vazio(proximo):
@@ -238,17 +181,10 @@ def ler_planilha(caminho):
             if fonte != '':
                 break
 
-        data_consulta = pegar_data(consulta)
-        if data_consulta == '':
-            data_consulta = pegar_data(titulo)
-
         dados = {
             'arquivo': caminho,
             'aba': nome_aba,
             'titulo': titulo,
-            'consulta': consulta,
-            'data_consulta': data_consulta,
-            'rodada': pegar_rodada(consulta),
             'fonte': fonte,
             'times': times,
         }
@@ -278,7 +214,7 @@ def classificar(dados):
                 posicao = i
                 break
             if time['pontos'] == atual['pontos']:
-                if sem_acento(time['time']).upper() < sem_acento(atual['time']).upper():
+                if time['time'].upper() < atual['time'].upper():
                     posicao = i
                     break
         ordenados.insert(posicao, time)
@@ -349,8 +285,6 @@ def imprimir_classificacao(dados):
     """Mostra a classificação no terminal."""
     print()
     print(dados['titulo'])
-    if dados['consulta']:
-        print(dados['consulta'])
     print()
     print('POS  TIME                   J    V    E    D   PTS   APROV.')
     print('-' * 66)
@@ -413,17 +347,9 @@ def layout_07_minimalista(dados, caminho):
     texto(pdf, 48, 768, 'SÉRIE A', 40, 'Helvetica-Bold', tinta)
     texto(pdf, 48, 726, '2026', 40, 'Helvetica', '#B9B9B9')
 
-    data = dados['data_consulta']
-    if data == '':
-        data = 'data não informada'
-    texto(pdf, 50, 704, f'Classificação após {dados["total_partidas"]} partidas  ·  dados de {data}', 7.5, 'Helvetica', cinza)
+    texto(pdf, 50, 704, f'Classificação após {dados["total_partidas"]} partidas', 7.5, 'Helvetica', cinza)
 
-    if dados['rodada'] == 0:
-        rodada = '-'
-    else:
-        rodada = str(dados['rodada'])
     metadados = [
-        ('RODADA', rodada),
         ('CLUBES', str(dados['total_times'])),
         ('MÉDIA', f'{dados["media_pontos"]:.2f}'.replace('.', ',')),
     ]
@@ -560,15 +486,9 @@ def montar_linhas(dados):
 
 def gerar_pagina(dados, caminho_html):
     """Cria uma página simples, no mesmo estilo do PDF."""
-    data = dados['data_consulta']
-    if data == '':
-        data = 'data não informada'
     fonte = dados['fonte']
     if fonte == '':
         fonte = 'Planilha da CBF'
-    rodada = dados['rodada']
-    if rodada == 0:
-        rodada = '-'
 
     html = f'''<!DOCTYPE html>
 <html lang="pt-BR">
@@ -619,11 +539,10 @@ def gerar_pagina(dados, caminho_html):
   <header class="cabecalho">
     <div class="kicker">Campeonato Brasileiro · Série A</div>
     <h1>SÉRIE A <span>2026</span></h1>
-    <p class="sub">Classificação após {dados['total_partidas']} partidas · dados de {escapar(data)}</p>
+    <p class="sub">Classificação após {dados['total_partidas']} partidas</p>
   </header>
 
   <div class="meta">
-    <div>Rodada<strong>{rodada}</strong></div>
     <div>Clubes<strong>{dados['total_times']}</strong></div>
     <div>Média<strong>{f'{dados["media_pontos"]:.2f}'.replace('.', ',')}</strong></div>
   </div>
@@ -652,7 +571,7 @@ def gerar_pagina(dados, caminho_html):
   </div>
 
   <footer>
-    <p>Fonte: {escapar(fonte)} · dados de {escapar(data)} · planilha lida pelo Python.</p>
+    <p>Fonte: {escapar(fonte)} · planilha lida pelo Python.</p>
   </footer>
 </body>
 </html>

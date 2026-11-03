@@ -67,7 +67,7 @@ Corinthians e Internacional terminam com **32 pontos** e, pela regra do projeto,
 
 Arquivo: **`classificacao.html`**
 
-- Cabeçalho editorial igual ao do PDF: “SÉRIE A 2026”, rodada, clubes e média.
+- Cabeçalho editorial igual ao do PDF: “SÉRIE A 2026”, clubes e média.
 - Tabela com posição, clube, jogos, vitórias, empates, derrotas e pontos.
 - G4 com fundo verde-claro; Z4 com fundo vermelho-claro.
 - Empates na pontuação marcados com `=`.
