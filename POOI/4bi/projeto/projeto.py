@@ -166,15 +166,19 @@ def classificar(dados):
         else:
             time['aproveitamento'] = 0
 
-    # Ordena por pontos (maior primeiro) e, no empate, pelo nome.
-    tabela_ordenada = pd.DataFrame(times)
-    tabela_ordenada = tabela_ordenada.sort_values(
-        by=['pontos', 'time'],
-        ascending=[False, True]
-    )
-    ordenados = tabela_ordenada.to_dict('records')
-
-
+    ordenados = []
+    for time in times:
+        posicao = len(ordenados)
+        for i in range(len(ordenados)):
+            atual = ordenados[i]
+            if time['pontos'] > atual['pontos']:
+                posicao = i
+                break
+            if time['pontos'] == atual['pontos']:
+                if time['time'].upper() < atual['time'].upper():
+                    posicao = i
+                    break
+        ordenados.insert(posicao, time)
 
     for i in range(len(ordenados)):
         time = ordenados[i]
