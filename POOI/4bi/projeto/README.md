@@ -27,14 +27,10 @@ Requisitos: Python 3.10 ou superior.
 
 ```bash
 pip install -r requirements.txt
-python main.py
+python projeto.py
 ```
 
-Há duas versões do arquivo principal:
-
-- `main.py` — versão **principal**, sem comentários, para entregar;
-- `main_comentado.py` — mesma lógica, com cada etapa explicada, para estudar e apresentar;
-- `comentado/` — projeto completo com versões comentadas de todos os módulos.
+Todo o projeto está em um único arquivo: **`projeto.py`**, organizado em seções comentadas.
 
 O menu interativo oferece:
 
@@ -63,7 +59,7 @@ Depois de gerar, abra o arquivo `classificacao.html` no navegador.
 
 ### O caso da 16ª posição
 
-Corinthians e Internacional terminam com **32 pontos** e, pela regra do projeto, os dois ficam na **16ª posição**. Como o Z4 é definido pelas quatro últimas linhas, o **Internacional** aparece no Z4 e o Corinthians não. O Z4 usa sempre as quatro últimas linhas; o programa não aplica desempate por nome nessa borda. Se o professor preferir outra interpretação, basta mudar a linha que define `time['z4']` em `dados.py`.
+Corinthians e Internacional terminam com **32 pontos** e, pela regra do projeto, os dois ficam na **16ª posição**. Como o Z4 é definido pelas quatro últimas linhas, o **Internacional** aparece no Z4 e o Corinthians não. O Z4 usa sempre as quatro últimas linhas; o programa não aplica desempate por nome nessa borda. Se o professor preferir outra interpretação, basta mudar a linha que define `time['z4']` em `projeto.py`.
 
 ---
 
@@ -106,17 +102,11 @@ O PDF e o HTML ficam na pasta do programa e são gerados novamente a cada execu�
 
 ```text
 POOI/4bi/projeto/
-├── main.py                 # versão principal, sem comentários
-├── main_comentado.py       # mesma versão, comentada para estudo
-├── comentado/              # todos os módulos comentados (versão de estudo)
-├── dados.py                # leitura do Excel, pontos, posições e estatísticas
-├── relatorios.py           # funções de desenho + layout em reportlab
-├── pagina_web.py           # gera o HTML da classificação e a galeria
-├── clubes.py               # cores e apelidos dos 20 clubes
+├── projeto.py              # todo o código: dados, PDF, página e menu
 ├── planilha/
 │   └── projeto4bi.xlsx     # planilha de exemplo da CBF
 ├── classificacao.html      # página gerada
-├── relatorio.pdf # relatório gerado
+├── relatorio.pdf           # relatório gerado
 ├── docs/                   # prévias para o README
 ├── requirements.txt
 └── README.md
@@ -128,10 +118,10 @@ POOI/4bi/projeto/
 
 | Conteúdo da apostila | Onde aparece |
 |---|---|
-| **38 — Arquivos texto** (`open`, `write`, `close`) | `pagina_web.py` grava o HTML com `open(..., 'w')`, `write()` e `close()`. |
-| **39 — PDF com reportlab** (`Canvas`, `setFont`, `setFillColor`, `drawString`, `setTitle`, `save`) | O layout em `relatorios.py`. |
-| **40 — pandas / openpyxl** (`ExcelFile`, `parse`, `sheet_names`, `iloc`) | `dados.py` lê a planilha, encontra a linha de cabeçalho e percorre as linhas. |
-| **Funções, listas, dicionários, laços, f-strings** | Em todos os módulos. |
+| **38 — Arquivos texto** (`open`, `write`, `close`) | `projeto.py` grava o HTML com `open(..., 'w')`, `write()` e `close()`. |
+| **39 — PDF com reportlab** (`Canvas`, `setFont`, `setFillColor`, `drawString`, `setTitle`, `save`) | O layout em `projeto.py`. |
+| **40 — pandas / openpyxl** (`ExcelFile`, `parse`, `sheet_names`, `iloc`) | `projeto.py` lê a planilha, encontra a linha de cabeçalho e percorre as linhas. |
+| **Funções, listas, dicionários, laços, f-strings** | Em todo o `projeto.py`. |
 
 ### Comandos de desenho usados no PDF
 
@@ -170,4 +160,4 @@ O HTML é gravado com `open(..., 'w')`, `write()` e `close()`; a página declara
 - [x] Página web com botão que abre a classificação em PDF.
 - [x] PDF gerado exclusivamente por Python/reportlab.
 - [x] **layout 07 (Minimalista suíço)**, além do layout da página web.
-- [x] Código comentado e organizado por assunto da apostila.
+- [x] Código organizado em seções comentadas dentro de `projeto.py`.

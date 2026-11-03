@@ -1,20 +1,601 @@
 # -*- coding: utf-8 -*-
-# VERSÃO COMENTADA PARA ESTUDO — o código principal é o da pasta anterior.
 """
-Página web do projeto.
+Projeto POOI — 4º bimestre
+Classificação do Campeonato Brasileiro Série A 2026
 
-O Python lê a planilha, calcula a classificação e ESCREVE o arquivo .html
-(conteúdo do 4º bimestre: arquivos texto). O botão de PDF é apenas um link
-para o arquivo que o relatorios.py já gerou com o reportlab.
+Arquivo único do projeto:
+- lê a planilha .xlsx com pandas;
+- calcula a classificação (3/1/0);
+- gera a página classificacao.html;
+- gera o PDF relatorio.pdf com reportlab.
 
-A galeria usa apenas HTML e CSS: cada card mostra a paleta do relatório e o
-seu número. Nenhuma biblioteca externa de imagem é necessária.
+Execute:
+    python projeto.py
 """
 
-import relatorios
+import pandas as pd
+from reportlab.pdfgen import canvas
 
 
-# Protege o HTML contra caracteres especiais.
+# ===========================================================================
+# 1) CLUBES
+# ===========================================================================
+
+CORES_TIMES = {
+    'Athletico-PR':      ('#C4122E', '#111111', 'Athletico-PR'),
+    'Atlético-MG':       ('#1A1A1A', '#FFFFFF', 'Atlético-MG'),
+    'Bahia':             ('#0057A0', '#E30613', 'Bahia'),
+    'Botafogo':          ('#1A1A1A', '#FFFFFF', 'Botafogo'),
+    'Chapecoense':       ('#006B3F', '#FFFFFF', 'Chapecoense'),
+    'Corinthians':       ('#1A1A1A', '#FFFFFF', 'Corinthians'),
+    'Coritiba':          ('#005C3B', '#FFFFFF', 'Coritiba'),
+    'Cruzeiro':          ('#003DA5', '#FFFFFF', 'Cruzeiro'),
+    'Flamengo':          ('#C8102E', '#111111', 'Flamengo'),
+    'Fluminense':        ('#7A0C2E', '#00613F', 'Fluminense'),
+    'Grêmio':            ('#0D80BF', '#111111', 'Grêmio'),
+    'Internacional':     ('#C8102E', '#FFFFFF', 'Internacional'),
+    'Mirassol':          ('#B58900', '#006B3F', 'Mirassol'),
+    'Palmeiras':         ('#006437', '#FFFFFF', 'Palmeiras'),
+    'Red Bull Bragantino': ('#D71920', '#FFFFFF', 'Bragantino'),
+    'Remo':              ('#002776', '#FFFFFF', 'Remo'),
+    'Santos':            ('#1A1A1A', '#E8E8E8', 'Santos'),
+    'São Paulo':         ('#C8102E', '#111111', 'São Paulo'),
+    'Vasco':             ('#1A1A1A', '#FFFFFF', 'Vasco'),
+    'Vitória':           ('#C8102E', '#111111', 'Vitória'),
+}
+
+# Cores usadas quando o time não está no dicionário acima.
+PALETA_RESERVA = [
+    '#1D4ED8', '#0E7C7B', '#B45309', '#7E22CE', '#BE123C',
+    '#0F766E', '#4338CA', '#A16207', '#9D174D', '#155E75',
+    '#4D7C0F', '#7C2D12', '#1E3A8A', '#86198F', '#065F46',
+    '#92400E', '#312E81', '#9F1239', '#115E59', '#3F3F46',
+]
+
+
+def identidade(nome, indice=0):
+    """Devolve (cor principal, cor secundária, apelido) de um clube."""
+    if nome in CORES_TIMES:
+        return CORES_TIMES[nome]
+    cor = PALETA_RESERVA[indice % len(PALETA_RESERVA)]
+    return (cor, '#FFFFFF', nome)
+
+
+
+
+
+# ===========================================================================
+# 2) LEITURA DA PLANILHA E CÁLCULO
+# ===========================================================================
+
+def sem_acento(texto):
+    """Remove acentos para comparar cabeçalhos e nomes."""
+    texto = str(texto)
+    trocas = [
+        ('á', 'a'), ('à', 'a'), ('â', 'a'), ('ã', 'a'), ('ä', 'a'),
+        ('é', 'e'), ('è', 'e'), ('ê', 'e'), ('ë', 'e'),
+        ('í', 'i'), ('ì', 'i'), ('î', 'i'), ('ï', 'i'),
+        ('ó', 'o'), ('ò', 'o'), ('ô', 'o'), ('õ', 'o'), ('ö', 'o'),
+        ('ú', 'u'), ('ù', 'u'), ('û', 'u'), ('ü', 'u'),
+        ('ç', 'c'), ('ñ', 'n'),
+        ('Á', 'A'), ('À', 'A'), ('Â', 'A'), ('Ã', 'A'), ('Ä', 'A'),
+        ('É', 'E'), ('È', 'E'), ('Ê', 'E'), ('Ë', 'E'),
+        ('Í', 'I'), ('Ì', 'I'), ('Î', 'I'), ('Ï', 'I'),
+        ('Ó', 'O'), ('Ò', 'O'), ('Ô', 'O'), ('Õ', 'O'), ('Ö', 'O'),
+        ('Ú', 'U'), ('Ù', 'U'), ('Û', 'U'), ('Ü', 'U'),
+        ('Ç', 'C'), ('Ñ', 'N'),
+    ]
+    for antigo, novo in trocas:
+        texto = texto.replace(antigo, novo)
+    return texto
+
+
+def vazio(valor):
+    """True quando a célula está vazia."""
+    texto = str(valor).strip()
+    if texto == '':
+        return True
+    if texto.upper() == 'NAN':
+        return True
+    if texto.upper() == 'NONE':
+        return True
+    return False
+
+
+def numero(valor):
+    """Converte a célula em inteiro, aceitando 30, 30.0, '30' e '30,0'."""
+    if vazio(valor):
+        return 0
+    texto = str(valor).strip().replace(' ', '').replace(',', '.')
+    try:
+        return int(float(texto))
+    except ValueError:
+        return 0
+
+
+def pegar_data(texto):
+    """Procura uma data dd/mm/aaaa dentro de um texto."""
+    palavras = str(texto).split()
+    for palavra in palavras:
+        palavra = palavra.replace('.', '').replace(',', '').replace(';', '').replace(':', '').replace('(', '').replace(')', '').replace('[', '').replace(']', '')
+        if len(palavra) == 10 and palavra[2] == '/' and palavra[5] == '/':
+            if palavra[0:2].isnumeric() and palavra[3:5].isnumeric() and palavra[6:10].isnumeric():
+                return palavra
+    return ''
+
+
+def pegar_rodada(texto):
+    """Procura 'rodada 30' dentro de um texto."""
+    texto = sem_acento(str(texto)).upper()
+    posicao = texto.find('RODADA')
+    if posicao == -1:
+        return 0
+    i = posicao + 6
+    while i < len(texto) and not texto[i].isnumeric():
+        i += 1
+    numero_texto = ''
+    while i < len(texto) and texto[i].isnumeric():
+        numero_texto += texto[i]
+        i += 1
+    if numero_texto != '':
+        return int(numero_texto)
+    return 0
+
+
+def ler_planilha(caminho):
+    """Lê o .xlsx e devolve os dados da classificação."""
+    try:
+        arquivo_excel = pd.ExcelFile(caminho)
+    except Exception as erro:
+        print(f'Não foi possível abrir a planilha: {erro}')
+        return {}
+
+    for nome_aba in arquivo_excel.sheet_names:
+        # header=None mantém as linhas de título acima da tabela.
+        tabela = arquivo_excel.parse(nome_aba, header=None)
+
+        linha_cabecalho = -1
+        for i in range(len(tabela)):
+            valores = []
+            for j in range(len(tabela.columns)):
+                valores.append(tabela.iloc[i, j])
+
+            normalizados = []
+            for valor in valores:
+                if not vazio(valor):
+                    normalizados.append(sem_acento(valor).upper().strip())
+
+            tem_time = False
+            tem_jogos = False
+            for valor in normalizados:
+                if 'TIME' in valor:
+                    tem_time = True
+                if 'JOGOS' in valor:
+                    tem_jogos = True
+
+            if tem_time and tem_jogos:
+                linha_cabecalho = i
+                break
+
+        if linha_cabecalho == -1:
+            continue
+
+        colunas = {'time': -1, 'jogos': -1, 'vitorias': -1, 'empates': -1, 'derrotas': -1}
+        for i in range(len(tabela.columns)):
+            valor = tabela.iloc[linha_cabecalho, i]
+            nome = sem_acento(valor).upper().strip()
+            if 'TIME' in nome and colunas['time'] == -1:
+                colunas['time'] = i
+            if 'JOGOS' in nome and colunas['jogos'] == -1:
+                colunas['jogos'] = i
+            if 'VITORIA' in nome and colunas['vitorias'] == -1:
+                colunas['vitorias'] = i
+            if 'EMPATE' in nome and colunas['empates'] == -1:
+                colunas['empates'] = i
+            if 'DERROTA' in nome and colunas['derrotas'] == -1:
+                colunas['derrotas'] = i
+
+        if colunas['time'] == -1:
+            continue
+        if colunas['vitorias'] == -1 or colunas['empates'] == -1 or colunas['derrotas'] == -1:
+            print('A planilha precisa das colunas Vitórias, Empates e Derrotas.')
+            continue
+
+        textos_acima = []
+        for i in range(linha_cabecalho):
+            for j in range(len(tabela.columns)):
+                valor = tabela.iloc[i, j]
+                if not vazio(valor):
+                    textos_acima.append(str(valor).strip())
+
+        if len(textos_acima) > 0:
+            titulo = textos_acima[0]
+        else:
+            titulo = 'CAMPEONATO BRASILEIRO'
+
+        consulta = ''
+        for texto in textos_acima:
+            if 'DADOS' in sem_acento(texto).upper():
+                consulta = texto
+                break
+
+        times = []
+        indice_cor = 0
+        linhas_vazias = 0
+        for i in range(linha_cabecalho + 1, len(tabela)):
+            nome_time = tabela.iloc[i, colunas['time']]
+
+            if vazio(nome_time):
+                linhas_vazias += 1
+                if linhas_vazias >= 3:
+                    break
+                continue
+            linhas_vazias = 0
+
+            # A linha de fonte/observação pode estar em qualquer coluna.
+            linha_tem_rotulo = False
+            for j in range(len(tabela.columns)):
+                texto_linha = sem_acento(tabela.iloc[i, j]).upper()
+                if 'FONTE' in texto_linha:
+                    linha_tem_rotulo = True
+                if 'OBSERVACAO' in texto_linha:
+                    linha_tem_rotulo = True
+            if linha_tem_rotulo:
+                break
+
+            nome_time = str(nome_time).strip()
+
+            jogos = 0
+            vitorias = 0
+            empates = 0
+            derrotas = 0
+            if colunas['jogos'] != -1:
+                jogos = numero(tabela.iloc[i, colunas['jogos']])
+            if colunas['vitorias'] != -1:
+                vitorias = numero(tabela.iloc[i, colunas['vitorias']])
+            if colunas['empates'] != -1:
+                empates = numero(tabela.iloc[i, colunas['empates']])
+            if colunas['derrotas'] != -1:
+                derrotas = numero(tabela.iloc[i, colunas['derrotas']])
+
+            if jogos == 0:
+                jogos = vitorias + empates + derrotas
+
+            cor, cor_secundaria, apelido = identidade(nome_time, indice_cor)
+            times.append({
+                'time': nome_time,
+                'apelido': apelido,
+                'jogos': jogos,
+                'vitorias': vitorias,
+                'empates': empates,
+                'derrotas': derrotas,
+                'cor': cor,
+                'cor_secundaria': cor_secundaria,
+            })
+            indice_cor += 1
+
+        if len(times) == 0:
+            continue
+
+        fonte = ''
+        for i in range(linha_cabecalho + 1, len(tabela)):
+            for j in range(len(tabela.columns)):
+                valor = tabela.iloc[i, j]
+                if 'FONTE' in sem_acento(valor).upper():
+                    for k in range(j + 1, len(tabela.columns)):
+                        proximo = tabela.iloc[i, k]
+                        if not vazio(proximo):
+                            fonte = str(proximo).strip()
+                            break
+                    break
+            if fonte != '':
+                break
+
+        data_consulta = pegar_data(consulta)
+        if data_consulta == '':
+            data_consulta = pegar_data(titulo)
+
+        dados = {
+            'arquivo': caminho,
+            'aba': nome_aba,
+            'titulo': titulo,
+            'consulta': consulta,
+            'data_consulta': data_consulta,
+            'rodada': pegar_rodada(consulta),
+            'fonte': fonte,
+            'times': times,
+        }
+        return classificar(dados)
+
+    print('A planilha não tem uma tabela com as colunas Time e Jogos.')
+    return {}
+
+
+def classificar(dados):
+    """Calcula pontos, ordena e define a posição de cada time."""
+    times = dados['times']
+
+    for time in times:
+        time['pontos'] = time['vitorias'] * 3 + time['empates']
+        if time['jogos'] > 0:
+            time['aproveitamento'] = time['pontos'] / (time['jogos'] * 3) * 100
+        else:
+            time['aproveitamento'] = 0
+
+    ordenados = []
+    for time in times:
+        posicao = len(ordenados)
+        for i in range(len(ordenados)):
+            atual = ordenados[i]
+            if time['pontos'] > atual['pontos']:
+                posicao = i
+                break
+            if time['pontos'] == atual['pontos']:
+                if sem_acento(time['time']).upper() < sem_acento(atual['time']).upper():
+                    posicao = i
+                    break
+        ordenados.insert(posicao, time)
+
+    for i in range(len(ordenados)):
+        time = ordenados[i]
+        if i > 0 and time['pontos'] == ordenados[i - 1]['pontos']:
+            time['posicao'] = ordenados[i - 1]['posicao']
+        else:
+            time['posicao'] = i + 1
+        time['indice'] = i
+        if len(ordenados) >= 8:
+            time['g4'] = i < 4
+            time['z4'] = i >= len(ordenados) - 4
+        else:
+            time['g4'] = True
+            time['z4'] = False
+
+    for i in range(len(ordenados)):
+        time = ordenados[i]
+        empatado = False
+        if i > 0 and time['pontos'] == ordenados[i - 1]['pontos']:
+            empatado = True
+        if i < len(ordenados) - 1 and time['pontos'] == ordenados[i + 1]['pontos']:
+            empatado = True
+        time['empatado'] = empatado
+
+        if empatado:
+            time['posicao_texto'] = str(time['posicao']) + 'º='
+        else:
+            time['posicao_texto'] = str(time['posicao']) + 'º'
+
+    total_jogos = 0
+    total_pontos = 0
+    for time in ordenados:
+        total_jogos += time['jogos']
+        total_pontos += time['pontos']
+
+    dados['times'] = ordenados
+    dados['total_times'] = len(ordenados)
+    dados['total_partidas'] = total_jogos // 2
+    dados['total_pontos'] = total_pontos
+
+    if dados['total_partidas'] > 0:
+        dados['media_pontos'] = total_pontos / dados['total_partidas']
+    else:
+        dados['media_pontos'] = 0
+
+    dados['lider'] = ordenados[0]
+    dados['lanterna'] = ordenados[-1]
+
+    jogos_max = 0
+    for time in ordenados:
+        if time['jogos'] > jogos_max:
+            jogos_max = time['jogos']
+    dados['jogos_max'] = jogos_max
+
+    times_menos_jogos = []
+    for time in ordenados:
+        if time['jogos'] < jogos_max:
+            times_menos_jogos.append(time)
+    dados['times_menos_jogos'] = times_menos_jogos
+
+    return dados
+
+
+def imprimir_classificacao(dados):
+    """Mostra a classificação no terminal."""
+    print()
+    print(dados['titulo'])
+    if dados['consulta']:
+        print(dados['consulta'])
+    print()
+    print('POS  TIME                   J    V    E    D   PTS   APROV.')
+    print('-' * 66)
+    for time in dados['times']:
+        marca = ' '
+        if time['g4']:
+            marca = 'G'
+        if time['z4']:
+            marca = 'Z'
+        print(
+            f"{time['posicao']:>3}º {marca} "
+            f"{time['time'][:20]:<20} "
+            f"{time['jogos']:>3} {time['vitorias']:>4} {time['empates']:>4} "
+            f"{time['derrotas']:>4} {time['pontos']:>5} "
+            f"{time['aproveitamento']:>6.1f}%"
+        )
+    print('-' * 66)
+    print(f"Líder: {dados['lider']['time']} ({dados['lider']['pontos']} pts)")
+    print(f"Lanterna: {dados['lanterna']['time']} ({dados['lanterna']['pontos']} pts)")
+    print()
+
+
+
+# ===========================================================================
+# 3) RELATÓRIO PDF
+# ===========================================================================
+
+CATALOGO = [
+    {
+        'numero': '07',
+        'arquivo': 'relatorio.pdf',
+        'titulo': 'Minimalista suíço',
+        'descricao': 'Grade tipográfica com faixas de zona verdes/vermelhas e distribuição V/E/D.',
+        'cor': '#FFFFFF',
+        'destaque': '#E2231A',
+    },
+]
+
+
+def texto(pdf, x, y, conteudo, tamanho=9, fonte='Helvetica', cor='#111111'):
+    """Escreve um texto na posição (x, y)."""
+    pdf.setFont(fonte, tamanho)
+    pdf.setFillColor(cor)
+    pdf.drawString(x, y, str(conteudo))
+
+
+def linha(pdf, x, y, largura=490, cor='#D9D9D9'):
+    """Desenha uma linha usando uma sequência de traços (sem rect/line)."""
+    pdf.setFont('Helvetica', 6)
+    pdf.setFillColor(cor)
+    quantidade = int(largura / 3.34)
+    pdf.drawString(x, y, '_' * quantidade)
+
+
+def nota_empates():
+    return 'Times com a mesma pontuação ocupam a mesma colocação, sem os critérios oficiais de desempate da CBF.'
+
+
+def layout_07_minimalista(dados, caminho):
+    """Desenha o layout 07 inteiro, de cima para baixo."""
+    pdf = canvas.Canvas(caminho)
+    pdf.setTitle('Minimalista Suíço — Série A 2026')
+
+    tinta = '#111111'
+    cinza = '#8A8A8A'
+    verde = '#2F7D4A'
+    vermelho = '#B3261E'
+    vitoria = '#1F9D55'
+    empate = '#E8A33D'
+    derrota = '#C0392B'
+
+    texto(pdf, 50, 812, 'CAMPEONATO BRASILEIRO  ·  SÉRIE A', 6.5, 'Helvetica-Bold', cinza)
+    texto(pdf, 48, 768, 'SÉRIE A', 40, 'Helvetica-Bold', tinta)
+    texto(pdf, 48, 726, '2026', 40, 'Helvetica', '#B9B9B9')
+
+    data = dados['data_consulta']
+    if data == '':
+        data = 'data não informada'
+    texto(pdf, 50, 704, f'Classificação após {dados["total_partidas"]} partidas  ·  dados de {data}', 7.5, 'Helvetica', cinza)
+
+    if dados['rodada'] == 0:
+        rodada = '-'
+    else:
+        rodada = str(dados['rodada'])
+    metadados = [
+        ('RODADA', rodada),
+        ('CLUBES', str(dados['total_times'])),
+        ('MÉDIA', f'{dados["media_pontos"]:.2f}'.replace('.', ',')),
+    ]
+    y = 800
+    for rotulo, valor in metadados:
+        texto(pdf, 470, y, rotulo, 5.5, 'Helvetica-Bold', cinza)
+        texto(pdf, 470, y - 16, valor, 17, 'Helvetica-Bold', tinta)
+        y -= 36
+
+    linha(pdf, 50, 690, 490, tinta)
+
+    y_header = 670
+    texto(pdf, 50, y_header, 'POS', 6, 'Helvetica-Bold', cinza)
+    texto(pdf, 84, y_header, 'CLUBE', 6, 'Helvetica-Bold', cinza)
+    texto(pdf, 210, y_header, 'DISTRIBUIÇÃO DOS JOGOS', 5.5, 'Helvetica-Bold', cinza)
+    texto(pdf, 430, y_header, 'J', 6, 'Helvetica-Bold', cinza)
+    texto(pdf, 462, y_header, 'V', 6, 'Helvetica-Bold', cinza)
+    texto(pdf, 494, y_header, 'E', 6, 'Helvetica-Bold', cinza)
+    texto(pdf, 516, y_header, 'D', 6, 'Helvetica-Bold', cinza)
+    texto(pdf, 545, y_header, 'PTS', 6, 'Helvetica-Bold', cinza)
+
+    topo = 660
+    altura = 500 / len(dados['times'])
+    tamanho_nome = 9.2 * altura / 25.2
+    if tamanho_nome < 6:
+        tamanho_nome = 6
+    if tamanho_nome > 9.2:
+        tamanho_nome = 9.2
+    for time in dados['times']:
+        y_topo = topo - time['indice'] * altura
+        y_base = y_topo - 16.5
+
+        if time['g4']:
+            cor_posicao = verde
+        elif time['z4']:
+            cor_posicao = vermelho
+        else:
+            cor_posicao = tinta
+
+        texto(pdf, 50, y_base, time['posicao_texto'], 9.5, 'Helvetica-Bold', cor_posicao)
+        texto(pdf, 84, y_base, time['time'][:22], tamanho_nome, 'Helvetica', tinta)
+
+        x = 210
+        for i in range(time['jogos']):
+            if i < time['vitorias']:
+                cor = vitoria
+            elif i < time['vitorias'] + time['empates']:
+                cor = empate
+            else:
+                cor = derrota
+            texto(pdf, x, y_base + 1.5, '·', 8, 'Helvetica-Bold', cor)
+            x += 180 / dados['jogos_max']
+
+        texto(pdf, 430, y_base, time['jogos'], 9, 'Helvetica', '#555555')
+        texto(pdf, 462, y_base, time['vitorias'], 9, 'Helvetica', '#555555')
+        texto(pdf, 494, y_base, time['empates'], 9, 'Helvetica', '#555555')
+        texto(pdf, 516, y_base, time['derrotas'], 9, 'Helvetica', '#555555')
+        texto(pdf, 545, y_base, time['pontos'], 12, 'Helvetica-Bold', tinta)
+
+    linha(pdf, 50, 660 - (len(dados['times']) - 1) * altura - 22.5, 490, tinta)
+
+    texto(pdf, 50, 132, 'FONTE', 5.5, 'Helvetica-Bold', cinza)
+    if dados['fonte'] == '':
+        fonte = 'Planilha da CBF'
+    else:
+        fonte = dados['fonte']
+    texto(pdf, 50, 118, fonte, 7, 'Helvetica', tinta)
+    texto(pdf, 50, 100, nota_empates(), 6.5, 'Helvetica', cinza)
+
+    if len(dados['times_menos_jogos']) > 0:
+        nomes = []
+        for time in dados['times_menos_jogos']:
+            nomes.append(time['time'])
+        texto(pdf, 50, 90, 'Com menos jogos: ' + ', '.join(nomes) + '.', 6.5, 'Helvetica', cinza)
+
+    texto(pdf, 470, 118, 'Página 1 de 1', 7, 'Helvetica', tinta)
+    texto(pdf, 470, 100, 'G4: 4 primeiros  ·  Z4: 4 últimos', 6.5, 'Helvetica', cinza)
+
+    texto(pdf, 430, 88, '·', 8, 'Helvetica-Bold', vitoria)
+    texto(pdf, 438, 88, 'vitória', 5.5, 'Helvetica', cinza)
+    texto(pdf, 473, 88, '·', 8, 'Helvetica-Bold', empate)
+    texto(pdf, 481, 88, 'empate', 5.5, 'Helvetica', cinza)
+    texto(pdf, 516, 88, '·', 8, 'Helvetica-Bold', derrota)
+    texto(pdf, 524, 88, 'derrota', 5.5, 'Helvetica', cinza)
+    texto(pdf, 430, 77, 'cada ponto = um jogo', 5.5, 'Helvetica', cinza)
+
+    pdf.save()
+    return caminho
+
+
+def gerar_todos(dados):
+    """Gera o PDF e devolve a lista de arquivos criados."""
+    gerados = []
+    for item in CATALOGO:
+        caminho = item['arquivo']
+        layout_07_minimalista(dados, caminho)
+        print(f'  PDF criado: {caminho}')
+        gerados.append(caminho)
+    return gerados
+
+
+
+# ===========================================================================
+# 4) PÁGINA WEB
+# ===========================================================================
+
 def escapar(texto):
     """Evita que um nome de time quebre o HTML."""
     texto = str(texto)
@@ -25,7 +606,6 @@ def escapar(texto):
     return texto
 
 
-# Formata número com vírgula decimal.
 def numero_br(valor, casas=1):
     """Formata 71.05 como 71,1 (padrão brasileiro)."""
     if casas == 2:
@@ -35,7 +615,6 @@ def numero_br(valor, casas=1):
     return f'{valor:.0f}'.replace('.', ',')
 
 
-# Monta o <tbody>: uma linha por time.
 def montar_linhas(dados):
     """Monta o <tbody> da classificação."""
     linhas = []
@@ -71,11 +650,10 @@ def montar_linhas(dados):
     return '\n'.join(linhas)
 
 
-# Monta o card do único relatório.
 def montar_galeria():
     """Monta o cartão do relatório."""
     cartoes = []
-    for item in relatorios.CATALOGO:
+    for item in CATALOGO:
         visual = (
             f'<span class="sem-miniatura" style="background:{item["cor"]};'
             f'color:{item["destaque"]}">{item["numero"]}</span>'
@@ -96,7 +674,6 @@ def montar_galeria():
     return '\n'.join(cartoes)
 
 
-# Monta o HTML completo e grava o arquivo texto.
 def gerar_pagina(dados, caminho_html):
     """Cria o arquivo .html da classificação e devolve o caminho."""
     lider = dados['lider']
@@ -122,7 +699,6 @@ def gerar_pagina(dados, caminho_html):
     else:
         sufixo = ''
 
-    # Todo o HTML/CSS é uma string; o Python grava o texto no arquivo.
     html = f'''<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -867,7 +1443,6 @@ footer .assinatura {{ text-align: right; }}
 </html>
 '''
 
-    # Grava com open/write/close, como na apostila 38.
     arquivo = open(caminho_html, 'w')
     arquivo.write(html)
     arquivo.close()
@@ -878,3 +1453,87 @@ def rel_nota():
     """Mantém o texto da regra em um único lugar."""
     return ('cada vitória vale 3 pontos e cada empate vale 1. Times com a mesma pontuação '
             'ocupam a mesma colocação, sem os critérios oficiais de desempate da CBF.')
+
+
+
+# ===========================================================================
+# 5) MENU E PROGRAMA PRINCIPAL
+# ===========================================================================
+
+PLANILHA_EXEMPLO = 'planilha/projeto4bi.xlsx'
+ARQUIVO_HTML = 'classificacao.html'
+
+
+def escolher_planilha():
+    caminho = input(f'Planilha (.xlsx) [Enter = {PLANILHA_EXEMPLO}]: ').strip()
+    caminho = caminho.replace('"', '')
+    if caminho == '':
+        caminho = PLANILHA_EXEMPLO
+    return caminho
+
+
+def gerar_pagina_web(tabela):
+    try:
+        gerar_pagina(tabela, ARQUIVO_HTML)
+        print(f'Página web criada: {ARQUIVO_HTML}')
+    except Exception as erro:
+        print(f'Erro ao gerar a página: {erro}')
+
+
+def gerar_pdf(tabela):
+    print('Gerando o relatório em PDF...')
+    try:
+        arquivos = gerar_todos(tabela)
+        print(f'{len(arquivos)} relatório(s) gerado(s).')
+    except Exception as erro:
+        print(f'Erro ao gerar o PDF: {erro}')
+
+
+def mostrar_menu():
+    print()
+    print('=' * 64)
+    print(' CAMPEONATO BRASILEIRO SÉRIE A 2026 — PROJETO POOI 4º BIMESTRE')
+    print('=' * 64)
+    print(' 1 - Gerar a página web')
+    print(' 2 - Gerar o relatório em PDF')
+    print(' 3 - Gerar tudo (página web + PDF)')
+    print(' 4 - Mostrar a classificação no terminal')
+    print(' 0 - Sair')
+    print('=' * 64)
+
+
+def modo_interativo():
+    caminho = escolher_planilha()
+    try:
+        tabela = ler_planilha(caminho)
+    except Exception as erro:
+        print(f'Erro ao ler a planilha: {erro}')
+        return
+
+    if tabela == {}:
+        return
+
+    print(f'\nPlanilha lida: {tabela["arquivo"]}')
+    print(f'Aba: {tabela["aba"]}  ·  times encontrados: {tabela["total_times"]}')
+    imprimir_classificacao(tabela)
+
+    while True:
+        mostrar_menu()
+        opcao = input('Escolha uma opção: ').strip()
+        if opcao == '0':
+            print('Até a próxima rodada!')
+            break
+        if opcao == '1':
+            gerar_pagina_web(tabela)
+        elif opcao == '2':
+            gerar_pdf(tabela)
+        elif opcao == '3':
+            gerar_pdf(tabela)
+            gerar_pagina_web(tabela)
+        elif opcao == '4':
+            imprimir_classificacao(tabela)
+        else:
+            print('Opção inválida. Digite 0, 1, 2, 3 ou 4.')
+
+
+modo_interativo()
