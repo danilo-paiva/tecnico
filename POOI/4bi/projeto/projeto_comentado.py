@@ -493,6 +493,15 @@ def layout_07_minimalista(dados, caminho):
 # ===========================================================================
 
 # MONTA O HTML: uma linha <tr> para cada time.
+def limpar(texto):
+    """Remove acentos para o HTML ficar só com caracteres simples."""
+    texto = str(texto)
+    trocas = [('á','a'),('à','a'),('â','a'),('ã','a'),('é','e'),('ê','e'),('í','i'),('ó','o'),('ô','o'),('õ','o'),('ú','u'),('ç','c'),('Á','A'),('À','A'),('Â','A'),('Ã','A'),('É','E'),('Ê','E'),('Í','I'),('Ó','O'),('Ô','O'),('Õ','O'),('Ú','U'),('Ç','C')]
+    for antigo, novo in trocas:
+        texto = texto.replace(antigo, novo)
+    return texto
+
+
 def montar_linhas(dados):
     """Monta o corpo da tabela, com uma linha por time."""
     # Guarda cada linha HTML.
@@ -508,15 +517,15 @@ def montar_linhas(dados):
         classe = ' '.join(classes)
 
         # Texto da posição, com = quando há empate.
-        posicao = time['posicao_texto']
+        posicao = str(time['posicao'])
         if time['empatado']:
-            posicao = posicao.replace('=', '<span class="empate">=</span>')
+            posicao = posicao + '<span class="empate">=</span>'
 
         # Cria as células da linha.
         linhas.append(
             f'<tr class="{classe}">'
             f'<td class="pos">{posicao}</td>'
-            f'<td>{time["time"]}</td>'
+            f'<td>{limpar(time["time"])}</td>'
             f'<td class="num">{time["jogos"]}</td>'
             f'<td class="num">{time["vitorias"]}</td>'
             f'<td class="num">{time["empates"]}</td>'

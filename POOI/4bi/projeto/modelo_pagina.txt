@@ -3,7 +3,7 @@
 <head>
 <meta charset="windows-1252">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Série A 2026 — Classificação</title>
+<title>Serie A 2026 - Classificacao</title>
 <style>
   body { font-family: Arial, Helvetica, sans-serif; background: #FFFFFF; color: #111111;
          max-width: 860px; margin: 40px auto; padding: 0 22px; }
@@ -45,18 +45,18 @@
 </head>
 <body>
   <header class="cabecalho">
-    <div class="kicker">Campeonato Brasileiro · Série A</div>
-    <h1>SÉRIE A <span>2026</span></h1>
-    <p class="sub">Classificação após @@PARTIDAS@@ partidas</p>
+    <div class="kicker">Campeonato Brasileiro - Serie A</div>
+    <h1>SERIE A <span>2026</span></h1>
+    <p class="sub">Classificacao apos @@PARTIDAS@@ partidas</p>
   </header>
 
   <div class="meta">
     <div>Clubes<strong>@@CLUBES@@</strong></div>
-    <div>Média<strong>@@MEDIA@@</strong></div>
+    <div>Media<strong>@@MEDIA@@</strong></div>
   </div>
 
   <table>
-    <caption class="kicker">Classificação do Campeonato Brasileiro Série A 2026</caption>
+    <caption class="kicker">Classificacao do Campeonato Brasileiro Serie A 2026</caption>
     <thead>
       <tr>
         <th>Pos</th>
@@ -73,13 +73,13 @@
 </tbody>
   </table>
 
-  <p class="nota">@@NOTA@@ G4: quatro primeiros. Z4: quatro últimos.</p>
+  <p class="nota">@@NOTA@@ G4: quatro primeiros. Z4: quatro ultimos.</p>
   <div class="acoes">
-    <form action="relatorio.pdf" target="_blank"><button class="botao" type="submit">Abrir relatório em PDF</button></form>
+    <form action="relatorio.pdf" target="_blank"><button class="botao" type="submit">Abrir relatorio em PDF</button></form>
   </div>
 
   <footer>
-    <p>Classificação gerada pelo Python.</p>
+    <p>Classificacao gerada pelo Python.</p>
   </footer>
 </body>
 </html>
