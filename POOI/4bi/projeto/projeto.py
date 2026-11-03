@@ -18,54 +18,7 @@ from reportlab.pdfgen import canvas
 
 
 # ===========================================================================
-# 1) CLUBES
-# ===========================================================================
-
-CORES_TIMES = {
-    'Athletico-PR':      ('#C4122E', '#111111', 'Athletico-PR'),
-    'Atlético-MG':       ('#1A1A1A', '#FFFFFF', 'Atlético-MG'),
-    'Bahia':             ('#0057A0', '#E30613', 'Bahia'),
-    'Botafogo':          ('#1A1A1A', '#FFFFFF', 'Botafogo'),
-    'Chapecoense':       ('#006B3F', '#FFFFFF', 'Chapecoense'),
-    'Corinthians':       ('#1A1A1A', '#FFFFFF', 'Corinthians'),
-    'Coritiba':          ('#005C3B', '#FFFFFF', 'Coritiba'),
-    'Cruzeiro':          ('#003DA5', '#FFFFFF', 'Cruzeiro'),
-    'Flamengo':          ('#C8102E', '#111111', 'Flamengo'),
-    'Fluminense':        ('#7A0C2E', '#00613F', 'Fluminense'),
-    'Grêmio':            ('#0D80BF', '#111111', 'Grêmio'),
-    'Internacional':     ('#C8102E', '#FFFFFF', 'Internacional'),
-    'Mirassol':          ('#B58900', '#006B3F', 'Mirassol'),
-    'Palmeiras':         ('#006437', '#FFFFFF', 'Palmeiras'),
-    'Red Bull Bragantino': ('#D71920', '#FFFFFF', 'Bragantino'),
-    'Remo':              ('#002776', '#FFFFFF', 'Remo'),
-    'Santos':            ('#1A1A1A', '#E8E8E8', 'Santos'),
-    'São Paulo':         ('#C8102E', '#111111', 'São Paulo'),
-    'Vasco':             ('#1A1A1A', '#FFFFFF', 'Vasco'),
-    'Vitória':           ('#C8102E', '#111111', 'Vitória'),
-}
-
-# Cores usadas quando o time não está no dicionário acima.
-PALETA_RESERVA = [
-    '#1D4ED8', '#0E7C7B', '#B45309', '#7E22CE', '#BE123C',
-    '#0F766E', '#4338CA', '#A16207', '#9D174D', '#155E75',
-    '#4D7C0F', '#7C2D12', '#1E3A8A', '#86198F', '#065F46',
-    '#92400E', '#312E81', '#9F1239', '#115E59', '#3F3F46',
-]
-
-
-def identidade(nome, indice=0):
-    """Devolve (cor principal, cor secundária, apelido) de um clube."""
-    if nome in CORES_TIMES:
-        return CORES_TIMES[nome]
-    cor = PALETA_RESERVA[indice % len(PALETA_RESERVA)]
-    return (cor, '#FFFFFF', nome)
-
-
-
-
-
-# ===========================================================================
-# 2) LEITURA DA PLANILHA E CÁLCULO
+# 1) LEITURA DA PLANILHA E CÁLCULO
 # ===========================================================================
 
 def sem_acento(texto):
@@ -220,7 +173,6 @@ def ler_planilha(caminho):
                 break
 
         times = []
-        indice_cor = 0
         linhas_vazias = 0
         for i in range(linha_cabecalho + 1, len(tabela)):
             nome_time = tabela.iloc[i, colunas['time']]
@@ -261,18 +213,13 @@ def ler_planilha(caminho):
             if jogos == 0:
                 jogos = vitorias + empates + derrotas
 
-            cor, cor_secundaria, apelido = identidade(nome_time, indice_cor)
             times.append({
                 'time': nome_time,
-                'apelido': apelido,
                 'jogos': jogos,
                 'vitorias': vitorias,
                 'empates': empates,
                 'derrotas': derrotas,
-                'cor': cor,
-                'cor_secundaria': cor_secundaria,
             })
-            indice_cor += 1
 
         if len(times) == 0:
             continue
@@ -428,20 +375,8 @@ def imprimir_classificacao(dados):
 
 
 # ===========================================================================
-# 3) RELATÓRIO PDF
+# 2) RELATÓRIO PDF
 # ===========================================================================
-
-CATALOGO = [
-    {
-        'numero': '07',
-        'arquivo': 'relatorio.pdf',
-        'titulo': 'Minimalista suíço',
-        'descricao': 'Grade tipográfica com faixas de zona verdes/vermelhas e distribuição V/E/D.',
-        'cor': '#FFFFFF',
-        'destaque': '#E2231A',
-    },
-]
-
 
 def texto(pdf, x, y, conteudo, tamanho=9, fonte='Helvetica', cor='#111111'):
     """Escreve um texto na posição (x, y)."""
@@ -458,8 +393,7 @@ def linha(pdf, x, y, largura=490, cor='#D9D9D9'):
     pdf.drawString(x, y, '_' * quantidade)
 
 
-def nota_empates():
-    return 'Times com a mesma pontuação ocupam a mesma colocação, sem os critérios oficiais de desempate da CBF.'
+NOTA_EMPATES = 'Times com a mesma pontuação ocupam a mesma colocação, sem os critérios oficiais de desempate da CBF.'
 
 
 def layout_07_minimalista(dados, caminho):
@@ -557,7 +491,7 @@ def layout_07_minimalista(dados, caminho):
     else:
         fonte = dados['fonte']
     texto(pdf, 50, 118, fonte, 7, 'Helvetica', tinta)
-    texto(pdf, 50, 100, nota_empates(), 6.5, 'Helvetica', cinza)
+    texto(pdf, 50, 100, NOTA_EMPATES, 6.5, 'Helvetica', cinza)
 
     if len(dados['times_menos_jogos']) > 0:
         nomes = []
@@ -580,20 +514,9 @@ def layout_07_minimalista(dados, caminho):
     return caminho
 
 
-def gerar_todos(dados):
-    """Gera o PDF e devolve a lista de arquivos criados."""
-    gerados = []
-    for item in CATALOGO:
-        caminho = item['arquivo']
-        layout_07_minimalista(dados, caminho)
-        print(f'  PDF criado: {caminho}')
-        gerados.append(caminho)
-    return gerados
-
-
 
 # ===========================================================================
-# 4) PÁGINA WEB
+# 3) PÁGINA WEB
 # ===========================================================================
 
 def escapar(texto):
@@ -604,15 +527,6 @@ def escapar(texto):
     texto = texto.replace('>', '&gt;')
     texto = texto.replace('"', '&quot;')
     return texto
-
-
-def numero_br(valor, casas=1):
-    """Formata 71.05 como 71,1 (padrão brasileiro)."""
-    if casas == 2:
-        return f'{valor:.2f}'.replace('.', ',')
-    if casas == 1:
-        return f'{valor:.1f}'.replace('.', ',')
-    return f'{valor:.0f}'.replace('.', ',')
 
 
 def montar_linhas(dados):
@@ -711,7 +625,7 @@ def gerar_pagina(dados, caminho_html):
   <div class="meta">
     <div>Rodada<strong>{rodada}</strong></div>
     <div>Clubes<strong>{dados['total_times']}</strong></div>
-    <div>Média<strong>{numero_br(dados['media_pontos'], 2)}</strong></div>
+    <div>Média<strong>{f'{dados["media_pontos"]:.2f}'.replace('.', ',')}</strong></div>
   </div>
 
   <table>
@@ -732,7 +646,7 @@ def gerar_pagina(dados, caminho_html):
     </tbody>
   </table>
 
-  <p class="nota">{escapar(rel_nota())} G4: quatro primeiros. Z4: quatro últimos.</p>
+  <p class="nota">{escapar(NOTA_EMPATES)} G4: quatro primeiros. Z4: quatro últimos.</p>
   <div class="acoes">
     <a class="botao" href="relatorio.pdf" target="_blank" rel="noopener">Abrir relatório em PDF</a>
   </div>
@@ -750,19 +664,14 @@ def gerar_pagina(dados, caminho_html):
     return caminho_html
 
 
-def rel_nota():
-    """Mantém o texto da regra em um único lugar."""
-    return ('cada vitória vale 3 pontos e cada empate vale 1. Times com a mesma pontuação '
-            'ocupam a mesma colocação, sem os critérios oficiais de desempate da CBF.')
-
-
 
 # ===========================================================================
-# 5) MENU E PROGRAMA PRINCIPAL
+# 4) MENU E PROGRAMA PRINCIPAL
 # ===========================================================================
 
 PLANILHA_EXEMPLO = 'planilha/projeto4bi.xlsx'
 ARQUIVO_HTML = 'classificacao.html'
+ARQUIVO_PDF = 'relatorio.pdf'
 
 
 def escolher_planilha():
@@ -784,8 +693,8 @@ def gerar_pagina_web(tabela):
 def gerar_pdf(tabela):
     print('Gerando o relatório em PDF...')
     try:
-        arquivos = gerar_todos(tabela)
-        print(f'{len(arquivos)} relatório(s) gerado(s).')
+        layout_07_minimalista(tabela, ARQUIVO_PDF)
+        print(f'PDF criado: {ARQUIVO_PDF}')
     except Exception as erro:
         print(f'Erro ao gerar o PDF: {erro}')
 
