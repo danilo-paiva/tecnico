@@ -50,11 +50,6 @@
     <p class="sub">Classificacao apos @@PARTIDAS@@ partidas</p>
   </header>
 
-  <div class="meta">
-    <div>Clubes<strong>@@CLUBES@@</strong></div>
-    <div>Media<strong>@@MEDIA@@</strong></div>
-  </div>
-
   <table>
     <caption class="kicker">Classificacao do Campeonato Brasileiro Serie A 2026</caption>
     <thead>

@@ -540,8 +540,6 @@ def montar_linhas(dados):
 def gerar_pagina(dados, caminho_html):
     """Lê o modelo txt e grava a página com os dados da classificação."""
     # Formata a média com vírgula.
-    media = f'{dados["media_pontos"]:.2f}'.replace('.', ',')
-
     # Abre o arquivo texto que contém o HTML.
     modelo = open('modelo_pagina.txt', 'r')
     html = modelo.read()
@@ -549,8 +547,6 @@ def gerar_pagina(dados, caminho_html):
 
     # Troca cada marcador pelo valor correspondente.
     html = html.replace('@@PARTIDAS@@', str(dados['total_partidas']))
-    html = html.replace('@@CLUBES@@', str(dados['total_times']))
-    html = html.replace('@@MEDIA@@', media)
     html = html.replace('@@LINHAS@@', montar_linhas(dados))
     html = html.replace('@@NOTA@@', NOTA_EMPATES)
 
