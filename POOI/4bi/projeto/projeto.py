@@ -125,6 +125,8 @@ def ler_planilha(caminho):
             linhas_vazias = 0
 
             nome_time = str(nome_time).strip()
+            if 'FONTE' in nome_time.upper() or 'OBSERV' in nome_time.upper():
+                break
 
             valor_jogos = tabela.iloc[i, colunas['jogos']]
             if vazio(valor_jogos):
@@ -164,19 +166,15 @@ def classificar(dados):
         else:
             time['aproveitamento'] = 0
 
-    ordenados = []
-    for time in times:
-        posicao = len(ordenados)
-        for i in range(len(ordenados)):
-            atual = ordenados[i]
-            if time['pontos'] > atual['pontos']:
-                posicao = i
-                break
-            if time['pontos'] == atual['pontos']:
-                if time['time'].upper() < atual['time'].upper():
-                    posicao = i
-                    break
-        ordenados.insert(posicao, time)
+    # Ordena por pontos (maior primeiro) e, no empate, pelo nome.
+    tabela_ordenada = pd.DataFrame(times)
+    tabela_ordenada = tabela_ordenada.sort_values(
+        by=['pontos', 'time'],
+        ascending=[False, True]
+    )
+    ordenados = tabela_ordenada.to_dict('records')
+
+
 
     for i in range(len(ordenados)):
         time = ordenados[i]

@@ -211,25 +211,15 @@ def classificar(dados):
             time['aproveitamento'] = 0
 
     # A lista será montada já na ordem correta.
-    ordenados = []
-    # Insere cada time na posição certa sem sorted(key=...).
-    for time in times:
-        # Por padrão, começa no fim da lista.
-        posicao = len(ordenados)
-        # Compara com os times que já estão ordenados.
-        for i in range(len(ordenados)):
-            atual = ordenados[i]
-            # Mais pontos ficam antes.
-            if time['pontos'] > atual['pontos']:
-                posicao = i
-                break
-            # Empate em pontos: usa o nome só para a ordem de exibição.
-            if time['pontos'] == atual['pontos']:
-                if time['time'].upper() < atual['time'].upper():
-                    posicao = i
-                    break
-        # Insere o time na posição encontrada.
-        ordenados.insert(posicao, time)
+    # Ordena por pontos (maior primeiro) e, no empate, pelo nome.
+    tabela_ordenada = pd.DataFrame(times)
+    tabela_ordenada = tabela_ordenada.sort_values(
+        by=['pontos', 'time'],
+        ascending=[False, True]
+    )
+    ordenados = tabela_ordenada.to_dict('records')
+
+
 
     # Depois da ordem, define a posição de cada time.
     for i in range(len(ordenados)):
