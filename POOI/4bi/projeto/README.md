@@ -35,14 +35,12 @@ O código está em **`projeto.py`**; o HTML fica no modelo **`modelo_pagina.txt`
 O menu interativo oferece:
 
 ```text
-1 - Gerar a página web (classificacao.html)
-2 - Gerar o relatório em PDF
-3 - Gerar tudo (página web + PDF)
-4 - Mostrar a classificação no terminal
+1 - Gerar a página web e o PDF
+2 - Mostrar a classificação no terminal
 0 - Sair
 ```
 
-O programa é guiado por menu: informe a planilha e escolha a opção **3** para gerar a página e o PDF.
+O programa é guiado por menu: informe a planilha e escolha a opção **1** para gerar a página e o PDF juntos.
 
 Depois de gerar, abra o arquivo `classificacao.html` no navegador.
 

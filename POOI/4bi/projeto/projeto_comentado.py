@@ -577,8 +577,10 @@ def escolher_planilha():
     return caminho
 
 
-# Gera a página e trata erro de gravação.
+# Gera o PDF e a página; se o PDF falhar, não cria o HTML.
 def gerar_pagina_web(tabela):
+    if gerar_pdf(tabela) == False:
+        return
     try:
         gerar_pagina(tabela, ARQUIVO_HTML)
         print(f'Página web criada: {ARQUIVO_HTML}')
@@ -592,8 +594,10 @@ def gerar_pdf(tabela):
     try:
         layout_07_minimalista(tabela, ARQUIVO_PDF)
         print(f'PDF criado: {ARQUIVO_PDF}')
+        return True
     except Exception as erro:
         print(f'Erro ao gerar o PDF: {erro}')
+        return False
 
 
 # Mostra as opções do menu.
@@ -602,10 +606,8 @@ def mostrar_menu():
     print('=' * 64)
     print(' CAMPEONATO BRASILEIRO SÉRIE A 2026 — PROJETO POOI 4º BIMESTRE')
     print('=' * 64)
-    print(' 1 - Gerar a página web')
-    print(' 2 - Gerar o relatório em PDF')
-    print(' 3 - Gerar tudo (página web + PDF)')
-    print(' 4 - Mostrar a classificação no terminal')
+    print(' 1 - Gerar a página web e o PDF')
+    print(' 2 - Mostrar a classificação no terminal')
     print(' 0 - Sair')
     print('=' * 64)
 
@@ -638,21 +640,14 @@ def modo_interativo():
         if opcao == '0':
             print('Até a próxima rodada!')
             break
-        # Opção 1 gera apenas a página.
+        # Opção 1 gera o PDF e depois a página; o link do HTML nunca fica quebrado.
         if opcao == '1':
             gerar_pagina_web(tabela)
-        # Opção 2 gera apenas o PDF.
+        # Opção 2 mostra a classificação no terminal.
         elif opcao == '2':
-            gerar_pdf(tabela)
-        # Opção 3 gera o PDF e depois a página.
-        elif opcao == '3':
-            gerar_pdf(tabela)
-            gerar_pagina_web(tabela)
-        # Opção 4 mostra a classificação no terminal.
-        elif opcao == '4':
             imprimir_classificacao(tabela)
         else:
-            print('Opção inválida. Digite 0, 1, 2, 3 ou 4.')
+            print('Opção inválida. Digite 0, 1 ou 2.')
 
 
 # Inicia o programa quando o arquivo é executado.

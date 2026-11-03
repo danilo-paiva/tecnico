@@ -457,6 +457,8 @@ def escolher_planilha():
 
 
 def gerar_pagina_web(tabela):
+    if gerar_pdf(tabela) == False:
+        return
     try:
         gerar_pagina(tabela, ARQUIVO_HTML)
         print(f'Página web criada: {ARQUIVO_HTML}')
@@ -469,8 +471,10 @@ def gerar_pdf(tabela):
     try:
         layout_07_minimalista(tabela, ARQUIVO_PDF)
         print(f'PDF criado: {ARQUIVO_PDF}')
+        return True
     except Exception as erro:
         print(f'Erro ao gerar o PDF: {erro}')
+        return False
 
 
 def mostrar_menu():
@@ -478,10 +482,8 @@ def mostrar_menu():
     print('=' * 64)
     print(' CAMPEONATO BRASILEIRO SÉRIE A 2026 — PROJETO POOI 4º BIMESTRE')
     print('=' * 64)
-    print(' 1 - Gerar a página web')
-    print(' 2 - Gerar o relatório em PDF')
-    print(' 3 - Gerar tudo (página web + PDF)')
-    print(' 4 - Mostrar a classificação no terminal')
+    print(' 1 - Gerar a página web e o PDF')
+    print(' 2 - Mostrar a classificação no terminal')
     print(' 0 - Sair')
     print('=' * 64)
 
@@ -509,14 +511,9 @@ def modo_interativo():
         if opcao == '1':
             gerar_pagina_web(tabela)
         elif opcao == '2':
-            gerar_pdf(tabela)
-        elif opcao == '3':
-            gerar_pdf(tabela)
-            gerar_pagina_web(tabela)
-        elif opcao == '4':
             imprimir_classificacao(tabela)
         else:
-            print('Opção inválida. Digite 0, 1, 2, 3 ou 4.')
+            print('Opção inválida. Digite 0, 1 ou 2.')
 
 
 modo_interativo()
