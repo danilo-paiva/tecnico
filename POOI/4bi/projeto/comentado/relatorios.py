@@ -13,7 +13,7 @@ from reportlab.pdfgen import canvas
 CATALOGO = [
     {
         'numero': '07',
-        'arquivo': '07_minimalista_suico.pdf',
+        'arquivo': 'relatorio.pdf',
         'titulo': 'Minimalista suíço',
         'descricao': 'Grade tipográfica com faixas de zona verdes/vermelhas e distribuição V/E/D.',
         'cor': '#FFFFFF',

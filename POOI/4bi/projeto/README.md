@@ -15,7 +15,7 @@ O programa foi feito para o projeto do 4º bimestre de **Programação Orientada
 3. Ordena da maior para a menor pontuação e define a posição de cada clube.
 4. Gera:
    - `classificacao.html` — a página web;
-   - `07_minimalista_suico.pdf` — o relatório;
+   - `relatorio.pdf` — o relatório;
 
 > Na apresentação, o professor pode indicar outra planilha. Basta informar o caminho quando o programa perguntar. A planilha **não é alterada**: o programa só lê.
 
@@ -116,7 +116,7 @@ POOI/4bi/projeto/
 ├── planilha/
 │   └── projeto4bi.xlsx     # planilha de exemplo da CBF
 ├── classificacao.html      # página gerada
-├── 07_minimalista_suico.pdf # relatório gerado
+├── relatorio.pdf # relatório gerado
 ├── docs/                   # prévias para o README
 ├── requirements.txt
 └── README.md

@@ -773,7 +773,7 @@ footer .assinatura {{ text-align: right; }}
           <div><dt>Por jogo</dt><dd>{numero_br(dados['media_pontos'], 2)}</dd></div>
         </dl>
         <div class="acoes">
-          <a class="botao botao-principal" href="07_minimalista_suico.pdf" target="_blank" rel="noopener">Abrir classificação em PDF</a>
+          <a class="botao botao-principal" href="relatorio.pdf" target="_blank" rel="noopener">Abrir classificação em PDF</a>
           <a class="botao botao-vazio" href="#relatorios">Ver o relatório</a>
         </div>
       </div>
@@ -833,7 +833,7 @@ footer .assinatura {{ text-align: right; }}
         </div>
         <div class="tabela-pe">
           <span>{dados['total_times']} clubes · {dados['total_partidas']} partidas · {dados['total_pontos']} pontos · fonte: {escapar(fonte)}</span>
-          <a class="botao botao-escuro" href="07_minimalista_suico.pdf" target="_blank" rel="noopener">Abrir tabela em PDF</a>
+          <a class="botao botao-escuro" href="relatorio.pdf" target="_blank" rel="noopener">Abrir tabela em PDF</a>
         </div>
       </div>
     </section>
