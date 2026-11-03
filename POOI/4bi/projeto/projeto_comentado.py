@@ -3,14 +3,9 @@
 VERSÃO COMENTADA — Projeto POOI 4º bimestre
 Classificação do Campeonato Brasileiro Série A 2026
 
-O programa executa cinco etapas:
-1. lê a planilha .xlsx com pandas (seção 1);
-2. calcula pontos e posições (seção 1);
-3. desenha o PDF com reportlab (seção 2);
-4. lê o modelo txt e grava o HTML (seção 3);
-5. mostra o menu e chama as etapas (seção 4).
+Lê apenas Time, Jogos, Vitórias, Empates e Derrotas da planilha.
+Calcula os pontos, gera o PDF e a página HTML.
 
-Os comentários explicam o que cada bloco faz; a versão de entrega é projeto.py.
 Execute:
     python projeto_comentado.py
 """
@@ -54,12 +49,10 @@ def ler_planilha(caminho):
         print(f'Não foi possível abrir a planilha: {erro}')
         return {}
 
-    # Percorre as abas da planilha.
     for nome_aba in arquivo_excel.sheet_names:
         # header=None mantém as linhas de título acima da tabela.
         tabela = arquivo_excel.parse(nome_aba, header=None)
 
-        # Procura a linha de cabeçalho; -1 significa não encontrada.
         linha_cabecalho = -1
         for i in range(len(tabela)):
             valores = []
@@ -107,18 +100,6 @@ def ler_planilha(caminho):
             print('A planilha precisa das colunas Vitórias, Empates e Derrotas.')
             continue
 
-        textos_acima = []
-        for i in range(linha_cabecalho):
-            for j in range(len(tabela.columns)):
-                valor = tabela.iloc[i, j]
-                if not vazio(valor):
-                    textos_acima.append(str(valor).strip())
-
-        if len(textos_acima) > 0:
-            titulo = textos_acima[0]
-        else:
-            titulo = 'CAMPEONATO BRASILEIRO'
-
         times = []
         linhas_vazias = 0
         for i in range(linha_cabecalho + 1, len(tabela)):
@@ -131,36 +112,19 @@ def ler_planilha(caminho):
                 continue
             linhas_vazias = 0
 
-            # A linha de fonte/observação pode estar em qualquer coluna.
-            linha_tem_rotulo = False
-            for j in range(len(tabela.columns)):
-                texto_linha = str(tabela.iloc[i, j]).upper()
-                if 'FONTE' in texto_linha:
-                    linha_tem_rotulo = True
-                if 'OBSERVACAO' in texto_linha:
-                    linha_tem_rotulo = True
-            if linha_tem_rotulo:
-                break
-
             nome_time = str(nome_time).strip()
 
-            jogos = 0
-            vitorias = 0
-            empates = 0
-            derrotas = 0
-            if colunas['jogos'] != -1:
-                jogos = numero(tabela.iloc[i, colunas['jogos']])
-            if colunas['vitorias'] != -1:
-                vitorias = numero(tabela.iloc[i, colunas['vitorias']])
-            if colunas['empates'] != -1:
-                empates = numero(tabela.iloc[i, colunas['empates']])
-            if colunas['derrotas'] != -1:
-                derrotas = numero(tabela.iloc[i, colunas['derrotas']])
-
+            valor_jogos = tabela.iloc[i, colunas['jogos']]
+            if vazio(valor_jogos):
+                break
+            jogos = numero(valor_jogos)
             if jogos == 0:
-                jogos = vitorias + empates + derrotas
+                break
 
-            # Cada linha válida vira um dicionário de time.
+            vitorias = numero(tabela.iloc[i, colunas['vitorias']])
+            empates = numero(tabela.iloc[i, colunas['empates']])
+            derrotas = numero(tabela.iloc[i, colunas['derrotas']])
+
             times.append({
                 'time': nome_time,
                 'jogos': jogos,
@@ -172,27 +136,7 @@ def ler_planilha(caminho):
         if len(times) == 0:
             continue
 
-        fonte = ''
-        for i in range(linha_cabecalho + 1, len(tabela)):
-            for j in range(len(tabela.columns)):
-                valor = tabela.iloc[i, j]
-                if 'FONTE' in str(valor).upper():
-                    for k in range(j + 1, len(tabela.columns)):
-                        proximo = tabela.iloc[i, k]
-                        if not vazio(proximo):
-                            fonte = str(proximo).strip()
-                            break
-                    break
-            if fonte != '':
-                break
-
-        dados = {
-            'arquivo': caminho,
-            'aba': nome_aba,
-            'titulo': titulo,
-            'fonte': fonte,
-            'times': times,
-        }
+        dados = {'times': times}
         return classificar(dados)
 
     print('A planilha não tem uma tabela com as colunas Time e Jogos.')
@@ -210,11 +154,9 @@ def classificar(dados):
         else:
             time['aproveitamento'] = 0
 
-    # A lista é montada em ordem, sem usar sorted(key=...).
     ordenados = []
     for time in times:
         posicao = len(ordenados)
-        # Marca G4, Z4 e a posição de cada time.
         for i in range(len(ordenados)):
             atual = ordenados[i]
             if time['pontos'] > atual['pontos']:
@@ -291,7 +233,6 @@ def classificar(dados):
 def imprimir_classificacao(dados):
     """Mostra a classificação no terminal."""
     print()
-    print(dados['titulo'])
     print()
     print('POS  TIME                   J    V    E    D   PTS   APROV.')
     print('-' * 66)
@@ -418,12 +359,6 @@ def layout_07_minimalista(dados, caminho):
 
     linha(pdf, 50, 660 - (len(dados['times']) - 1) * altura - 22.5, 490, tinta)
 
-    texto(pdf, 50, 132, 'FONTE', 5.5, 'Helvetica-Bold', cinza)
-    if dados['fonte'] == '':
-        fonte = 'Planilha da CBF'
-    else:
-        fonte = dados['fonte']
-    texto(pdf, 50, 118, fonte, 7, 'Helvetica', tinta)
     texto(pdf, 50, 100, NOTA_EMPATES, 6.5, 'Helvetica', cinza)
 
     if len(dados['times_menos_jogos']) > 0:
@@ -452,16 +387,6 @@ def layout_07_minimalista(dados, caminho):
 # 3) PÁGINA WEB
 # ===========================================================================
 
-def escapar(texto):
-    """Evita que um nome de time quebre o HTML."""
-    texto = str(texto)
-    texto = texto.replace('&', '&amp;')
-    texto = texto.replace('<', '&lt;')
-    texto = texto.replace('>', '&gt;')
-    texto = texto.replace('"', '&quot;')
-    return texto
-
-
 def montar_linhas(dados):
     """Monta o corpo da tabela, com uma linha por time."""
     linhas = []
@@ -473,14 +398,14 @@ def montar_linhas(dados):
             classes.append('z4')
         classe = ' '.join(classes)
 
-        posicao = escapar(time['posicao_texto'])
+        posicao = time['posicao_texto']
         if time['empatado']:
             posicao = posicao.replace('=', '<span class="empate">=</span>')
 
         linhas.append(
             f'<tr class="{classe}">'
             f'<td class="pos">{posicao}</td>'
-            f'<td>{escapar(time["time"])}</td>'
+            f'<td>{time["time"]}</td>'
             f'<td class="num">{time["jogos"]}</td>'
             f'<td class="num">{time["vitorias"]}</td>'
             f'<td class="num">{time["empates"]}</td>'
@@ -493,12 +418,8 @@ def montar_linhas(dados):
 
 def gerar_pagina(dados, caminho_html):
     """Lê o modelo txt e grava a página com os dados da classificação."""
-    fonte = dados['fonte']
-    if fonte == '':
-        fonte = 'Planilha da CBF'
     media = f'{dados["media_pontos"]:.2f}'.replace('.', ',')
 
-    # O HTML fica em arquivo separado para não poluir o Python.
     modelo = open('modelo_pagina.txt')
     html = modelo.read()
     modelo.close()
@@ -507,8 +428,7 @@ def gerar_pagina(dados, caminho_html):
     html = html.replace('@@CLUBES@@', str(dados['total_times']))
     html = html.replace('@@MEDIA@@', media)
     html = html.replace('@@LINHAS@@', montar_linhas(dados))
-    html = html.replace('@@NOTA@@', escapar(NOTA_EMPATES))
-    html = html.replace('@@FONTE@@', escapar(fonte))
+    html = html.replace('@@NOTA@@', NOTA_EMPATES)
 
     arquivo = open(caminho_html, 'w')
     arquivo.write(html)
@@ -574,8 +494,7 @@ def modo_interativo():
     if tabela == {}:
         return
 
-    print(f'\nPlanilha lida: {tabela["arquivo"]}')
-    print(f'Aba: {tabela["aba"]}  ·  times encontrados: {tabela["total_times"]}')
+    print(f'\nTimes encontrados: {tabela["total_times"]}')
     imprimir_classificacao(tabela)
 
     while True:

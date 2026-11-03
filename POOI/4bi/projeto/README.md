@@ -143,7 +143,6 @@ O HTML é gravado com `open(..., 'w')`, `write()` e `close()`; a página declara
 # Observações
 
 - **Outra planilha:** o leitor procura uma linha de cabeçalho que tenha `Time` e `Jogos`, e colunas com `Vitórias`, `Empates` e `Derrotas`. Linhas de título antes da tabela e linhas de fonte/observação depois são ignoradas. A planilha pode estar em qualquer aba.
-- **Fonte dos dados:** a planilha de exemplo é a fornecida pelo professor; a fonte citada no relatório é a que está na própria planilha.
 - **Fontes:** o PDF usa as fontes internas do reportlab (Helvetica e Helvetica-Bold), sem depender de arquivos externos.
 
 ---
