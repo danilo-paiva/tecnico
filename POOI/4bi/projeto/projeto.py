@@ -286,7 +286,7 @@ def linha(pdf, x, y, largura=490, cor='#D9D9D9'):
 NOTA_EMPATES = 'Times com a mesma pontuacao ocupam a mesma colocacao, sem os criterios oficiais de desempate da CBF.'
 
 
-def layout_07_minimalista(dados, caminho):
+def gerar_pdf(dados, caminho):
     """Desenha o layout 07 inteiro, de cima para baixo."""
     pdf = canvas.Canvas(caminho)
     pdf.setTitle('Minimalista Suíço — Série A 2026')
@@ -471,24 +471,19 @@ def escolher_planilha():
 
 
 def gerar_pagina_web(tabela):
-    if gerar_pdf(tabela) == False:
+    print('Gerando o relatório em PDF...')
+    try:
+        gerar_pdf(tabela, ARQUIVO_PDF)
+        print(f'PDF criado: {ARQUIVO_PDF}')
+    except Exception as erro:
+        print(f'Erro ao gerar o PDF: {erro}')
         return
+
     try:
         gerar_pagina(tabela, ARQUIVO_HTML)
         print(f'Página web criada: {ARQUIVO_HTML}')
     except Exception as erro:
         print(f'Erro ao gerar a página: {erro}')
-
-
-def gerar_pdf(tabela):
-    print('Gerando o relatório em PDF...')
-    try:
-        layout_07_minimalista(tabela, ARQUIVO_PDF)
-        print(f'PDF criado: {ARQUIVO_PDF}')
-        return True
-    except Exception as erro:
-        print(f'Erro ao gerar o PDF: {erro}')
-        return False
 
 
 def mostrar_menu():

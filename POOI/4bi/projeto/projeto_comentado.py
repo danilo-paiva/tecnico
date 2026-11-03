@@ -356,7 +356,7 @@ NOTA_EMPATES = 'Times com a mesma pontuação ocupam a mesma colocação, sem os
 
 
 # FUNÇÃO QUE DESENHA O PDF INTEIRO.
-def layout_07_minimalista(dados, caminho):
+def gerar_pdf(dados, caminho):
     """Desenha o layout 07 inteiro, de cima para baixo."""
     # Cria uma página A4 padrão do reportlab.
     pdf = canvas.Canvas(caminho)
@@ -583,8 +583,14 @@ def escolher_planilha():
 
 # Gera o PDF e a página; se o PDF falhar, não cria o HTML.
 def gerar_pagina_web(tabela):
-    if gerar_pdf(tabela) == False:
+    print('Gerando o relatório em PDF...')
+    try:
+        gerar_pdf(tabela, ARQUIVO_PDF)
+        print(f'PDF criado: {ARQUIVO_PDF}')
+    except Exception as erro:
+        print(f'Erro ao gerar o PDF: {erro}')
         return
+
     try:
         gerar_pagina(tabela, ARQUIVO_HTML)
         print(f'Página web criada: {ARQUIVO_HTML}')
@@ -592,19 +598,6 @@ def gerar_pagina_web(tabela):
         print(f'Erro ao gerar a página: {erro}')
 
 
-# Gera o PDF e trata erro de gravação.
-def gerar_pdf(tabela):
-    print('Gerando o relatório em PDF...')
-    try:
-        layout_07_minimalista(tabela, ARQUIVO_PDF)
-        print(f'PDF criado: {ARQUIVO_PDF}')
-        return True
-    except Exception as erro:
-        print(f'Erro ao gerar o PDF: {erro}')
-        return False
-
-
-# Mostra as opções do menu.
 def mostrar_menu():
     print()
     print('=' * 64)
