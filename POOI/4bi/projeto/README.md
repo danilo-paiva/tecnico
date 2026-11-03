@@ -30,7 +30,7 @@ pip install -r requirements.txt
 python projeto.py
 ```
 
-Todo o projeto está em um único arquivo: **`projeto.py`**, organizado em seções comentadas.
+O código está em **`projeto.py`**; o HTML fica no modelo **`modelo_pagina.txt`**, lido e preenchido pelo programa. Há também uma versão de estudo em **`projeto_comentado.py`**.
 
 O menu interativo oferece:
 
@@ -101,7 +101,9 @@ O PDF e o HTML ficam na pasta do programa e são gerados novamente a cada execu�
 
 ```text
 POOI/4bi/projeto/
-├── projeto.py              # todo o código: dados, PDF, página e menu
+├── projeto.py              # código principal: dados, PDF, página e menu
+├── projeto_comentado.py    # mesma versão, comentada para estudo
+├── modelo_pagina.txt       # modelo HTML lido e preenchido pelo programa
 ├── planilha/
 │   └── projeto4bi.xlsx     # planilha de exemplo da CBF
 ├── classificacao.html      # página gerada
@@ -117,7 +119,7 @@ POOI/4bi/projeto/
 
 | Conteúdo da apostila | Onde aparece |
 |---|---|
-| **38 — Arquivos texto** (`open`, `write`, `close`) | `projeto.py` grava o HTML com `open(..., 'w')`, `write()` e `close()`. |
+| **38 — Arquivos texto** (`open`, `write`, `close`) | `projeto.py` lê `modelo_pagina.txt` e grava o HTML com `open`, `read`, `write` e `close`. |
 | **39 — PDF com reportlab** (`Canvas`, `setFont`, `setFillColor`, `drawString`, `setTitle`, `save`) | O layout em `projeto.py`. |
 | **40 — pandas / openpyxl** (`ExcelFile`, `parse`, `sheet_names`, `iloc`) | `projeto.py` lê a planilha, encontra a linha de cabeçalho e percorre as linhas. |
 | **Funções, listas, dicionários, laços, f-strings** | Em todo o `projeto.py`. |
@@ -157,4 +159,4 @@ O HTML é gravado com `open(..., 'w')`, `write()` e `close()`; a página declara
 - [x] Página web com botão que abre a classificação em PDF.
 - [x] PDF gerado exclusivamente por Python/reportlab.
 - [x] **layout 07 (Minimalista suíço)**, além do layout da página web.
-- [x] Código organizado em seções comentadas dentro de `projeto.py`.
+- [x] Código principal, modelo HTML em txt e versão comentada.

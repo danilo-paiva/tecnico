@@ -485,103 +485,27 @@ def montar_linhas(dados):
 
 
 def gerar_pagina(dados, caminho_html):
-    """Cria uma página simples, no mesmo estilo do PDF."""
+    """Lê o modelo txt e grava a página com os dados da classificação."""
     fonte = dados['fonte']
     if fonte == '':
         fonte = 'Planilha da CBF'
+    media = f'{dados["media_pontos"]:.2f}'.replace('.', ',')
 
-    html = f'''<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="windows-1252">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Série A 2026 — Classificação</title>
-<style>
-  body {{ font-family: Arial, Helvetica, sans-serif; background: #FFFFFF; color: #111111;
-         max-width: 860px; margin: 40px auto; padding: 0 22px; }}
-  .cabecalho {{ border-bottom: 2px solid #111111; padding-bottom: 20px; }}
-  .kicker {{ font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: #777777; }}
-  h1 {{ font-size: 72px; line-height: .9; margin: 10px 0 0; letter-spacing: -2px; }}
-  h1 span {{ color: #BBBBBB; }}
-  .sub {{ font-size: 14px; color: #777777; margin: 16px 0 0; }}
-  .meta {{ display: flex; gap: 44px; margin: 24px 0 26px; }}
-  .meta div {{ font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: #777777; }}
-  .meta strong {{ display: block; font-size: 24px; letter-spacing: 0; color: #111111; margin-top: 3px; }}
-  table {{ width: 100%; border-collapse: collapse; font-size: 15px; }}
-  th {{ text-align: left; font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase;
-        color: #777777; padding: 10px 6px; border-bottom: 1px solid #111111; }}
-  td {{ padding: 11px 6px; border-bottom: 1px solid #E5E5E5; }}
-  .num {{ text-align: right; }}
-  .pos {{ width: 54px; font-weight: bold; }}
-  .pts {{ font-weight: bold; }}
-  .g4 {{ background: #E5EBDC; }}
-  .z4 {{ background: #F3DFD8; }}
-  .g4 .pos {{ color: #2F4A32; }}
-  .z4 .pos {{ color: #8E1B1B; }}
-  .empate {{ color: #999999; font-weight: normal; }}
-  .nota {{ font-size: 12px; line-height: 1.5; color: #777777; margin: 18px 0 0; max-width: 680px; }}
-  .acoes {{ margin-top: 24px; }}
-  .botao {{ display: inline-block; background: #111111; color: #FFFFFF; padding: 12px 18px;
-            text-decoration: none; font-size: 13px; }}
-  footer {{ margin-top: 34px; border-top: 1px solid #E5E5E5; padding-top: 14px;
-            font-size: 12px; color: #777777; }}
-  @media (max-width: 600px) {{
-    body {{ margin: 24px auto; padding: 0 14px; }}
-    h1 {{ font-size: 48px; }}
-    .meta {{ gap: 22px; }}
-    table {{ font-size: 13px; }}
-    th, td {{ padding: 8px 3px; }}
-    .pos {{ width: 40px; }}
-  }}
-</style>
-</head>
-<body>
-  <header class="cabecalho">
-    <div class="kicker">Campeonato Brasileiro · Série A</div>
-    <h1>SÉRIE A <span>2026</span></h1>
-    <p class="sub">Classificação após {dados['total_partidas']} partidas</p>
-  </header>
+    modelo = open('modelo_pagina.txt')
+    html = modelo.read()
+    modelo.close()
 
-  <div class="meta">
-    <div>Clubes<strong>{dados['total_times']}</strong></div>
-    <div>Média<strong>{f'{dados["media_pontos"]:.2f}'.replace('.', ',')}</strong></div>
-  </div>
-
-  <table>
-    <caption class="kicker">Classificação do Campeonato Brasileiro Série A 2026</caption>
-    <thead>
-      <tr>
-        <th>Pos</th>
-        <th>Clube</th>
-        <th class="num">J</th>
-        <th class="num">V</th>
-        <th class="num">E</th>
-        <th class="num">D</th>
-        <th class="num">Pts</th>
-      </tr>
-    </thead>
-    <tbody>
-{montar_linhas(dados)}
-    </tbody>
-  </table>
-
-  <p class="nota">{escapar(NOTA_EMPATES)} G4: quatro primeiros. Z4: quatro últimos.</p>
-  <div class="acoes">
-    <a class="botao" href="relatorio.pdf" target="_blank" rel="noopener">Abrir relatório em PDF</a>
-  </div>
-
-  <footer>
-    <p>Fonte: {escapar(fonte)} · planilha lida pelo Python.</p>
-  </footer>
-</body>
-</html>
-'''
+    html = html.replace('@@PARTIDAS@@', str(dados['total_partidas']))
+    html = html.replace('@@CLUBES@@', str(dados['total_times']))
+    html = html.replace('@@MEDIA@@', media)
+    html = html.replace('@@LINHAS@@', montar_linhas(dados))
+    html = html.replace('@@NOTA@@', escapar(NOTA_EMPATES))
+    html = html.replace('@@FONTE@@', escapar(fonte))
 
     arquivo = open(caminho_html, 'w')
     arquivo.write(html)
     arquivo.close()
     return caminho_html
-
 
 
 # ===========================================================================
