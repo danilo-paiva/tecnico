@@ -432,8 +432,12 @@ def layout_07_minimalista(dados, caminho):
         # G4 em verde; Z4 em vermelho; os demais em preto.
         if time['g4']:
             cor_posicao = verde
+            pdf.setFillColor('#E5EBDC')
+            pdf.rect(48, y_base - 5, 499, 19, fill=1, stroke=0)
         elif time['z4']:
             cor_posicao = vermelho
+            pdf.setFillColor('#F3DFD8')
+            pdf.rect(48, y_base - 5, 499, 19, fill=1, stroke=0)
         else:
             cor_posicao = tinta
 
