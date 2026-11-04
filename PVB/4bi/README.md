@@ -126,3 +126,6 @@ O que é coberto:
 - As classes `Imc`, `Banco`/`ArquivoJson` e `Html` são apenas agrupadores de funções e
   procedimentos `static` — como `Math` e `Console` (aulas 02/05) e as funções da aula 08.
   Não há criação de objeto (`new`), construtor, herança nem propriedade.
+- O eixo radial do `grafico.html` vai até o maior valor da base + 2 (o template mostra 50),
+  para o gráfico ficar legível com poucos registros. O vetor `r:` continua sendo a contagem
+  de pessoas por faixa de IMC.

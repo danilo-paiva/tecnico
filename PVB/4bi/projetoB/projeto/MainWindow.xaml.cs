@@ -520,11 +520,19 @@ namespace projetoB
         // montado pelas faixas de IMC do arquivo (item 9)
         // -------------------------------------------------------
         // GerarGrafico: o vetor "r" e a contagem de pessoas em cada faixa
-        // de IMC; "theta" sao os rotulos fixos do template; o range
-        // [0, 50] tambem vem do template do enunciado.
+        // de IMC; "theta" sao os rotulos fixos do template. O eixo radial
+        // vai ate o maior valor + 2 (o template mostra 50) para o grafico
+        // ficar legivel mesmo com poucos registros.
         public static void GerarGrafico(string caminho, string[] lista)
         {
             int[] contagem = ContarFaixas(lista);
+
+            int maior = 0;
+            for (int f = 0; f < 6; f++)
+                if (contagem[f] > maior) maior = contagem[f];
+
+            int limite = maior + 2;
+            if (limite < 4) limite = 4;
 
             string html = "";
 
@@ -545,7 +553,7 @@ namespace projetoB
             html += "theta: ['Magreza','Saúdavel','Sobrepeso', 'OBG-I', 'OBG-II', 'OBG-III'], fill: 'toself'" + Environment.NewLine;
             html += "}]" + Environment.NewLine;
             html += "layout = { polar: {" + Environment.NewLine;
-            html += "radialaxis: { visible: true, range: [0, 50]" + Environment.NewLine;
+            html += "radialaxis: { visible: true, range: [0, " + limite + "]" + Environment.NewLine;
             html += "}" + Environment.NewLine;
             html += "}," + Environment.NewLine;
             html += "showlegend: false" + Environment.NewLine;
