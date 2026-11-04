@@ -295,7 +295,9 @@ namespace projetoA
         {
             Quantidade = 0;
 
-            if (!File.Exists(caminho)) return;   // primeira execucao: base vazia
+            // Primeira execucao: o arquivo ainda nao existe. Sem esta
+            // linha, File.ReadAllLines lancaria FileNotFoundException.
+            if (!File.Exists(caminho)) return;
 
             string[] linhas = File.ReadAllLines(caminho);
 
