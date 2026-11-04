@@ -51,7 +51,7 @@ namespace projetoA
         // -------------------------------------------------------
         // Cada posicao dos seis vetores forma um registro (pessoa).
         // Quantidade e o indice da proxima posicao livre; MAX e o limite.
-        public const int MAX = 100;
+        public const int MAX = 1000;   // capacidade dos vetores
         public static int[] Ids = new int[MAX];
         public static string[] Nomes = new string[MAX];
         public static double[] Pesos = new double[MAX];
