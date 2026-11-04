@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>TestesProjetos</AssemblyName>
+    <RootNamespace>testes</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\projetoA\projeto\projetoA.csproj" />
+    <ProjectReference Include="..\projetoB\projeto\projetoB.csproj" />
+  </ItemGroup>
+
+</Project>

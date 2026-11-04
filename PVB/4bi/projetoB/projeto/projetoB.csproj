@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net5.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <RollForward>Major</RollForward>
+    <AssemblyName>ProjetoListas</AssemblyName>
+    <RootNamespace>projetoB</RootNamespace>
+  </PropertyGroup>
+
+</Project>
