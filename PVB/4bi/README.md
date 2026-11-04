@@ -66,6 +66,16 @@ Resultado esperado: **TODOS OS 92 TESTES PASSARAM.**
 O projeto `testes` referencia `projetoA.csproj` e `projetoB.csproj` (não copia os `.cs`),
 então testa exatamente o código que roda na janela.
 
+### Ver as telas sem depender do monitor
+
+```bash
+dotnet run --project testes/testes.csproj -- --render
+```
+
+O modo `--render` monta as duas janelas e salva `telaA.png` e `telaB.png` em
+`%TEMP%\pvb-render`, usando `RenderTargetBitmap` — funciona mesmo com a tela desligada.
+
+
 O que é coberto:
 
 1. Fórmula do IMC (`70/1,75 = 22,86` etc.)

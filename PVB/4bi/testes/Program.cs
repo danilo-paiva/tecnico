@@ -1,5 +1,8 @@
 using System;
 using System.IO;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using A = projetoA;
 using B = projetoB;
 
@@ -8,6 +11,7 @@ namespace testes
     /***************************************************************
     * Testes das duas implementacoes (A = vetores, B = blocos).
     * Roda sem Visual Studio:  dotnet run --project testes
+    * Use --render para gerar PNGs das duas janelas sem depender da tela.
     ***************************************************************/
     class Program
     {
@@ -42,8 +46,14 @@ namespace testes
 ]";
 
         [STAThread]   // as classes usadas sao de WPF (Window)
-        static void Main()
+        static void Main(string[] args)
         {
+            if (args.Length > 0 && args[0] == "--render")
+            {
+                RenderTelas();
+                return;
+            }
+
             string pasta = Path.Combine(Path.GetTempPath(), "pvb-4bi-testes");
 
             if (Directory.Exists(pasta)) Directory.Delete(pasta, true);
@@ -246,6 +256,58 @@ namespace testes
 
             Environment.ExitCode = falhas == 0 ? 0 : 1;
         }
+        // Gera PNGs das duas janelas com RenderTargetBitmap. Nao depende
+        // de a tela estar ligada: o WPF desenha a janela na memoria.
+        static void RenderTelas()
+        {
+            string pasta = Path.Combine(Path.GetTempPath(), "pvb-render");
+
+            if (Directory.Exists(pasta)) Directory.Delete(pasta, true);
+            Directory.CreateDirectory(pasta);
+            File.WriteAllText(Path.Combine(pasta, "pessoas.json"), TEMPLATE);
+
+            Directory.SetCurrentDirectory(pasta);
+
+            Application app = new Application();
+            app.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+
+            A.MainWindow janelaA = new A.MainWindow();
+            janelaA.ShowActivated = false;
+            janelaA.Show();
+            janelaA.UpdateLayout();
+            SalvarJanela(janelaA, Path.Combine(pasta, "telaA.png"));
+            janelaA.Close();
+
+            B.MainWindow janelaB = new B.MainWindow();
+            janelaB.ShowActivated = false;
+            janelaB.Show();
+            janelaB.UpdateLayout();
+            SalvarJanela(janelaB, Path.Combine(pasta, "telaB.png"));
+            janelaB.Close();
+
+            app.Shutdown();
+
+            Console.WriteLine("PNGs gerados em " + pasta);
+        }
+
+        static void SalvarJanela(Window janela, string caminho)
+        {
+            int largura = (int)janela.ActualWidth;
+            int altura = (int)janela.ActualHeight;
+
+            if (largura <= 0) largura = (int)janela.Width;
+            if (altura <= 0) altura = (int)janela.Height;
+
+            RenderTargetBitmap bmp = new RenderTargetBitmap(largura, altura, 96, 96, PixelFormats.Pbgra32);
+            bmp.Render(janela);
+
+            PngBitmapEncoder encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(bmp));
+
+            using (FileStream fs = File.Create(caminho))
+                encoder.Save(fs);
+        }
+
 
         static void Secao(string titulo)
         {
