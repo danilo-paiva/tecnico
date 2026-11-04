@@ -30,35 +30,35 @@
                 </Grid.RowDefinitions>
 
                 <Label Content="Id"/>
-                <TextBox Grid.Column="1" x:Name="txtId" Margin="0,3,0,3"/>
+                <TextBox Grid.Column="1" x:Name="txtIdentificador" Margin="0,3,0,3"/>
 
                 <Label Grid.Row="1" Content="Nome"/>
-                <TextBox Grid.Row="1" Grid.Column="1" x:Name="txtNome" Margin="0,3,0,3"/>
+                <TextBox Grid.Row="1" Grid.Column="1" x:Name="txtPaciente" Margin="0,3,0,3"/>
 
                 <Label Grid.Row="2" Content="Peso (Kg)"/>
-                <TextBox Grid.Row="2" Grid.Column="1" x:Name="txtPeso" Margin="0,3,0,3"/>
+                <TextBox Grid.Row="2" Grid.Column="1" x:Name="txtQuilos" Margin="0,3,0,3"/>
 
                 <Label Grid.Row="3" Content="Altura (m)"/>
-                <TextBox Grid.Row="3" Grid.Column="1" x:Name="txtAltura" Margin="0,3,0,3"/>
+                <TextBox Grid.Row="3" Grid.Column="1" x:Name="txtEstatura" Margin="0,3,0,3"/>
             </Grid>
 
             <UniformGrid Columns="2" Margin="0,10,0,0">
-                <Button Content="Cadastrar" Margin="3" Click="btCadastrar_Click"
+                <Button Content="Cadastrar" Margin="3" Click="Cadastrar_Click"
                         Background="#0F6CBD" Foreground="White" BorderBrush="#0B5897"
                         FontWeight="SemiBold"/>
-                <Button Content="Consultar" Margin="3" Click="btConsultar_Click"/>
-                <Button Content="Alterar" Margin="3" Click="btAlterar_Click"/>
-                <Button Content="Excluir" Margin="3" Click="btExcluir_Click"/>
+                <Button Content="Consultar" Margin="3" Click="Consultar_Click"/>
+                <Button Content="Alterar" Margin="3" Click="Alterar_Click"/>
+                <Button Content="Excluir" Margin="3" Click="Excluir_Click"/>
             </UniformGrid>
 
             <Label Content="Relatorios" Margin="0,12,0,0"/>
 
-            <Button Content="Relatorio (texto)" Margin="0,3,0,0" Click="btRelatorio_Click"/>
-            <Button Content="Grafico HTML" Margin="0,3,0,0" Click="btGrafico_Click"/>
-            <Button Content="Dados HTML" Margin="0,3,0,0" Click="btDados_Click"
+            <Button Content="Relatorio (texto)" Margin="0,3,0,0" Click="Relatorio_Click"/>
+            <Button Content="Grafico HTML" Margin="0,3,0,0" Click="Grafico_Click"/>
+            <Button Content="Dados HTML" Margin="0,3,0,0" Click="Dados_Click"
                     Background="#0F6CBD" Foreground="White" BorderBrush="#0B5897"/>
 
-            <Label x:Name="lblStatus" Margin="0,12,0,0"/>
+            <Label x:Name="lblMensagem" Margin="0,12,0,0"/>
         </StackPanel>
 
         <!-- Coluna direita: lista e relatorio -->
@@ -70,14 +70,14 @@
 
             <StackPanel>
                 <Label Content="Pacientes cadastrados"/>
-                <ListBox x:Name="lstPacientes"
-                         SelectionChanged="lstPacientes_SelectionChanged"
+                <ListBox x:Name="lstAvaliados"
+                         SelectionChanged="lstAvaliados_SelectionChanged"
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
             </StackPanel>
 
             <StackPanel Grid.Row="1" Margin="0,10,0,0">
                 <Label Content="Relatorio"/>
-                <TextBox x:Name="txtRelatorio" Height="200"
+                <TextBox x:Name="txtResumo" Height="200"
                          IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap"
                          FontFamily="Consolas" VerticalScrollBarVisibility="Auto"/>
             </StackPanel>

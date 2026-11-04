@@ -11,7 +11,7 @@ namespace projetoB
 
     /***************************************************************
     * PROJETO DO 4o BIMESTRE - IMC EM CONSULTORIO DE FISIOTERAPIA
-    * Implementacao B - um vetor de blocos JSON (um bloco por pessoa).
+    * Implementacao B - um vetor de registros JSON (um registro por pessoa).
     *
     * Uma unica janela: formulario, lista de pacientes, relatorio
     * (caixa de texto multilinha) e rodape com as mensagens.
@@ -24,7 +24,7 @@ namespace projetoB
     * Leitura/gravacao: somente a classe File do System.IO.
     *
     * Cada pessoa e guardada como o texto de um objeto JSON (as linhas
-    * entre "{" e "}"), dentro do vetor blocos.
+    * entre "{" e "}"), dentro do vetor registros.
     *
     * Template gravado em pessoas.json (item 1):
     * [
@@ -38,31 +38,31 @@ namespace projetoB
     *     }
     * ]
     *
-    * Seccoes: dados (blocos), tela, relatorio/IMC, leitura do JSON,
+    * Seccoes: dados (registros), tela, relatorio/IMC, leitura do JSON,
     * gravacao do JSON, operacoes (CRUD) e geracao dos HTML.
     ***************************************************************/
     public partial class MainWindow : Window
     {
         // Nomes relativos: os arquivos ficam na pasta de trabalho do
         // programa (a pasta do projeto no F5; a do .exe na publicacao).
-        string arquivo = "pessoas.json";
-        string grafico = "grafico.html";
-        string dados = "pessoas.html";
+        string arquivoBase = "pessoas.json";
+        string arquivoGrafico = "grafico.html";
+        string arquivoTabela = "pessoas.html";
 
         // -------------------------------------------------------
-        // Dados: um bloco JSON por pessoa
+        // Dados: um registro JSON por pessoa
         // -------------------------------------------------------
         // Cada posicao guarda o texto de um objeto JSON (as linhas
         // entre "{" e "}"). O vetor cresce/diminui nas operacoes.
-        public static string[] blocos = new string[0];
+        public static string[] registros = new string[0];
 
         // Ao abrir a janela: le o JSON e monta a lista/relatorio.
         public MainWindow()
         {
             InitializeComponent();
 
-            blocos = Ler(arquivo);
-            AtualizarTela();
+            registros = LerRegistros(arquivoBase);
+            AtualizarInterface();
         }
 
         // -------------------------------------------------------
@@ -70,36 +70,36 @@ namespace projetoB
         // -------------------------------------------------------
         // Monta as linhas da lista (item 4: o peso aparece na caixa),
         // atualiza o relatorio e o rodape.
-        void AtualizarTela()
+        void AtualizarInterface()
         {
-            string[] linhas = new string[blocos.Length];
+            string[] linhas = new string[registros.Length];
 
-            for (int i = 0; i < blocos.Length; i++)
+            for (int i = 0; i < registros.Length; i++)
             {
-                string bloco = blocos[i];
+                string registro = registros[i];
 
-                linhas[i] = "Id " + Id(bloco) +
-                    " - " + Campo(bloco, "Nome") +
-                    " - " + Numero(Campo(bloco, "Peso (Kg)")).ToString("0.##") + " kg" +
-                    " - IMC " + Numero(Campo(bloco, "IMC")).ToString("0.00") +
-                    " - " + Campo(bloco, "Classificação");
+                linhas[i] = "Id " + ObterId(registro) +
+                    " - " + ObterCampo(registro, "Nome") +
+                    " - " + ConverterNumero(ObterCampo(registro, "Peso (Kg)")).ToString("0.##") + " kg" +
+                    " - IMC " + ConverterNumero(ObterCampo(registro, "IMC")).ToString("0.00") +
+                    " - " + ObterCampo(registro, "Classificação");
             }
 
-            lstPacientes.ItemsSource = linhas;
+            lstAvaliados.ItemsSource = linhas;
 
-            txtRelatorio.Text = Relatorio();
-            lblStatus.Content = blocos.Length + " pessoa(s) em " + Nome(arquivo);
+            txtResumo.Text = MontarRelatorio();
+            lblMensagem.Content = registros.Length + " pessoa(s) em " + NomeArquivo(arquivoBase);
         }
 
-        // Joga os campos do bloco da posicao nos campos da tela.
-        void Mostrar(int posicao)
+        // Joga os campos do registro da posicao nos campos da tela.
+        void PreencherFormulario(int posicao)
         {
-            string bloco = blocos[posicao];
+            string registro = registros[posicao];
 
-            txtId.Text = Id(bloco).ToString();
-            txtNome.Text = Campo(bloco, "Nome");
-            txtPeso.Text = Numero(Campo(bloco, "Peso (Kg)")).ToString("0.##");
-            txtAltura.Text = Numero(Campo(bloco, "Altura (m)")).ToString("0.##");
+            txtIdentificador.Text = ObterId(registro).ToString();
+            txtPaciente.Text = ObterCampo(registro, "Nome");
+            txtQuilos.Text = ConverterNumero(ObterCampo(registro, "Peso (Kg)")).ToString("0.##");
+            txtEstatura.Text = ConverterNumero(ObterCampo(registro, "Altura (m)")).ToString("0.##");
         }
 
 
@@ -107,164 +107,164 @@ namespace projetoB
         // Operacoes (itens 5 e 6 do enunciado)
         // -------------------------------------------------------
         // Todos os botoes leem o Id digitado; consultar/alterar/excluir
-        // usam Buscar() e param quando o Id nao existe.
-        // Cadastrar: le os tres campos, cria um bloco novo e regrava o JSON.
-        private void btCadastrar_Click(object sender, RoutedEventArgs e)
+        // usam LocalizarId() e param quando o Id nao existe.
+        // Cadastrar: le os tres campos, cria um registro novo e regrava o JSON.
+        private void Cadastrar_Click(object sender, RoutedEventArgs e)
         {
-            string nome = txtNome.Text.Trim();
-            double peso = Numero(txtPeso.Text);
-            double altura = Numero(txtAltura.Text);
+            string nome = txtPaciente.Text.Trim();
+            double peso = ConverterNumero(txtQuilos.Text);
+            double altura = ConverterNumero(txtEstatura.Text);
 
-            blocos = Adicionar(blocos, nome, peso, altura);
-            Gravar(arquivo, blocos);
+            registros = IncluirRegistro(registros, nome, peso, altura);
+            GravarRegistros(arquivoBase, registros);
 
-            AtualizarTela();
-            lstPacientes.SelectedIndex = blocos.Length - 1;
+            AtualizarInterface();
+            lstAvaliados.SelectedIndex = registros.Length - 1;
 
-            lblStatus.Content = "Id " + Id(blocos[blocos.Length - 1]) + " cadastrado.";
+            lblMensagem.Content = "Id " + ObterId(registros[registros.Length - 1]) + " cadastrado.";
         }
 
         // Consultar: busca pelo Id digitado e mostra os campos.
-        private void btConsultar_Click(object sender, RoutedEventArgs e)
+        private void Consultar_Click(object sender, RoutedEventArgs e)
         {
-            int id = int.Parse(txtId.Text);
+            int id = int.Parse(txtIdentificador.Text);
 
-            int posicao = Buscar(blocos, id);
+            int posicao = LocalizarId(registros, id);
 
             if (posicao < 0)
             {
-                lblStatus.Content = "Nenhum registro com Id " + id + ".";
+                lblMensagem.Content = "Nenhum registro com Id " + id + ".";
                 return;
             }
 
-            Mostrar(posicao);
-            lstPacientes.SelectedIndex = posicao;
-            lblStatus.Content = "Id " + id + " encontrado.";
+            PreencherFormulario(posicao);
+            lstAvaliados.SelectedIndex = posicao;
+            lblMensagem.Content = "Id " + id + " encontrado.";
         }
 
-        // Alterar: busca pelo Id, refaz o bloco e regrava o JSON.
-        private void btAlterar_Click(object sender, RoutedEventArgs e)
+        // Alterar: busca pelo Id, refaz o registro e regrava o JSON.
+        private void Alterar_Click(object sender, RoutedEventArgs e)
         {
-            int id = int.Parse(txtId.Text);
+            int id = int.Parse(txtIdentificador.Text);
 
-            int posicao = Buscar(blocos, id);
+            int posicao = LocalizarId(registros, id);
 
             if (posicao < 0)
             {
-                lblStatus.Content = "Nenhum registro com Id " + id + ".";
+                lblMensagem.Content = "Nenhum registro com Id " + id + ".";
                 return;
             }
 
-            string nome = txtNome.Text.Trim();
-            double peso = Numero(txtPeso.Text);
-            double altura = Numero(txtAltura.Text);
+            string nome = txtPaciente.Text.Trim();
+            double peso = ConverterNumero(txtQuilos.Text);
+            double altura = ConverterNumero(txtEstatura.Text);
 
-            blocos = Alterar(blocos, posicao, nome, peso, altura);
-            Gravar(arquivo, blocos);
+            registros = AtualizarRegistro(registros, posicao, nome, peso, altura);
+            GravarRegistros(arquivoBase, registros);
 
-            AtualizarTela();
-            lstPacientes.SelectedIndex = posicao;
+            AtualizarInterface();
+            lstAvaliados.SelectedIndex = posicao;
 
-            lblStatus.Content = "Id " + id + " alterado.";
+            lblMensagem.Content = "Id " + id + " alterado.";
         }
 
-        // Excluir: busca pelo Id, remove o bloco e regrava o JSON.
-        private void btExcluir_Click(object sender, RoutedEventArgs e)
+        // Excluir: busca pelo Id, remove o registro e regrava o JSON.
+        private void Excluir_Click(object sender, RoutedEventArgs e)
         {
-            int id = int.Parse(txtId.Text);
+            int id = int.Parse(txtIdentificador.Text);
 
-            int posicao = Buscar(blocos, id);
+            int posicao = LocalizarId(registros, id);
 
             if (posicao < 0)
             {
-                lblStatus.Content = "Nenhum registro com Id " + id + ".";
+                lblMensagem.Content = "Nenhum registro com Id " + id + ".";
                 return;
             }
 
-            blocos = Excluir(blocos, posicao);
-            Gravar(arquivo, blocos);
+            registros = RemoverRegistro(registros, posicao);
+            GravarRegistros(arquivoBase, registros);
 
-            AtualizarTela();
-            lstPacientes.SelectedIndex = -1;
-            txtId.Text = "";
-            txtNome.Text = "";
-            txtPeso.Text = "";
-            txtAltura.Text = "";
+            AtualizarInterface();
+            lstAvaliados.SelectedIndex = -1;
+            txtIdentificador.Text = "";
+            txtPaciente.Text = "";
+            txtQuilos.Text = "";
+            txtEstatura.Text = "";
 
-            lblStatus.Content = "Id " + id + " excluido.";
+            lblMensagem.Content = "Id " + id + " excluido.";
         }
 
         // Clicar em uma linha da lista tambem preenche os campos.
-        private void lstPacientes_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void lstAvaliados_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            int posicao = lstPacientes.SelectedIndex;
+            int posicao = lstAvaliados.SelectedIndex;
 
-            if (posicao < 0 || posicao >= blocos.Length) return;
+            if (posicao < 0 || posicao >= registros.Length) return;
 
-            Mostrar(posicao);
+            PreencherFormulario(posicao);
         }
 
         // -------------------------------------------------------
         // Relatorio e HTML (itens 7, 9, 10 e 11)
         // -------------------------------------------------------
         // Monta o relatorio do item 7 (todos os pacientes + IMC + classe).
-        string Relatorio()
+        string MontarRelatorio()
         {
             string texto = "RELATORIO DE AVALIACOES - CONSULTORIO DE FISIOTERAPIA" + Environment.NewLine;
             texto += "======================================================" + Environment.NewLine;
 
-            for (int i = 0; i < blocos.Length; i++)
+            for (int i = 0; i < registros.Length; i++)
             {
-                string bloco = blocos[i];
+                string registro = registros[i];
 
-                texto += "Id: " + Id(bloco) + Environment.NewLine;
-                texto += "Nome: " + Campo(bloco, "Nome") + Environment.NewLine;
-                texto += "Peso: " + Numero(Campo(bloco, "Peso (Kg)")).ToString("0.##") + " kg" + Environment.NewLine;
-                texto += "Altura: " + Numero(Campo(bloco, "Altura (m)")).ToString("0.##") + " m" + Environment.NewLine;
-                texto += "IMC: " + Numero(Campo(bloco, "IMC")).ToString("0.00") + Environment.NewLine;
-                texto += "Classificacao: " + Campo(bloco, "Classificação") + Environment.NewLine;
+                texto += "Id: " + ObterId(registro) + Environment.NewLine;
+                texto += "Nome: " + ObterCampo(registro, "Nome") + Environment.NewLine;
+                texto += "Peso: " + ConverterNumero(ObterCampo(registro, "Peso (Kg)")).ToString("0.##") + " kg" + Environment.NewLine;
+                texto += "Altura: " + ConverterNumero(ObterCampo(registro, "Altura (m)")).ToString("0.##") + " m" + Environment.NewLine;
+                texto += "IMC: " + ConverterNumero(ObterCampo(registro, "IMC")).ToString("0.00") + Environment.NewLine;
+                texto += "Classificacao: " + ObterCampo(registro, "Classificação") + Environment.NewLine;
                 texto += "------------------------------------------------------" + Environment.NewLine;
             }
 
-            int[] contagem = ContarFaixas(blocos);
+            int[] contagem = ContarPorFaixa(registros);
 
-            texto += "Total de pessoas: " + blocos.Length + Environment.NewLine;
+            texto += "Total de pessoas: " + registros.Length + Environment.NewLine;
 
             for (int f = 0; f < 6; f++)
-                texto += NomeFaixa(f) + ": " + contagem[f] + Environment.NewLine;
+                texto += DescreverFaixa(f) + ": " + contagem[f] + Environment.NewLine;
 
             return texto;
         }
 
-        private void btRelatorio_Click(object sender, RoutedEventArgs e)
+        private void Relatorio_Click(object sender, RoutedEventArgs e)
         {
-            txtRelatorio.Text = Relatorio();
-            lblStatus.Content = "Relatorio atualizado.";
+            txtResumo.Text = MontarRelatorio();
+            lblMensagem.Content = "Relatorio atualizado.";
         }
 
-        private void btGrafico_Click(object sender, RoutedEventArgs e)
+        private void Grafico_Click(object sender, RoutedEventArgs e)
         {
-            GerarGrafico(grafico, blocos);
-            lblStatus.Content = "Arquivo " + Nome(grafico) + " gerado.";
+            GerarHtmlGrafico(arquivoGrafico, registros);
+            lblMensagem.Content = "Arquivo " + NomeArquivo(arquivoGrafico) + " gerado.";
         }
 
-        private void btDados_Click(object sender, RoutedEventArgs e)
+        private void Dados_Click(object sender, RoutedEventArgs e)
         {
-            GerarDados(dados, blocos);
-            lblStatus.Content = "Arquivo " + Nome(dados) + " gerado.";
+            GerarHtmlDados(arquivoTabela, registros);
+            lblMensagem.Content = "Arquivo " + NomeArquivo(arquivoTabela) + " gerado.";
         }
 
         // -------------------------------------------------------
         // IMC (item 8): aula 05 (Math.Pow / Math.Round) e aula 08
         // -------------------------------------------------------
         // IMC = peso / altura^2, arredondado em duas casas (item 8).
-        public static double CalcularImc(double peso, double altura)
+        public static double CalcularIndice(double peso, double altura)
         {
             return Math.Round(peso / Math.Pow(altura, 2), 2);
         }
 
         // 0 <18,5 | 1 18,5-24,9 | 2 25-29,9 | 3 30-34,9 | 4 35-39,9 | 5 >=40
-        public static int Faixa(double imc)
+        public static int ObterFaixa(double imc)
         {
             if (imc < 18.5) return 0;
             if (imc < 25.0) return 1;
@@ -275,13 +275,13 @@ namespace projetoB
         }
 
         // Classificacao por extenso a partir da mesma faixa do grafico.
-        public static string Classificar(double imc)
+        public static string ClassificarImc(double imc)
         {
-            return NomeFaixa(Faixa(imc));
+            return DescreverFaixa(ObterFaixa(imc));
         }
 
         // Nomes usados no relatorio, na ordem 0..5.
-        public static string NomeFaixa(int faixa)
+        public static string DescreverFaixa(int faixa)
         {
             string[] nomes = new string[] { "Magreza", "Peso Normal", "Sobrepeso",
                 "Obesidade Grau I", "Obesidade Grau II", "Obesidade Grau III" };
@@ -293,10 +293,10 @@ namespace projetoB
         // Leitura do JSON: cada posicao do vetor e um objeto
         // (aula 08: Trim, StartsWith, EndsWith, IndexOf, Substring)
         // -------------------------------------------------------
-        // Le o arquivo e devolve um vetor de blocos: cada posicao e o
+        // Le o arquivo e devolve um vetor de registros: cada posicao e o
         // texto de um objeto JSON. As linhas entre "{" e "}" sao
         // copiadas na ordem; no fim o vetor e ajustado ao tamanho real.
-        public static string[] Ler(string caminho)
+        public static string[] LerRegistros(string caminho)
         {
             if (!File.Exists(caminho)) return new string[0];
 
@@ -315,12 +315,12 @@ namespace projetoB
                 }
                 else if (linha.StartsWith("}") && inicio >= 0)
                 {
-                    string bloco = "";
+                    string registro = "";
 
                     for (int j = inicio + 1; j < i; j++)
-                        bloco += linhas[j].Trim() + Environment.NewLine;
+                        registro += linhas[j].Trim() + Environment.NewLine;
 
-                    novos[n] = bloco;
+                    novos[n] = registro;
                     n++;
                     inicio = -1;
                 }
@@ -335,19 +335,19 @@ namespace projetoB
             return resultado;
         }
 
-        // Valor de um campo do bloco. Usa IndexOf com char no fim da
+        // Valor de um campo do registro. Usa IndexOf com char no fim da
         // linha: em .NET 5 o IndexOf("\n") com string nao encontra o
         // \n que vem depois do \r (comparacao sensivel a cultura).
-        public static string Campo(string bloco, string chave)
+        public static string ObterCampo(string registro, string chave)
         {
-            int p = bloco.IndexOf("\"" + chave + "\"");
+            int p = registro.IndexOf("\"" + chave + "\"");
             if (p < 0) return "";
 
-            int dp = bloco.IndexOf(':', p);
-            int fim = bloco.IndexOf('\n', dp);
-            if (fim < 0) fim = bloco.Length;
+            int dp = registro.IndexOf(':', p);
+            int fim = registro.IndexOf('\n', dp);
+            if (fim < 0) fim = registro.Length;
 
-            string valor = bloco.Substring(dp + 1, fim - dp - 1).Trim();
+            string valor = registro.Substring(dp + 1, fim - dp - 1).Trim();
 
             if (valor.EndsWith(","))
                 valor = valor.Substring(0, valor.Length - 1);
@@ -360,10 +360,10 @@ namespace projetoB
             return valor;
         }
 
-        // O Id vem do bloco; se a chave nao existir, devolve 0.
-        public static int Id(string bloco)
+        // O Id vem do registro; se a chave nao existir, devolve 0.
+        public static int ObterId(string registro)
         {
-            string texto = Campo(bloco, "Id");
+            string texto = ObterCampo(registro, "Id");
 
             if (texto == "") return 0;
 
@@ -372,7 +372,7 @@ namespace projetoB
 
         // O JSON usa ponto decimal: troca por virgula antes do Parse.
         // Campo vazio devolve 0 para nao quebrar a leitura.
-        public static double Numero(string texto)
+        public static double ConverterNumero(string texto)
         {
             if (texto == "") return 0;
 
@@ -383,23 +383,23 @@ namespace projetoB
         // Gravacao do JSON
         // -------------------------------------------------------
         // Monta o texto de um objeto JSON com os seis campos do template.
-        public static string Montar(int id, string nome, double peso, double altura, double imc, string classe)
+        public static string MontarRegistro(int id, string nome, double peso, double altura, double imc, string classe)
         {
-            string bloco = "";
+            string registro = "";
 
-            bloco += "        \"Id\": " + id + "," + Environment.NewLine;
-            bloco += "        \"Nome\": \"" + Limpar(nome) + "\"," + Environment.NewLine;
-            bloco += "        \"Peso (Kg)\": " + ComPonto(peso, "0.##") + "," + Environment.NewLine;
-            bloco += "        \"Altura (m)\": " + ComPonto(altura, "0.##") + "," + Environment.NewLine;
-            bloco += "        \"IMC\": " + ComPonto(imc, "0.00") + "," + Environment.NewLine;
-            bloco += "        \"Classificação\": \"" + Limpar(classe) + "\"" + Environment.NewLine;
+            registro += "        \"Id\": " + id + "," + Environment.NewLine;
+            registro += "        \"Nome\": \"" + LimparTexto(nome) + "\"," + Environment.NewLine;
+            registro += "        \"Peso (Kg)\": " + NumeroComPonto(peso, "0.##") + "," + Environment.NewLine;
+            registro += "        \"Altura (m)\": " + NumeroComPonto(altura, "0.##") + "," + Environment.NewLine;
+            registro += "        \"IMC\": " + NumeroComPonto(imc, "0.00") + "," + Environment.NewLine;
+            registro += "        \"Classificação\": \"" + LimparTexto(classe) + "\"" + Environment.NewLine;
 
-            return bloco;
+            return registro;
         }
 
-        // Junta os blocos no template: "[", objetos separados por "," e "]".
+        // Junta os registros no template: "[", objetos separados por "," e "]".
         // O ultimo objeto nao leva virgula.
-        public static void Gravar(string caminho, string[] lista)
+        public static void GravarRegistros(string caminho, string[] lista)
         {
             string texto = "[" + Environment.NewLine;
 
@@ -420,13 +420,13 @@ namespace projetoB
         }
 
         // O ToString do Windows usa virgula; o JSON usa ponto.
-        static string ComPonto(double valor, string formato)
+        static string NumeroComPonto(double valor, string formato)
         {
             return valor.ToString(formato).Replace(",", ".");
         }
 
         // Aspas dentro do nome quebrariam o JSON.
-        static string Limpar(string texto)
+        static string LimparTexto(string texto)
         {
             if (texto == null) return "";
 
@@ -434,25 +434,25 @@ namespace projetoB
         }
 
         // -------------------------------------------------------
-        // Operacoes no vetor de blocos
+        // Operacoes no vetor de registros
         // -------------------------------------------------------
-        // Devolve a posicao do Id no vetor de blocos, ou -1.
-        public static int Buscar(string[] lista, int id)
+        // Devolve a posicao do Id no vetor de registros, ou -1.
+        public static int LocalizarId(string[] lista, int id)
         {
             for (int i = 0; i < lista.Length; i++)
-                if (Id(lista[i]) == id) return i;
+                if (ObterId(lista[i]) == id) return i;
 
             return -1;
         }
 
         // Maior Id existente + 1.
-        public static int ProximoId(string[] lista)
+        public static int ProximoIdentificador(string[] lista)
         {
             int maior = 0;
 
             for (int i = 0; i < lista.Length; i++)
             {
-                int id = Id(lista[i]);
+                int id = ObterId(lista[i]);
 
                 if (id > maior) maior = id;
             }
@@ -461,32 +461,32 @@ namespace projetoB
         }
 
         // Cria um vetor com uma posicao a mais, copia os antigos e monta o novo.
-        public static string[] Adicionar(string[] lista, string nome, double peso, double altura)
+        public static string[] IncluirRegistro(string[] lista, string nome, double peso, double altura)
         {
             string[] novo = new string[lista.Length + 1];
 
             for (int i = 0; i < lista.Length; i++)
                 novo[i] = lista[i];
 
-            double imc = CalcularImc(peso, altura);
+            double imc = CalcularIndice(peso, altura);
 
-            novo[lista.Length] = Montar(ProximoId(lista), nome, peso, altura, imc, Classificar(imc));
+            novo[lista.Length] = MontarRegistro(ProximoIdentificador(lista), nome, peso, altura, imc, ClassificarImc(imc));
 
             return novo;
         }
 
-        // Substitui o bloco da posicao mantendo o Id e recalculando o IMC.
-        public static string[] Alterar(string[] lista, int posicao, string nome, double peso, double altura)
+        // Substitui o registro da posicao mantendo o Id e recalculando o IMC.
+        public static string[] AtualizarRegistro(string[] lista, int posicao, string nome, double peso, double altura)
         {
-            double imc = CalcularImc(peso, altura);
+            double imc = CalcularIndice(peso, altura);
 
-            lista[posicao] = Montar(Id(lista[posicao]), nome, peso, altura, imc, Classificar(imc));
+            lista[posicao] = MontarRegistro(ObterId(lista[posicao]), nome, peso, altura, imc, ClassificarImc(imc));
 
             return lista;
         }
 
         // Cria um vetor uma posicao menor, copiando todos menos a posicao.
-        public static string[] Excluir(string[] lista, int posicao)
+        public static string[] RemoverRegistro(string[] lista, int posicao)
         {
             string[] novo = new string[lista.Length - 1];
             int k = 0;
@@ -503,15 +503,15 @@ namespace projetoB
         }
 
         // Quantidade de pessoas em cada faixa (item 9 do enunciado).
-        public static int[] ContarFaixas(string[] lista)
+        public static int[] ContarPorFaixa(string[] lista)
         {
             int[] contagem = new int[6];
 
             for (int i = 0; i < lista.Length; i++)
             {
-                double imc = Numero(Campo(lista[i], "IMC"));
+                double imc = ConverterNumero(ObterCampo(lista[i], "IMC"));
 
-                contagem[Faixa(imc)]++;
+                contagem[ObterFaixa(imc)]++;
             }
 
             return contagem;
@@ -524,9 +524,9 @@ namespace projetoB
         // GerarGrafico: o vetor "r" e a contagem de pessoas em cada faixa
         // de IMC; "theta" sao os rotulos fixos do template; o range
         // [0, 50] tambem vem do template do enunciado.
-        public static void GerarGrafico(string caminho, string[] lista)
+        public static void GerarHtmlGrafico(string caminho, string[] lista)
         {
-            int[] contagem = ContarFaixas(lista);
+            int[] contagem = ContarPorFaixa(lista);
 
             string html = "";
 
@@ -564,7 +564,7 @@ namespace projetoB
         // pessoas.html - tabela com os dados das pessoas (item 10)
         // -------------------------------------------------------
         // Gera a tabela HTML com os dados das pessoas (item 10).
-        public static void GerarDados(string caminho, string[] lista)
+        public static void GerarHtmlDados(string caminho, string[] lista)
         {
             string html = "";
 
@@ -581,14 +581,14 @@ namespace projetoB
 
             for (int i = 0; i < lista.Length; i++)
             {
-                string bloco = lista[i];
+                string registro = lista[i];
 
-                html += "<tr><td>" + Id(bloco) + "</td><td>" +
-                        Escapar(Campo(bloco, "Nome")) + "</td><td>" +
-                        Numero(Campo(bloco, "Peso (Kg)")).ToString("0.##") + "</td><td>" +
-                        Numero(Campo(bloco, "Altura (m)")).ToString("0.##") + "</td><td>" +
-                        Numero(Campo(bloco, "IMC")).ToString("0.00") + "</td><td>" +
-                        Campo(bloco, "Classificação") + "</td></tr>" + Environment.NewLine;
+                html += "<tr><td>" + ObterId(registro) + "</td><td>" +
+                        EscaparHtml(ObterCampo(registro, "Nome")) + "</td><td>" +
+                        ConverterNumero(ObterCampo(registro, "Peso (Kg)")).ToString("0.##") + "</td><td>" +
+                        ConverterNumero(ObterCampo(registro, "Altura (m)")).ToString("0.##") + "</td><td>" +
+                        ConverterNumero(ObterCampo(registro, "IMC")).ToString("0.00") + "</td><td>" +
+                        ObterCampo(registro, "Classificação") + "</td></tr>" + Environment.NewLine;
             }
 
             html += "</table>" + Environment.NewLine;
@@ -601,13 +601,13 @@ namespace projetoB
         }
 
         // Somente o nome do arquivo, para mostrar no rodape.
-        static string Nome(string caminho)
+        static string NomeArquivo(string caminho)
         {
             return caminho.Substring(caminho.LastIndexOf('\\') + 1);
         }
 
         // Nome com < ou & quebraria o HTML.
-        static string Escapar(string texto)
+        static string EscaparHtml(string texto)
         {
             if (texto == null) return "";
 

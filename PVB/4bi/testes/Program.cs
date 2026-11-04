@@ -9,7 +9,7 @@ using B = projetoB;
 namespace testes
 {
     /***************************************************************
-    * Testes das duas implementacoes (A = vetores, B = blocos).
+    * Testes das duas implementacoes (A = vetores, B = registros).
     * Roda sem Visual Studio:  dotnet run --project testes
     * Use --render para gerar PNGs das duas janelas sem depender da tela.
     ***************************************************************/
@@ -65,7 +65,7 @@ namespace testes
             Secao("1. Formula do IMC");
             Perto("A: 70 kg / 1,75 m", 22.86, A.MainWindow.CalcularImc(70, 1.75));
             Perto("A: 85 kg / 1,68 m", 30.12, A.MainWindow.CalcularImc(85, 1.68));
-            Perto("B: 60 kg / 1,60 m", 23.44, B.MainWindow.CalcularImc(60, 1.6));
+            Perto("B: 60 kg / 1,60 m", 23.44, B.MainWindow.CalcularIndice(60, 1.6));
 
             Secao("2. Limites da classificacao");
             Igual("A: 18,49 -> Magreza", "Magreza", A.MainWindow.Classificar(18.49));
@@ -79,16 +79,16 @@ namespace testes
             Igual("A: 39,99 -> Obesidade II", "Obesidade Grau II", A.MainWindow.Classificar(39.99));
             Igual("A: 40,00 -> Obesidade III", "Obesidade Grau III", A.MainWindow.Classificar(40.00));
 
-            Igual("B: 18,49 -> Magreza", "Magreza", B.MainWindow.Classificar(18.49));
-            Igual("B: 25,00 -> Sobrepeso", "Sobrepeso", B.MainWindow.Classificar(25.00));
-            Igual("B: 40,00 -> Obesidade III", "Obesidade Grau III", B.MainWindow.Classificar(40.00));
-            Igual("B: faixa 25,00 = 2", 2, B.MainWindow.Faixa(25.00));
+            Igual("B: 18,49 -> Magreza", "Magreza", B.MainWindow.ClassificarImc(18.49));
+            Igual("B: 25,00 -> Sobrepeso", "Sobrepeso", B.MainWindow.ClassificarImc(25.00));
+            Igual("B: 40,00 -> Obesidade III", "Obesidade Grau III", B.MainWindow.ClassificarImc(40.00));
+            Igual("B: faixa 25,00 = 2", 2, B.MainWindow.ObterFaixa(25.00));
 
             Secao("3. Conversao de numeros do JSON");
             Perto("A: Numero(1.75)", 1.75, A.MainWindow.Numero("1.75"));
             Perto("A: Numero(1.6)", 1.6, A.MainWindow.Numero("1.6"));
             Perto("A: Numero(70)", 70, A.MainWindow.Numero("70"));
-            Perto("B: Numero(22.86)", 22.86, B.MainWindow.Numero("22.86"));
+            Perto("B: Numero(22.86)", 22.86, B.MainWindow.ConverterNumero("22.86"));
 
             Secao("4. Implementacao A - leitura do template");
             string arquivoA = Path.Combine(pasta, "a.json");
@@ -172,24 +172,24 @@ namespace testes
             string arquivoB = Path.Combine(pasta, "b.json");
             File.Copy(template, arquivoB, true);
 
-            string[] blocos = B.MainWindow.Ler(arquivoB);
-            Igual("B: quantidade de blocos", 3, blocos.Length);
-            Igual("B: nome 1", "João Silva", B.MainWindow.Campo(blocos[0], "Nome"));
-            Igual("B: Id 2", 2, B.MainWindow.Id(blocos[1]));
-            Perto("B: peso 2", 85, B.MainWindow.Numero(B.MainWindow.Campo(blocos[1], "Peso (Kg)")));
-            Perto("B: IMC 2", 30.12, B.MainWindow.Numero(B.MainWindow.Campo(blocos[1], "IMC")));
-            Igual("B: classificacao 2", "Obesidade Grau I", B.MainWindow.Campo(blocos[1], "Classificação"));
-            VetorIgual("B: faixas", new int[] { 0, 2, 0, 1, 0, 0 }, B.MainWindow.ContarFaixas(blocos));
-            Igual("B: proximo Id", 4, B.MainWindow.ProximoId(blocos));
-            Igual("B: busca Id 2", 1, B.MainWindow.Buscar(blocos, 2));
-            Igual("B: busca Id 99", -1, B.MainWindow.Buscar(blocos, 99));
+            string[] registros = B.MainWindow.LerRegistros(arquivoB);
+            Igual("B: quantidade de registros", 3, registros.Length);
+            Igual("B: nome 1", "João Silva", B.MainWindow.ObterCampo(registros[0], "Nome"));
+            Igual("B: Id 2", 2, B.MainWindow.ObterId(registros[1]));
+            Perto("B: peso 2", 85, B.MainWindow.ConverterNumero(B.MainWindow.ObterCampo(registros[1], "Peso (Kg)")));
+            Perto("B: IMC 2", 30.12, B.MainWindow.ConverterNumero(B.MainWindow.ObterCampo(registros[1], "IMC")));
+            Igual("B: classificacao 2", "Obesidade Grau I", B.MainWindow.ObterCampo(registros[1], "Classificação"));
+            VetorIgual("B: faixas", new int[] { 0, 2, 0, 1, 0, 0 }, B.MainWindow.ContarPorFaixa(registros));
+            Igual("B: proximo Id", 4, B.MainWindow.ProximoIdentificador(registros));
+            Igual("B: busca Id 2", 1, B.MainWindow.LocalizarId(registros, 2));
+            Igual("B: busca Id 99", -1, B.MainWindow.LocalizarId(registros, 99));
 
             Secao("8. Implementacao B - HTML");
             string graficoB = Path.Combine(pasta, "grafico-b.html");
             string dadosB = Path.Combine(pasta, "dados-b.html");
 
-            B.MainWindow.GerarGrafico(graficoB, blocos);
-            B.MainWindow.GerarDados(dadosB, blocos);
+            B.MainWindow.GerarHtmlGrafico(graficoB, registros);
+            B.MainWindow.GerarHtmlDados(dadosB, registros);
 
             Ok("B: grafico.html criado", File.Exists(graficoB));
             Ok("B: pessoas.html criado", File.Exists(dadosB));
@@ -202,40 +202,40 @@ namespace testes
             Ok("B: dois HTML diferentes", htmlGraficoB != htmlDadosB);
 
             Secao("9. Implementacao B - cadastrar, alterar e excluir");
-            blocos = B.MainWindow.Adicionar(blocos, "Teste B", 80, 1.8);
-            Igual("B: adicionou", 4, blocos.Length);
-            Igual("B: Id novo", 4, B.MainWindow.Id(blocos[3]));
-            B.MainWindow.Gravar(arquivoB, blocos);
+            registros = B.MainWindow.IncluirRegistro(registros, "Teste B", 80, 1.8);
+            Igual("B: adicionou", 4, registros.Length);
+            Igual("B: Id novo", 4, B.MainWindow.ObterId(registros[3]));
+            B.MainWindow.GravarRegistros(arquivoB, registros);
 
-            blocos = B.MainWindow.Ler(arquivoB);
-            Igual("B: recarrega 4", 4, blocos.Length);
-            Igual("B: nome novo", "Teste B", B.MainWindow.Campo(blocos[3], "Nome"));
+            registros = B.MainWindow.LerRegistros(arquivoB);
+            Igual("B: recarrega 4", 4, registros.Length);
+            Igual("B: nome novo", "Teste B", B.MainWindow.ObterCampo(registros[3], "Nome"));
 
-            blocos = B.MainWindow.Alterar(blocos, 0, "João B", 90, 2.0);
-            B.MainWindow.Gravar(arquivoB, blocos);
+            registros = B.MainWindow.AtualizarRegistro(registros, 0, "João B", 90, 2.0);
+            B.MainWindow.GravarRegistros(arquivoB, registros);
 
             string cruB = File.ReadAllText(arquivoB);
             Ok("B: Id com virgula", cruB.Contains("\"Id\": 1,"));
             Ok("B: IMC com ponto decimal", cruB.Contains("\"IMC\": 22.50,"));
             Ok("B: sem virgula decimal", !cruB.Contains("22,50"));
-            blocos = B.MainWindow.Ler(arquivoB);
+            registros = B.MainWindow.LerRegistros(arquivoB);
 
-            Igual("B: nome alterado", "João B", B.MainWindow.Campo(blocos[0], "Nome"));
-            Perto("B: IMC 22,50", 22.50, B.MainWindow.Numero(B.MainWindow.Campo(blocos[0], "IMC")));
-            Igual("B: Id preservado", 1, B.MainWindow.Id(blocos[0]));
+            Igual("B: nome alterado", "João B", B.MainWindow.ObterCampo(registros[0], "Nome"));
+            Perto("B: IMC 22,50", 22.50, B.MainWindow.ConverterNumero(B.MainWindow.ObterCampo(registros[0], "IMC")));
+            Igual("B: Id preservado", 1, B.MainWindow.ObterId(registros[0]));
 
-            blocos = B.MainWindow.Excluir(blocos, 2);
-            B.MainWindow.Gravar(arquivoB, blocos);
-            blocos = B.MainWindow.Ler(arquivoB);
+            registros = B.MainWindow.RemoverRegistro(registros, 2);
+            B.MainWindow.GravarRegistros(arquivoB, registros);
+            registros = B.MainWindow.LerRegistros(arquivoB);
 
-            Igual("B: apos excluir", 3, blocos.Length);
-            Igual("B: Id 3 sumiu", -1, B.MainWindow.Buscar(blocos, 3));
+            Igual("B: apos excluir", 3, registros.Length);
+            Igual("B: Id 3 sumiu", -1, B.MainWindow.LocalizarId(registros, 3));
 
             Secao("10. Compatibilidade entre as duas implementacoes");
-            string[] lidosPelaB = B.MainWindow.Ler(arquivoA);
+            string[] lidosPelaB = B.MainWindow.LerRegistros(arquivoA);
             Igual("B le o arquivo da A", 3, lidosPelaB.Length);
-            Igual("B le primeiro Id", 2, B.MainWindow.Id(lidosPelaB[0]));
-            Igual("B le nome alterado", "Ana Alterada", B.MainWindow.Campo(lidosPelaB[2], "Nome"));
+            Igual("B le primeiro Id", 2, B.MainWindow.ObterId(lidosPelaB[0]));
+            Igual("B le nome alterado", "Ana Alterada", B.MainWindow.ObterCampo(lidosPelaB[2], "Nome"));
 
             A.MainWindow.Carregar(arquivoB);
             Igual("A le o arquivo da B", 3, A.MainWindow.Quantidade);
@@ -246,7 +246,7 @@ namespace testes
             string inexistente = Path.Combine(pasta, "nao-existe.json");
             A.MainWindow.Carregar(inexistente);
             Igual("A: arquivo inexistente = 0", 0, A.MainWindow.Quantidade);
-            Igual("B: arquivo inexistente = 0", 0, B.MainWindow.Ler(inexistente).Length);
+            Igual("B: arquivo inexistente = 0", 0, B.MainWindow.LerRegistros(inexistente).Length);
 
             Console.WriteLine();
             if (falhas == 0)
