@@ -2,71 +2,85 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Avaliacao de IMC - Fisioterapia (B)"
-        Width="980" Height="700" FontSize="20"
+        Width="1100" Height="720" FontSize="20"
         WindowStartupLocation="CenterScreen">
 
-    <!-- Uma unica janela: formulario (linhas 0-1), lista (2-3),
-         relatorio (4-5) e rodape (6). O FontSize=20 do Window
-         e herdado por todos os controles. -->
+    <!-- Layout B: formulario e acoes na coluna esquerda; lista e
+         relatorio na direita. Fonte 20 herdada do Window. -->
     <Grid Margin="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="420"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
-        <!-- Dados do paciente -->
-        <Grid Grid.Row="0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+        <!-- Coluna esquerda: dados e botoes -->
+        <StackPanel Grid.Column="0" Margin="0,0,12,0">
+            <Label Content="Dados do paciente"/>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="110"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Label Content="Id"/>
+                <TextBox Grid.Column="1" x:Name="txtId" Margin="0,3,0,3"/>
+
+                <Label Grid.Row="1" Content="Nome"/>
+                <TextBox Grid.Row="1" Grid.Column="1" x:Name="txtNome" Margin="0,3,0,3"/>
+
+                <Label Grid.Row="2" Content="Peso (Kg)"/>
+                <TextBox Grid.Row="2" Grid.Column="1" x:Name="txtPeso" Margin="0,3,0,3"/>
+
+                <Label Grid.Row="3" Content="Altura (m)"/>
+                <TextBox Grid.Row="3" Grid.Column="1" x:Name="txtAltura" Margin="0,3,0,3"/>
+            </Grid>
+
+            <UniformGrid Columns="2" Margin="0,10,0,0">
+                <Button Content="Cadastrar" Margin="3" Click="btCadastrar_Click"
+                        Background="#0F6CBD" Foreground="White" BorderBrush="#0B5897"
+                        FontWeight="SemiBold"/>
+                <Button Content="Consultar" Margin="3" Click="btConsultar_Click"/>
+                <Button Content="Alterar" Margin="3" Click="btAlterar_Click"/>
+                <Button Content="Excluir" Margin="3" Click="btExcluir_Click"/>
+            </UniformGrid>
+
+            <Label Content="Relatorios" Margin="0,12,0,0"/>
+
+            <Button Content="Relatorio (texto)" Margin="0,3,0,0" Click="btRelatorio_Click"/>
+            <Button Content="Grafico HTML" Margin="0,3,0,0" Click="btGrafico_Click"/>
+            <Button Content="Dados HTML" Margin="0,3,0,0" Click="btDados_Click"
+                    Background="#0F6CBD" Foreground="White" BorderBrush="#0B5897"/>
+
+            <Label x:Name="lblStatus" Margin="0,12,0,0"/>
+        </StackPanel>
+
+        <!-- Coluna direita: lista e relatorio -->
+        <Grid Grid.Column="1">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <Label Content="Id"/>
-            <TextBox Grid.Column="1" x:Name="txtId" Margin="8,4,20,4"/>
+            <StackPanel>
+                <Label Content="Pacientes cadastrados"/>
+                <ListBox x:Name="lstPacientes"
+                         SelectionChanged="lstPacientes_SelectionChanged"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
+            </StackPanel>
 
-            <Label Grid.Column="2" Content="Nome" Margin="0,0,8,0"/>
-            <TextBox Grid.Column="3" x:Name="txtNome" Margin="8,4,0,4"/>
-
-            <Label Grid.Row="1" Content="Peso (Kg)"/>
-            <TextBox Grid.Row="1" Grid.Column="1" x:Name="txtPeso" Margin="8,4,20,4"/>
-
-            <Label Grid.Row="1" Grid.Column="2" Content="Altura (m)" Margin="0,0,8,0"/>
-            <TextBox Grid.Row="1" Grid.Column="3" x:Name="txtAltura" Margin="8,4,0,4"/>
+            <StackPanel Grid.Row="1" Margin="0,10,0,0">
+                <Label Content="Relatorio"/>
+                <TextBox x:Name="txtRelatorio" Height="200"
+                         IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap"
+                         FontFamily="Consolas" VerticalScrollBarVisibility="Auto"/>
+            </StackPanel>
         </Grid>
-
-        <!-- Operacoes -->
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,8,0,0">
-            <Button Content="Cadastrar" Click="btCadastrar_Click" Margin="0,0,8,0" Padding="12,4"/>
-            <Button Content="Consultar" Click="btConsultar_Click" Margin="0,0,8,0" Padding="12,4"/>
-            <Button Content="Alterar" Click="btAlterar_Click" Margin="0,0,8,0" Padding="12,4"/>
-            <Button Content="Excluir" Click="btExcluir_Click" Margin="0,0,8,0" Padding="12,4"/>
-            <Button Content="Relatorio" Click="btRelatorio_Click" Margin="0,0,8,0" Padding="12,4"/>
-            <Button Content="Grafico HTML" Click="btGrafico_Click" Margin="0,0,8,0" Padding="12,4"/>
-            <Button Content="Dados HTML" Click="btDados_Click" Padding="12,4"/>
-        </StackPanel>
-
-        <!-- Lista (item 4 do enunciado: o peso aparece na caixa de lista) -->
-        <Label Grid.Row="2" Content="Pacientes cadastrados" Margin="0,8,0,0"/>
-        <ListBox Grid.Row="3" x:Name="lstPacientes"
-                 SelectionChanged="lstPacientes_SelectionChanged"/>
-
-        <!-- Relatorio em caixa de texto multilinha (item 7) -->
-        <Label Grid.Row="4" Content="Relatorio" Margin="0,8,0,0"/>
-        <TextBox Grid.Row="5" x:Name="txtRelatorio" Height="200" Margin="0,0,0,8"
-                 IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap"
-                 FontFamily="Consolas" VerticalScrollBarVisibility="Auto"/>
-
-        <Label Grid.Row="6" x:Name="lblStatus"/>
     </Grid>
 </Window>
