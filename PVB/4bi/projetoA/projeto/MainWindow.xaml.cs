@@ -313,17 +313,21 @@ namespace projetoA
 
                 string linha = linhas[l].Trim();
 
+                // Cada linha do objeto JSON tem "chave": valor. O StartsWith
+                // identifica a chave; Valor() pega o que vem depois dos ':',
+                // tira aspas e a virgula. "Peso", "Altura" e "Classifica" sao
+                // prefixos da chave (o resto e " (Kg)", " (m)", "cao").
                 if (linha.StartsWith("\"Id\""))
                     Ids[Quantidade] = int.Parse(Valor(linha));
                 else if (linha.StartsWith("\"Nome\""))
                     Nomes[Quantidade] = Valor(linha);
-                else if (linha.StartsWith("\"Peso"))
+                else if (linha.StartsWith("\"Peso"))       // "Peso (Kg)": 70,
                     Pesos[Quantidade] = Numero(Valor(linha));
-                else if (linha.StartsWith("\"Altura"))
+                else if (linha.StartsWith("\"Altura"))     // "Altura (m)": 1.75,
                     Alturas[Quantidade] = Numero(Valor(linha));
                 else if (linha.StartsWith("\"IMC\""))
                     Imcs[Quantidade] = Numero(Valor(linha));
-                else if (linha.StartsWith("\"Classifica"))
+                else if (linha.StartsWith("\"Classifica")) // "Classificação": "Peso Normal"
                     Classes[Quantidade] = Valor(linha);
                 else if (linha.StartsWith("}"))
                     Quantidade++;
