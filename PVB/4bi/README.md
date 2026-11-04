@@ -54,6 +54,14 @@ No F5/`dotnet run`, a pasta de trabalho é a do projeto (`projetoA/projeto`); na
 **publicada**, os três arquivos ficam ao lado do próprio `.exe`. Os botões de HTML mostram
 só o nome do arquivo no rodapé. Na primeira execução a base começa vazia; use **Cadastrar**.
 
+### Base de demonstração
+
+O `grafico.html` mantém o `range: [0, 50]` do template. Com os 3 registros do template, o
+polígono fica pequeno; para ver o desenho do enunciado, use `demo/pessoas.json`
+(118 pacientes, contagens 16 / 28 / 8 / 7 / 20 / 39). Copie para a pasta de trabalho do
+programa como `pessoas.json` (`projetoA/projeto`, `projetoB/projeto` ou `publicado/A|B`).
+
+
 ## Testes
 
 ```bash
