@@ -295,11 +295,17 @@ namespace projetoA
         {
             Quantidade = 0;
 
-            // Primeira execucao: o arquivo ainda nao existe. Sem esta
-            // linha, File.ReadAllLines lancaria FileNotFoundException.
-            if (!File.Exists(caminho)) return;
+            string[] linhas;
 
-            string[] linhas = File.ReadAllLines(caminho);
+            try
+            {
+                linhas = File.ReadAllLines(caminho);
+            }
+            catch (FileNotFoundException)
+            {
+                // Primeira execucao: o arquivo ainda nao existe.
+                return;
+            }
 
             for (int l = 0; l < linhas.Length; l++)
             {

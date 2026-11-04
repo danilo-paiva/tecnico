@@ -292,11 +292,17 @@ namespace projetoB
         // copiadas na ordem; no fim o vetor e ajustado ao tamanho real.
         public static string[] LerRegistros(string caminho)
         {
-            // Primeira execucao: o arquivo ainda nao existe.
-            // Sem esta linha, File.ReadAllLines lancaria FileNotFoundException.
-            if (!File.Exists(caminho)) return new string[0];
+            string[] linhas;
 
-            string[] linhas = File.ReadAllLines(caminho);
+            try
+            {
+                linhas = File.ReadAllLines(caminho);
+            }
+            catch (FileNotFoundException)
+            {
+                // Primeira execucao: o arquivo ainda nao existe.
+                return new string[0];
+            }
             string[] novos = new string[linhas.Length];   // sobra espaco, ajusta no fim
             int n = 0;
             int inicio = -1;
