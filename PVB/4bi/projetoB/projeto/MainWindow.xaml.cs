@@ -68,22 +68,24 @@ namespace projetoB
         // -------------------------------------------------------
         // Tela
         // -------------------------------------------------------
-        // Limpa a lista, escreve uma linha por pessoa (item 4: o peso
-        // aparece na caixa de lista), atualiza o relatorio e o rodape.
+        // Monta as linhas da lista (item 4: o peso aparece na caixa),
+        // atualiza o relatorio e o rodape.
         void AtualizarTela()
         {
-            lstPacientes.Items.Clear();
+            string[] linhas = new string[blocos.Length];
 
             for (int i = 0; i < blocos.Length; i++)
             {
                 string bloco = blocos[i];
 
-                lstPacientes.Items.Add("Id " + Id(bloco) +
+                linhas[i] = "Id " + Id(bloco) +
                     " - " + Campo(bloco, "Nome") +
                     " - " + Numero(Campo(bloco, "Peso (Kg)")).ToString("0.##") + " kg" +
                     " - IMC " + Numero(Campo(bloco, "IMC")).ToString("0.00") +
-                    " - " + Campo(bloco, "Classificação"));
+                    " - " + Campo(bloco, "Classificação");
             }
+
+            lstPacientes.ItemsSource = linhas;
 
             txtRelatorio.Text = Relatorio();
             lblStatus.Content = blocos.Length + " pessoa(s) em " + Nome(arquivo);
