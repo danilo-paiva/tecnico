@@ -218,6 +218,9 @@ namespace projetoA
                 texto += "------------------------------------------------------" + Environment.NewLine;
             }
 
+            // Conta quantas pessoas ha em cada faixa de IMC.
+            // contagem[0] = Magreza ... contagem[5] = Obesidade Grau III;
+            // o rodape do relatorio usa esses totais.
             int[] contagem = ContarFaixas();
 
             texto += "Total de pessoas: " + Quantidade + Environment.NewLine;
@@ -453,7 +456,9 @@ namespace projetoA
             Quantidade--;
         }
 
-        // Quantidade de pessoas em cada faixa (item 9 do enunciado).
+        // Conta quantas pessoas estao em cada faixa de IMC.
+        // Faixa(Imcs[i]) devolve 0..5; o vetor contagem guarda os totais
+        // e e usado no rodape do relatorio e no vetor "r" do grafico.
         public static int[] ContarFaixas()
         {
             int[] contagem = new int[6];
