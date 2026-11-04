@@ -76,15 +76,15 @@ namespace projetoA
         // atualiza o relatorio e o rodape.
         void AtualizarTela()
         {
-            string[] linhas = new string[Quantidade];
+            string lista = "";
 
             for (int i = 0; i < Quantidade; i++)
-                linhas[i] = "Id " + Ids[i] + " - " + Nomes[i] +
+                lista += "Id " + Ids[i] + " - " + Nomes[i] +
                     " - " + Pesos[i].ToString("0.##") + " kg" +
                     " - IMC " + Imcs[i].ToString("0.00") +
-                    " - " + Classes[i];
+                    " - " + Classes[i] + Environment.NewLine;
 
-            lstPacientes.ItemsSource = linhas;
+            txtLista.Text = lista;
 
             txtRelatorio.Text = Relatorio();
             lblStatus.Content = Quantidade + " pessoa(s) em " + Nome(arquivo);
@@ -93,6 +93,8 @@ namespace projetoA
         // Joga os dados da posicao i nos campos da tela.
         void Mostrar(int i)
         {
+            // Coloca o Id do registro no campo Id da tela
+            // (para consultar, alterar ou excluir pelo Id).
             txtId.Text = Ids[i].ToString();
             txtNome.Text = Nomes[i];
             txtPeso.Text = Pesos[i].ToString("0.##");
@@ -122,7 +124,7 @@ namespace projetoA
             Salvar(arquivo);
 
             AtualizarTela();
-            lstPacientes.SelectedIndex = i;
+            Mostrar(i);
 
             lblStatus.Content = "Id " + Ids[i] + " cadastrado.";
         }
@@ -141,7 +143,6 @@ namespace projetoA
             }
 
             Mostrar(i);
-            lstPacientes.SelectedIndex = i;
             lblStatus.Content = "Id " + id + " encontrado.";
         }
 
@@ -166,7 +167,7 @@ namespace projetoA
             Salvar(arquivo);
 
             AtualizarTela();
-            lstPacientes.SelectedIndex = i;
+            Mostrar(i);
 
             lblStatus.Content = "Id " + id + " alterado.";
         }
@@ -188,7 +189,6 @@ namespace projetoA
             Salvar(arquivo);
 
             AtualizarTela();
-            lstPacientes.SelectedIndex = -1;
             txtId.Text = "";
             txtNome.Text = "";
             txtPeso.Text = "";
@@ -197,15 +197,6 @@ namespace projetoA
             lblStatus.Content = "Id " + id + " excluido.";
         }
 
-        // Clicar em uma linha da lista tambem preenche os campos.
-        private void lstPacientes_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            int i = lstPacientes.SelectedIndex;
-
-            if (i < 0 || i >= Quantidade) return;
-
-            Mostrar(i);
-        }
 
         // -------------------------------------------------------
         // Relatorio e HTML (itens 7, 9, 10 e 11)

@@ -56,10 +56,12 @@
             <Button Content="Dados HTML" Click="btDados_Click" Padding="12,4"/>
         </StackPanel>
 
-        <!-- Lista (item 4 do enunciado: o peso aparece na caixa de lista) -->
+        <!-- Lista (item 4): o peso aparece na caixa de texto multilinha -->
         <Label Grid.Row="2" Content="Pacientes cadastrados" Margin="0,8,0,0"/>
-        <ListBox Grid.Row="3" x:Name="lstPacientes"
-                 SelectionChanged="lstPacientes_SelectionChanged"/>
+        <TextBox Grid.Row="3" x:Name="txtLista"
+                 IsReadOnly="True" AcceptsReturn="True" TextWrapping="NoWrap"
+                 FontFamily="Consolas" VerticalScrollBarVisibility="Auto"
+                 HorizontalScrollBarVisibility="Auto"/>
 
         <!-- Relatorio em caixa de texto multilinha (item 7) -->
         <Label Grid.Row="4" Content="Relatorio" Margin="0,8,0,0"/>

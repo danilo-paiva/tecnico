@@ -72,20 +72,20 @@ namespace projetoB
         // atualiza o relatorio e o rodape.
         void AtualizarInterface()
         {
-            string[] linhas = new string[registros.Length];
+            string lista = "";
 
             for (int i = 0; i < registros.Length; i++)
             {
                 string registro = registros[i];
 
-                linhas[i] = "Id " + ObterId(registro) +
+                lista += "Id " + ObterId(registro) +
                     " - " + ObterCampo(registro, "Nome") +
                     " - " + ConverterNumero(ObterCampo(registro, "Peso (Kg)")).ToString("0.##") + " kg" +
                     " - IMC " + ConverterNumero(ObterCampo(registro, "IMC")).ToString("0.00") +
-                    " - " + ObterCampo(registro, "Classificação");
+                    " - " + ObterCampo(registro, "Classificação") + Environment.NewLine;
             }
 
-            lstAvaliados.ItemsSource = linhas;
+            txtAvaliacoes.Text = lista;
 
             txtResumo.Text = MontarRelatorio();
             lblMensagem.Content = registros.Length + " pessoa(s) em " + NomeArquivo(arquivoBase);
@@ -96,6 +96,8 @@ namespace projetoB
         {
             string registro = registros[posicao];
 
+            // Coloca o Id do registro no campo Identificador
+            // (para consultar, alterar ou excluir pelo Id).
             txtIdentificador.Text = ObterId(registro).ToString();
             txtPaciente.Text = ObterCampo(registro, "Nome");
             txtQuilos.Text = ConverterNumero(ObterCampo(registro, "Peso (Kg)")).ToString("0.##");
@@ -119,7 +121,7 @@ namespace projetoB
             GravarRegistros(arquivoBase, registros);
 
             AtualizarInterface();
-            lstAvaliados.SelectedIndex = registros.Length - 1;
+            PreencherFormulario(registros.Length - 1);
 
             lblMensagem.Content = "Id " + ObterId(registros[registros.Length - 1]) + " cadastrado.";
         }
@@ -138,7 +140,6 @@ namespace projetoB
             }
 
             PreencherFormulario(posicao);
-            lstAvaliados.SelectedIndex = posicao;
             lblMensagem.Content = "Id " + id + " encontrado.";
         }
 
@@ -163,7 +164,7 @@ namespace projetoB
             GravarRegistros(arquivoBase, registros);
 
             AtualizarInterface();
-            lstAvaliados.SelectedIndex = posicao;
+            PreencherFormulario(posicao);
 
             lblMensagem.Content = "Id " + id + " alterado.";
         }
@@ -185,7 +186,6 @@ namespace projetoB
             GravarRegistros(arquivoBase, registros);
 
             AtualizarInterface();
-            lstAvaliados.SelectedIndex = -1;
             txtIdentificador.Text = "";
             txtPaciente.Text = "";
             txtQuilos.Text = "";
@@ -194,15 +194,6 @@ namespace projetoB
             lblMensagem.Content = "Id " + id + " excluido.";
         }
 
-        // Clicar em uma linha da lista tambem preenche os campos.
-        private void lstAvaliados_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            int posicao = lstAvaliados.SelectedIndex;
-
-            if (posicao < 0 || posicao >= registros.Length) return;
-
-            PreencherFormulario(posicao);
-        }
 
         // -------------------------------------------------------
         // Relatorio e HTML (itens 7, 9, 10 e 11)
