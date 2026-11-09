@@ -3,8 +3,13 @@ const { texto, inteiro, dataHora } = require("../utils/validacao");
 
 /**
  * Model da entidade Evento (N:1 com Organizador).
+ * Guarda os dados e valida o que é regra de domínio: status dentro da lista,
+ * datas em formato válido e organizador com id > 0.
+ * Título único por data e "data no futuro" são regras de negócio → EventoService.
+ * Não faz SQL nem monta resposta HTTP.
  */
 module.exports = class Evento {
+    // Status possíveis; o banco guarda como VARCHAR e o Model garante o domínio.
     static STATUS = ["planejado", "confirmado", "realizado", "cancelado"];
 
     #idEvento = null;
@@ -43,6 +48,7 @@ module.exports = class Evento {
     }
 
     set dataEvento(valor) {
+        // Guarda um Date de verdade; quem formata para o MySQL é o DAO (paraSql).
         this.#dataEvento = dataHora(valor, "dataEvento");
     }
 
@@ -51,6 +57,7 @@ module.exports = class Evento {
     }
 
     set status(valor) {
+        // Aceita qualquer caixa ("Confirmado"), mas grava sempre minúsculo.
         const limpo = String(valor || "").trim().toLowerCase();
         if (Evento.STATUS.indexOf(limpo) === -1) {
             throw new DomainError(`status deve ser ${Evento.STATUS.join(", ")}.`);

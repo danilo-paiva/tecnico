@@ -1,5 +1,6 @@
 const Banco = require("../database/Banco");
 
+// O CAST é necessário porque o driver devolve DECIMAL como texto.
 const SELECT = `
     SELECT l.id_lote AS idLote,
            l.nome,
@@ -14,8 +15,12 @@ const SELECT = `
 
 /**
  * DAO de Lote.
+ * Só SQL: filtros por nome, evento e faixa de preço, contagem e CRUD.
+ * Não verifica se o evento existe nem nome repetido — o LoteService faz isso
+ * usando os métodos de contagem e de duplicidade daqui.
  */
 module.exports = class LoteDAO {
+    /** Lista com filtros opcionais de nome, evento e faixa de preço. */
     async findAll(filtros = {}) {
         const condicoes = [];
         const parametros = [];
@@ -28,6 +33,7 @@ module.exports = class LoteDAO {
             condicoes.push("l.id_evento = ?");
             parametros.push(Number(filtros.idEvento));
         }
+        // Query string chega como texto: Number() garante a comparação numérica.
         if (filtros.precoMin !== undefined && filtros.precoMin !== "") {
             condicoes.push("l.preco >= ?");
             parametros.push(Number(filtros.precoMin));
@@ -41,11 +47,17 @@ module.exports = class LoteDAO {
         return Banco.consultar(`${SELECT}${where} ORDER BY e.data_evento ASC, l.preco ASC`, parametros);
     }
 
+    /** Devolve uma linha ou null — o 404 é decidido no Service. */
     async findById(idLote) {
         const linhas = await Banco.consultar(`${SELECT} WHERE l.id_lote = ?`, [idLote]);
         return linhas.length > 0 ? linhas[0] : null;
     }
 
+    /**
+     * Nome único DENTRO do evento: dois eventos diferentes podem ter um lote "VIP".
+     * @param {number|null} ignorarId no update, o próprio lote não conta como duplicado
+     * @returns {Promise<boolean>}
+     */
     async existeNomeEvento(nome, idEvento, ignorarId = null) {
         const parametros = [nome, idEvento];
         let SQL = "SELECT COUNT(*) AS total FROM lotes WHERE nome = ? AND id_evento = ?";
@@ -57,6 +69,7 @@ module.exports = class LoteDAO {
         return Number(linhas[0].total) > 0;
     }
 
+    /** Quantos lotes o evento tem — usado antes de permitir excluí-lo. */
     async countByEvento(idEvento) {
         const linhas = await Banco.consultar(
             "SELECT COUNT(*) AS total FROM lotes WHERE id_evento = ?",
@@ -65,6 +78,7 @@ module.exports = class LoteDAO {
         return Number(linhas[0].total);
     }
 
+    /** Insere e devolve o id gerado. */
     async create(lote) {
         const resultado = await Banco.executar(
             `INSERT INTO lotes (nome, preco, quantidade_total, quantidade_disponivel, id_evento)
@@ -84,6 +98,7 @@ module.exports = class LoteDAO {
         return resultado.insertId;
     }
 
+    /** Atualiza todos os campos do lote. */
     async update(lote) {
         await Banco.executar(
             `UPDATE lotes
@@ -102,6 +117,7 @@ module.exports = class LoteDAO {
         return true;
     }
 
+    /** Remove e devolve false quando o id não existia mais. */
     async delete(idLote) {
         const resultado = await Banco.executar(
             "DELETE FROM lotes WHERE id_lote = ?",

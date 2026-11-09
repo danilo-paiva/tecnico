@@ -4,7 +4,12 @@ const config = require("../config/config");
 
 /**
  * Geração e validação de tokens JWT (aula paw04x01 / paw03x01).
- * A mesma chave, emissor e audiência são usados na API Flask.
+ * Infraestrutura HTTP: o OrganizadorService usa no login para emitir o token e
+ * o JwtMiddleware usa para validar o cabeçalho Authorization das requisições.
+ * A mesma chave, emissor e audiência são usados na API Flask: por isso o token
+ * emitido aqui também vale lá (e vice-versa).
+ * Não acessa banco, não guarda senha e não decide permissões — quem autoriza
+ * por perfil é o AdminMiddleware.
  */
 module.exports = class MeuTokenJWT {
     #key;
@@ -28,11 +33,14 @@ module.exports = class MeuTokenJWT {
     }
 
     /**
+     * Monta as claims e assina o token com HS256.
      * @param {object} claims { idOrganizador, nome, email, perfil }
-     * @returns {string} token assinado
+     * @returns {string} token assinado, enviado no Authorization das próximas chamadas
      */
     gerarToken(claims) {
         const agora = Math.floor(Date.now() / 1000);
+        // iat/nbf = emitido e válido a partir de agora; exp = agora + validade do config.
+        // jti é só um identificador único do token (dois logins nunca geram o mesmo).
         const payload = {
             iss: this.#iss,
             aud: this.#aud,
@@ -54,17 +62,23 @@ module.exports = class MeuTokenJWT {
     }
 
     /**
+     * Valida a assinatura e as claims fixas (iss, aud, exp) do token recebido.
      * @param {string} stringToken header Authorization (com ou sem "Bearer ")
-     * @returns {boolean}
+     * @returns {boolean} true se o token vale; false em qualquer falha
+     *          (o 401 é montado por quem chamou, no JwtMiddleware)
      */
     validarToken(stringToken) {
+        // Sem cabeçalho não há token: devolve false e o middleware responde 401.
         if (!stringToken || String(stringToken).trim() === "") {
             return false;
         }
 
+        // Aceita tanto o header cru quanto o formato "Bearer <token>".
         const token = String(stringToken).replace("Bearer ", "").trim();
 
         try {
+            // verify confere assinatura e exp; algorithms fixo impede que alguém
+            // troque o algoritmo do token (ex.: alg "none") para falsificar acesso.
             this.#payload = jwt.verify(token, this.#key, {
                 algorithms: [this.#alg],
                 audience: this.#aud,
@@ -73,10 +87,12 @@ module.exports = class MeuTokenJWT {
             return true;
         } catch (erro) {
             this.#payload = null;
+            // Token expirado, assinatura errada ou aud/iss diferente: tudo vira false.
             return false;
         }
     }
 
+    /** Claims do último token validado (lido pelo JwtMiddleware). */
     get payload() {
         return this.#payload;
     }

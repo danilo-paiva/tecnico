@@ -1,5 +1,7 @@
 const Banco = require("../database/Banco");
 
+// Consulta base: os AS já entregam a coluna em camelCase, igual ao JSON da API.
+// DATE_FORMAT devolve a data em ISO (com "T"), sem o driver converter fuso.
 const SELECT = `
     SELECT id_organizador AS idOrganizador,
            nome,
@@ -12,8 +14,11 @@ const SELECT = `
 /**
  * DAO (Data Access Object) de Organizador.
  * Isola todo o SQL da regra de negócio: o Service nunca escreve consulta.
+ * Não valida dado (isso é do Model) e não decide se pode gravar (isso é do
+ * Service). Se o banco mudar, só este arquivo muda.
  */
 module.exports = class OrganizadorDAO {
+    /** Lista com filtros opcionais de nome, email e perfil (o WHERE é montado conforme o que veio). */
     async findAll(filtros = {}) {
         const condicoes = [];
         const parametros = [];
@@ -31,15 +36,18 @@ module.exports = class OrganizadorDAO {
             parametros.push(filtros.perfil);
         }
 
+        // Cada filtro vira um "?": o valor nunca é concatenado dentro do SQL.
         const where = condicoes.length > 0 ? ` WHERE ${condicoes.join(" AND ")}` : "";
         return Banco.consultar(`${SELECT}${where} ORDER BY nome`, parametros);
     }
 
+    /** Devolve uma linha ou null — o 404 é decidido no Service. */
     async findById(idOrganizador) {
         const linhas = await Banco.consultar(`${SELECT} WHERE id_organizador = ?`, [idOrganizador]);
         return linhas.length > 0 ? linhas[0] : null;
     }
 
+    /** Devolve uma linha ou null (usado aqui para checar e-mail único). */
     async findByEmail(email) {
         const linhas = await Banco.consultar(`${SELECT} WHERE email = ?`, [email]);
         return linhas.length > 0 ? linhas[0] : null;
@@ -55,6 +63,12 @@ module.exports = class OrganizadorDAO {
         return linhas.length > 0 ? linhas[0] : null;
     }
 
+    /**
+     * Diz se o e-mail já está em uso (o banco também tem UNIQUE, mas aqui a
+     * resposta sai como 409 com mensagem clara).
+     * @param {number|null} ignorarId no update, o próprio registro não conta como duplicado
+     * @returns {Promise<boolean>}
+     */
     async existeEmail(email, ignorarId = null) {
         const parametros = [email];
         let SQL = "SELECT COUNT(*) AS total FROM organizadores WHERE email = ?";
@@ -66,6 +80,7 @@ module.exports = class OrganizadorDAO {
         return Number(linhas[0].total) > 0;
     }
 
+    /** Insere com o hash da senha (nunca a senha pura) e devolve o id gerado. */
     async create(organizador, senhaHash) {
         const resultado = await Banco.executar(
             `INSERT INTO organizadores (nome, email, senha, telefone, perfil)
@@ -85,6 +100,11 @@ module.exports = class OrganizadorDAO {
         return resultado.insertId;
     }
 
+    /**
+     * Atualiza o registro; a senha só é trocada quando veio uma nova.
+     * @param {string|null} senhaHash null mantém a senha que já está no banco
+     * @returns {Promise<boolean>}
+     */
     async update(organizador, senhaHash = null) {
         const campos = ["nome = ?", "email = ?", "telefone = ?", "perfil = ?"];
         const parametros = [
@@ -110,6 +130,7 @@ module.exports = class OrganizadorDAO {
         return true;
     }
 
+    /** Remove e devolve false quando o id não existia mais. */
     async delete(idOrganizador) {
         const resultado = await Banco.executar(
             "DELETE FROM organizadores WHERE id_organizador = ?",

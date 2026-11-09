@@ -1,6 +1,7 @@
 const Banco = require("../database/Banco");
 const { paraSql } = require("../utils/validacao");
 
+// Datas já formatadas em ISO: o JSON sai sem conversão de fuso do driver.
 const SELECT = `
     SELECT e.id_evento AS idEvento,
            e.titulo,
@@ -15,8 +16,12 @@ const SELECT = `
 
 /**
  * DAO de Evento.
+ * Só SQL: SELECT base, filtros, contagem e CRUD — nenhuma validação de negócio.
+ * O INNER JOIN traz o nome do organizador junto do evento (e a FK garante que
+ * não existe evento sem organizador).
  */
 module.exports = class EventoDAO {
+    /** Lista com filtros opcionais de título, status, organizador e período. */
     async findAll(filtros = {}) {
         const condicoes = [];
         const parametros = [];
@@ -33,6 +38,7 @@ module.exports = class EventoDAO {
             condicoes.push("e.id_organizador = ?");
             parametros.push(Number(filtros.idOrganizador));
         }
+        // "de"/"ate" chegam só como data (AAAA-MM-DD): completa a hora para pegar o dia inteiro.
         if (filtros.de) {
             condicoes.push("e.data_evento >= ?");
             parametros.push(`${filtros.de} 00:00:00`);
@@ -46,12 +52,19 @@ module.exports = class EventoDAO {
         return Banco.consultar(`${SELECT}${where} ORDER BY e.data_evento ASC`, parametros);
     }
 
+    /** Devolve uma linha ou null — o 404 é decidido no Service. */
     async findById(idEvento) {
         const linhas = await Banco.consultar(`${SELECT} WHERE e.id_evento = ?`, [idEvento]);
         return linhas.length > 0 ? linhas[0] : null;
     }
 
+    /**
+     * Verifica título repetido na mesma data/hora (a tabela tem UNIQUE em titulo+data_evento).
+     * @param {number|null} ignorarId no update, o próprio evento não conta como duplicado
+     * @returns {Promise<boolean>}
+     */
     async existeTituloData(titulo, dataEvento, ignorarId = null) {
+        // paraSql deixa a data no formato que o MySQL compara com a coluna DATETIME.
         const parametros = [titulo, paraSql(dataEvento)];
         let SQL = "SELECT COUNT(*) AS total FROM eventos WHERE titulo = ? AND data_evento = ?";
         if (ignorarId !== null) {
@@ -62,6 +75,7 @@ module.exports = class EventoDAO {
         return Number(linhas[0].total) > 0;
     }
 
+    /** Quantos eventos o organizador tem — usado antes de permitir excluí-lo. */
     async countByOrganizador(idOrganizador) {
         const linhas = await Banco.consultar(
             "SELECT COUNT(*) AS total FROM eventos WHERE id_organizador = ?",
@@ -70,6 +84,7 @@ module.exports = class EventoDAO {
         return Number(linhas[0].total);
     }
 
+    /** Insere e devolve o id gerado. */
     async create(evento) {
         const resultado = await Banco.executar(
             `INSERT INTO eventos (titulo, descricao, data_evento, status, id_organizador)
@@ -89,6 +104,7 @@ module.exports = class EventoDAO {
         return resultado.insertId;
     }
 
+    /** Atualiza todos os campos do evento; a data é convertida com paraSql. */
     async update(evento) {
         await Banco.executar(
             `UPDATE eventos
@@ -107,6 +123,7 @@ module.exports = class EventoDAO {
         return true;
     }
 
+    /** Remove e devolve false quando o id não existia mais. */
     async delete(idEvento) {
         const resultado = await Banco.executar(
             "DELETE FROM eventos WHERE id_evento = ?",
