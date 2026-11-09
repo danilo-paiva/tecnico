@@ -72,14 +72,33 @@ projeto/
 
 ## Como rodar
 
-### 1. Banco de dados
+### 1. Banco de dados (MySQL do XAMPP)
 
-```bash
-mysql -u root -p < docs/banco.sql
+No painel do XAMPP, clique em **Start** no módulo **MySQL** (o Apache não é necessário).
+Depois importe o banco, dentro da pasta `projeto/`:
+
+**Prompt do Windows (cmd) ou Git Bash:**
+
+```bat
+"C:\xampp\mysql\bin\mysql.exe" -u root < docs/banco.sql
+```
+
+**PowerShell** (não aceita `<`; use o `cmd` ou o pipe):
+
+```powershell
+cmd /c '"C:\xampp\mysql\bin\mysql.exe" -u root < docs\banco.sql'
+# alternativa: Get-Content docs\banco.sql -Raw | & "C:\xampp\mysql\bin\mysql.exe" -u root
 ```
 
 O script **recria** o banco `paw4bi_eventos` com 3 organizadores, 4 eventos e 7 lotes.
-Todas as senhas do seed são `123456`.
+Todas as senhas do seed são `123456`. Para conferir:
+
+```bat
+"C:\xampp\mysql\bin\mysql.exe" -u root -e "USE paw4bi_eventos; SELECT COUNT(*) FROM organizadores;"
+```
+
+> `mysql` normalmente **não** está no PATH do Windows — por isso o caminho completo do XAMPP
+> acima. Se você adicionou `C:\xampp\mysql\bin` ao PATH, pode usar só `mysql`.
 
 ### 2. API JavaScript (porta 3000)
 
@@ -101,8 +120,6 @@ A conexão está fixa no código, como nos exemplos da aula: `127.0.0.1:3306`, `
 banco `paw4bi_eventos` (`js-api/src/config/config.js` e `flask-api/api/config/config.py`).
 Se o seu MySQL usar outro usuário/senha, ajuste essas duas constantes.
 
-No XAMPP: inicie o módulo **MySQL** no painel de controle do XAMPP antes de rodar as APIs.
-
 ### 4. Frontend
 
 Não precisa de servidor separado: **as duas APIs servem o próprio frontend**.
@@ -123,6 +140,17 @@ lateral) para alternar a API em uso sem sair da sessão.
 
 Também é possível criar conta na aba **Criar conta** do login (o cadastro público cria
 sempre perfil `comum`).
+
+### 6. Se algo não subir
+
+| Sintoma | Causa provável | Solução |
+|---|---|---|
+| `EADDRINUSE :::3000` ou `:8080` | já existe processo na porta | feche o outro terminal; no Windows: `netstat -ano | findstr :3000` e `taskkill /PID <pid> /F` |
+| API responde **503** em `/health` | MySQL parado | Start no módulo MySQL do XAMPP |
+| Login devolve **401** com a senha certa | banco antigo / sem seed | rode de novo o `docs/banco.sql` |
+| `Access denied for user 'root'` | o root do seu MySQL tem senha | ajuste `password` em `js-api/src/config/config.js` e `flask-api/api/config/config.py` |
+| Acentos estranhos no `mysql.exe` | encoding do console | é só o terminal; confira pela API ou no navegador |
+| Frontend abre, mas diz “API fora do ar” | API parada ou porta diferente | confira `/api/v1/health` e o seletor Node/Flask no login |
 
 ## Login + JWT (fluxo resumido)
 
