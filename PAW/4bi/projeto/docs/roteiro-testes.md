@@ -21,6 +21,13 @@ BASE=http://localhost:3000/api/v1 node docs/testes/teste-api.js
 BASE=http://localhost:8080/api/v1 node docs/testes/teste-api.js
 ```
 
+No **PowerShell**:
+
+```powershell
+$env:BASE='http://localhost:3000/api/v1'; node docs/testes/teste-api.js
+$env:BASE='http://localhost:8080/api/v1'; node docs/testes/teste-api.js
+```
+
 Cada execução faz **33 verificações** e limpa tudo que criou (o banco volta ao seed).
 Saída esperada nas duas:
 
@@ -95,7 +102,7 @@ Abre-se `http://localhost:3000/login.html` (API Node) ou `http://localhost:8080/
 ### 2.3 Organizadores (`organizadores.html`)
 
 - [x] Lista 3 registros do seed (nome, e-mail, telefone, perfil, data).
-- [x] Filtros: `nome`, `e-mail`, `perfil=comum` → 3.
+- [x] Filtros: `nome`, `e-mail`, `perfil=comum` → 2.
 - [x] Criar organizador → 201, aparece na lista, toast “Organizador cadastrado.”
 - [x] E-mail repetido → 409, modal aberto com o motivo.
 - [x] Editar outro organizador (admin) → 200.
@@ -144,10 +151,11 @@ Abre-se `http://localhost:3000/login.html` (API Node) ou `http://localhost:8080/
 
 - [x] Desktop (1440×900): sidebar fixa, grids de 3 colunas, tabelas sem quebra — prints em
       `docs/01-login.png` a `docs/07-login-criar-conta.png`.
-- [x] Mobile 390×844 (iPhone 12 Pro emulado): sidebar vira **barra superior** com marca,
-      seletor Node/Flask e navegação horizontal; cards e filtros empilham; sem rolagem
-      horizontal na página (`scrollWidth = clientWidth = 390`). A tabela de eventos rola
-      dentro do próprio card (`table-wrap` com `overflow-x: auto`) — prints em
+- [x] Mobile 390×844 (iPhone 12 Pro emulado): a sidebar vira **cabeçalho** com marca,
+      seletor Node/Flask e navegação em **4 colunas** (ícone + rótulo); cards e filtros
+      empilham em 1–2 colunas e a página não rola na horizontal
+      (`scrollWidth = clientWidth = 390`). A tabela rola **dentro do próprio card**
+      (`table-wrap` com `overflow-x: auto` + dica “Deslize a tabela…”) — prints em
       `docs/08-mobile-login.png` a `docs/12-mobile-eventos-tabela.png`.
 - [x] Nenhum erro de console, de página ou de rede nas 4 telas (desktop e mobile).
 

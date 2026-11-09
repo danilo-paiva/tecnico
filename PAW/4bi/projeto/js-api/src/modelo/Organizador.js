@@ -20,7 +20,7 @@ module.exports = class Organizador {
     }
 
     set idOrganizador(valor) {
-        this.#idOrganizador = inteiro(valor, "idOrganizador", { min: 1 });
+        this.#idOrganizador = inteiro(valor, "idOrganizador", 1);
     }
 
     get nome() {
@@ -28,7 +28,7 @@ module.exports = class Organizador {
     }
 
     set nome(valor) {
-        this.#nome = texto(valor, "nome", { min: 3, max: 120 });
+        this.#nome = texto(valor, "nome", 3, 120);
     }
 
     get email() {
@@ -45,8 +45,8 @@ module.exports = class Organizador {
 
     /** Recebe a senha em texto puro; o hash é gerado na camada de serviço. */
     set senha(valor) {
-        const limpa = texto(valor, "senha", { min: 6, max: 72 });
-        if (limpa.includes(" ")) {
+        const limpa = texto(valor, "senha", 6, 72);
+        if (limpa.indexOf(" ") !== -1) {
             throw new DomainError("senha não pode conter espaços.");
         }
         this.#senha = limpa;
@@ -66,7 +66,7 @@ module.exports = class Organizador {
 
     set perfil(valor) {
         const limpo = String(valor || "").trim().toLowerCase();
-        if (!Organizador.PERFIS.includes(limpo)) {
+        if (Organizador.PERFIS.indexOf(limpo) === -1) {
             throw new DomainError(`perfil deve ser ${Organizador.PERFIS.join(" ou ")}.`);
         }
         this.#perfil = limpo;

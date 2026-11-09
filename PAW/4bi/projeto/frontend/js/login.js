@@ -32,7 +32,7 @@
         const api = Sessao.apiConfig();
         apiEscolhida.textContent = `${api.nome} · ${api.base}`;
         document.querySelectorAll("#seletorApi button").forEach((item) => {
-            item.classList.toggle("active", item.dataset.api === api.id);
+            item.className = item.getAttribute("data-api") === api.id ? "active" : "";
         });
 
         Sessao.testarApi().then((online) => {
@@ -41,7 +41,7 @@
                     `${api.nome} não respondeu em ${api.origem}. Ligue o servidor para entrar.`,
                     "erro"
                 );
-            } else if (mensagem.textContent.includes("não respondeu")) {
+            } else if (mensagem.textContent.indexOf("não respondeu") !== -1) {
                 limparMensagem();
             }
         });
@@ -52,7 +52,7 @@
         const registrando = modo === "registrar";
 
         document.querySelectorAll("#tabsAuth button").forEach((item) => {
-            item.classList.toggle("active", item.dataset.modo === modo);
+            item.className = item.getAttribute("data-modo") === modo ? "active" : "";
         });
 
         campoNome.hidden = !registrando;
@@ -67,12 +67,12 @@
     }
 
     document.querySelectorAll("#tabsAuth button").forEach((item) => {
-        item.addEventListener("click", () => trocarModo(item.dataset.modo));
+        item.addEventListener("click", () => trocarModo(item.getAttribute("data-modo")));
     });
 
     document.querySelectorAll("#seletorApi button").forEach((item) => {
         item.addEventListener("click", () => {
-            Sessao.definirApi(item.dataset.api);
+            Sessao.definirApi(item.getAttribute("data-api"));
             atualizarApi();
             limparMensagem();
         });
@@ -111,7 +111,7 @@
                 : { organizador: { nome, email, senha, telefone: telefone || null } };
 
             const dados = await api.post(caminho, corpo);
-            const organizador = dados.organizadores?.[0];
+            const organizador = dados.organizadores[0];
 
             if (!dados.token || !organizador) {
                 throw new Error("A API não retornou o token de acesso.");
@@ -121,7 +121,7 @@
             window.location.replace("index.html");
         } catch (erro) {
             console.error(erro);
-            const texto = erro?.status === 0
+            const texto = erro && erro.status === 0
                 ? `Não foi possível falar com ${Sessao.apiConfig().nome}. Confira se o servidor está rodando.`
                 : erro.message;
             mostrarMensagem(texto);
@@ -131,7 +131,7 @@
     });
 
     // Mensagem quando a sessão expira em outra página.
-    const parametros = new URLSearchParams(window.location.search);
+    const parametros = location.search;
     if (parametros.get("sessao") === "expirada") {
         mostrarMensagem("Sua sessão expirou. Entre novamente.", "erro");
     }

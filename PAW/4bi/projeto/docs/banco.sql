@@ -26,7 +26,7 @@ CREATE TABLE organizadores (
   email          VARCHAR(150) NOT NULL,
   senha          VARCHAR(255) NOT NULL,
   telefone       VARCHAR(20)  DEFAULT NULL,
-  perfil         ENUM('administrador','comum') NOT NULL DEFAULT 'comum',
+  perfil         VARCHAR(20)  NOT NULL DEFAULT 'comum',
   created_at     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id_organizador),
   UNIQUE KEY uq_organizador_email (email)
@@ -40,8 +40,7 @@ CREATE TABLE eventos (
   titulo         VARCHAR(150) NOT NULL,
   descricao      TEXT         DEFAULT NULL,
   data_evento    DATETIME     NOT NULL,
-  status         ENUM('planejado','confirmado','realizado','cancelado')
-                              NOT NULL DEFAULT 'planejado',
+  status         VARCHAR(20)  NOT NULL DEFAULT 'planejado',
   id_organizador INT          NOT NULL,
   created_at     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id_evento),
@@ -49,7 +48,7 @@ CREATE TABLE eventos (
   KEY idx_evento_organizador (id_organizador),
   CONSTRAINT fk_evento_organizador
     FOREIGN KEY (id_organizador) REFERENCES organizadores (id_organizador)
-    ON UPDATE CASCADE
+    ON DELETE NO ACTION
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------
@@ -68,11 +67,7 @@ CREATE TABLE lotes (
   KEY idx_lote_evento (id_evento),
   CONSTRAINT fk_lote_evento
     FOREIGN KEY (id_evento) REFERENCES eventos (id_evento)
-    ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT ck_lote_preco CHECK (preco >= 0),
-  CONSTRAINT ck_lote_quantidade_total CHECK (quantidade_total > 0),
-  CONSTRAINT ck_lote_disponivel CHECK (quantidade_disponivel >= 0),
-  CONSTRAINT ck_lote_disponivel_total CHECK (quantidade_disponivel <= quantidade_total)
+    ON DELETE NO ACTION
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------

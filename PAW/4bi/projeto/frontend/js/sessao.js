@@ -47,7 +47,7 @@ const Sessao = {
     usuario() {
         try {
             return JSON.parse(localStorage.getItem(CHAVE_USUARIO) || "null");
-        } catch {
+        } catch (erro) {
             return null;
         }
     },
@@ -64,13 +64,13 @@ const Sessao = {
     sair() {
         localStorage.removeItem(CHAVE_TOKEN);
         localStorage.removeItem(CHAVE_USUARIO);
-        window.location.replace("login.html");
+        window.location.href = "login.html";
     },
 
     expirar() {
         localStorage.removeItem(CHAVE_TOKEN);
         localStorage.removeItem(CHAVE_USUARIO);
-        window.location.replace("login.html?sessao=expirada");
+        window.location.href = "login.html?sessao=expirada";
     },
 
     /** Retorna um ApiService já apontando para a API escolhida e com o token. */
@@ -80,17 +80,11 @@ const Sessao = {
 
     /** Verifica se a API escolhida está online (health check). */
     async testarApi() {
-        const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 2500);
         try {
-            const resposta = await fetch(`${this.apiConfig().base}/health`, {
-                signal: controller.signal
-            });
+            const resposta = await fetch(this.apiConfig().base + "/health");
             return resposta.ok;
-        } catch {
+        } catch (erro) {
             return false;
-        } finally {
-            clearTimeout(timer);
         }
     }
 };

@@ -17,7 +17,7 @@ module.exports = class Lote {
     }
 
     set idLote(valor) {
-        this.#idLote = inteiro(valor, "idLote", { min: 1 });
+        this.#idLote = inteiro(valor, "idLote", 1);
     }
 
     get nome() {
@@ -25,7 +25,7 @@ module.exports = class Lote {
     }
 
     set nome(valor) {
-        this.#nome = texto(valor, "nome", { min: 2, max: 80 });
+        this.#nome = texto(valor, "nome", 2, 80);
     }
 
     get preco() {
@@ -33,7 +33,7 @@ module.exports = class Lote {
     }
 
     set preco(valor) {
-        this.#preco = decimal(valor, "preco", { min: 0, max: 999999.99 });
+        this.#preco = decimal(valor, "preco", 0, 999999.99);
     }
 
     get quantidadeTotal() {
@@ -41,7 +41,7 @@ module.exports = class Lote {
     }
 
     set quantidadeTotal(valor) {
-        this.#quantidadeTotal = inteiro(valor, "quantidadeTotal", { min: 1, max: 1000000 });
+        this.#quantidadeTotal = inteiro(valor, "quantidadeTotal", 1, 1000000);
     }
 
     get quantidadeDisponivel() {
@@ -49,7 +49,7 @@ module.exports = class Lote {
     }
 
     set quantidadeDisponivel(valor) {
-        const numero = inteiro(valor, "quantidadeDisponivel", { min: 0, max: 1000000 });
+        const numero = inteiro(valor, "quantidadeDisponivel", 0, 1000000);
         if (this.#quantidadeTotal !== null && numero > this.#quantidadeTotal) {
             throw new DomainError("quantidadeDisponivel não pode ser maior que quantidadeTotal.");
         }
@@ -61,6 +61,6 @@ module.exports = class Lote {
     }
 
     set idEvento(valor) {
-        this.#idEvento = inteiro(valor, "idEvento", { min: 1 });
+        this.#idEvento = inteiro(valor, "idEvento", 1);
     }
 };

@@ -609,6 +609,7 @@ textarea.input { resize: vertical; min-height: 74px; }
   .filters .actions .btn { flex: 1; padding: 9px 8px; }
 
   .table-scroll-hint { display: block; }
+  table { min-width: 760px; }
 
   .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
   .stat { padding: 13px 12px; gap: 9px; }

@@ -55,11 +55,11 @@ module.exports = class EventoService {
 
         const evento = new Evento();
         evento.idEvento = idEvento;
-        evento.titulo = dados.titulo ?? atual.titulo;
+        evento.titulo = (dados.titulo !== undefined && dados.titulo !== null ? dados.titulo : atual.titulo);
         evento.descricao = dados.descricao !== undefined ? dados.descricao : atual.descricao;
-        evento.dataEvento = dados.dataEvento ?? atual.dataEvento;
-        evento.status = dados.status ?? atual.status;
-        evento.idOrganizador = dados.idOrganizador ?? atual.idOrganizador;
+        evento.dataEvento = (dados.dataEvento !== undefined && dados.dataEvento !== null ? dados.dataEvento : atual.dataEvento);
+        evento.status = (dados.status !== undefined && dados.status !== null ? dados.status : atual.status);
+        evento.idOrganizador = (dados.idOrganizador !== undefined && dados.idOrganizador !== null ? dados.idOrganizador : atual.idOrganizador);
 
         await this.#validarRegras(evento);
 

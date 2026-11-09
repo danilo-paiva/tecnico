@@ -19,7 +19,7 @@ module.exports = class Evento {
     }
 
     set idEvento(valor) {
-        this.#idEvento = inteiro(valor, "idEvento", { min: 1 });
+        this.#idEvento = inteiro(valor, "idEvento", 1);
     }
 
     get titulo() {
@@ -27,7 +27,7 @@ module.exports = class Evento {
     }
 
     set titulo(valor) {
-        this.#titulo = texto(valor, "titulo", { min: 3, max: 150 });
+        this.#titulo = texto(valor, "titulo", 3, 150);
     }
 
     get descricao() {
@@ -35,7 +35,7 @@ module.exports = class Evento {
     }
 
     set descricao(valor) {
-        this.#descricao = texto(valor, "descricao", { min: 1, max: 2000, obrigatorio: false });
+        this.#descricao = texto(valor, "descricao", 1, 2000, false);
     }
 
     get dataEvento() {
@@ -52,7 +52,7 @@ module.exports = class Evento {
 
     set status(valor) {
         const limpo = String(valor || "").trim().toLowerCase();
-        if (!Evento.STATUS.includes(limpo)) {
+        if (Evento.STATUS.indexOf(limpo) === -1) {
             throw new DomainError(`status deve ser ${Evento.STATUS.join(", ")}.`);
         }
         this.#status = limpo;
@@ -63,6 +63,6 @@ module.exports = class Evento {
     }
 
     set idOrganizador(valor) {
-        this.#idOrganizador = inteiro(valor, "idOrganizador", { min: 1 });
+        this.#idOrganizador = inteiro(valor, "idOrganizador", 1);
     }
 };

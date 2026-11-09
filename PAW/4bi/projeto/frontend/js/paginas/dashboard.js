@@ -25,13 +25,13 @@
             ? `<b>${gratuitos}</b> lote(s) gratuito(s)`
             : "todos com preço definido";
 
-        document.getElementById("statDisponiveis").textContent = disponiveis.toLocaleString("pt-BR");
+        document.getElementById("statDisponiveis").textContent = UI.formatarNumero(disponiveis);
         document.getElementById("statDisponiveisFoot").innerHTML = `<b>${ocupacao}%</b> já ocupado`;
     }
 
     function renderizarProximos(eventos) {
         const container = document.getElementById("proximos");
-        const ordenados = [...eventos].sort((a, b) => new Date(a.dataEvento) - new Date(b.dataEvento)).slice(0, 6);
+        const ordenados = eventos.slice().sort((a, b) => new Date(a.dataEvento) - new Date(b.dataEvento)).slice(0, 6);
 
         if (ordenados.length === 0) {
             container.innerHTML = `
@@ -64,14 +64,16 @@
             return;
         }
 
-        const ordenados = [...lotes]
-            .map((lote) => {
-                const total = Number(lote.quantidadeTotal) || 1;
-                const disponivel = Number(lote.quantidadeDisponivel) || 0;
-                return { ...lote, percentual: Math.round((disponivel / total) * 100) };
-            })
-            .sort((a, b) => a.percentual - b.percentual)
-            .slice(0, 4);
+        const comPercentual = lotes.map((lote) => {
+            const total = Number(lote.quantidadeTotal) || 1;
+            const disponivel = Number(lote.quantidadeDisponivel) || 0;
+            const copia = Object.assign({}, lote);
+            copia.percentual = Math.round((disponivel / total) * 100);
+            return copia;
+        });
+
+        comPercentual.sort((a, b) => a.percentual - b.percentual);
+        const ordenados = comPercentual.slice(0, 4);
 
         container.innerHTML = ordenados.map((lote) => `
             <div>
@@ -97,11 +99,10 @@
 
         try {
             const api = Sessao.api();
-            const [respostaEventos, respostaLotes, respostaOrganizadores] = await Promise.all([
-                api.get("eventos"),
-                api.get("lotes"),
-                api.get("organizadores")
-            ]);
+
+            const respostaEventos = await api.get("eventos");
+            const respostaLotes = await api.get("lotes");
+            const respostaOrganizadores = await api.get("organizadores");
 
             const eventos = respostaEventos.eventos || [];
             const lotes = respostaLotes.lotes || [];

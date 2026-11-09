@@ -40,7 +40,7 @@ module.exports = class OrganizadorService {
 
     /** Cadastro pela rota administrativa: apenas administrador define o perfil. */
     async createOrganizadorComoAdministrador(dados = {}, usuarioLogado) {
-        if (usuarioLogado?.perfil !== "administrador") {
+        if (usuarioLogado && usuarioLogado.perfil !== "administrador") {
             throw new ErrorResponse(403, "Acesso negado", {
                 mensagem: "Somente administradores podem cadastrar organizadores."
             });
@@ -63,8 +63,8 @@ module.exports = class OrganizadorService {
     }
 
     async updateOrganizador(idOrganizador, dados = {}, usuarioLogado) {
-        const ehAdministrador = usuarioLogado?.perfil === "administrador";
-        if (!ehAdministrador && Number(usuarioLogado?.idOrganizador) !== Number(idOrganizador)) {
+        const ehAdministrador = usuarioLogado && usuarioLogado.perfil === "administrador";
+        if (!ehAdministrador && Number(usuarioLogado && usuarioLogado.idOrganizador) !== Number(idOrganizador)) {
             throw new ErrorResponse(403, "Acesso negado", {
                 mensagem: "Você só pode editar o seu próprio cadastro."
             });
@@ -79,13 +79,13 @@ module.exports = class OrganizadorService {
 
         const organizador = new Organizador();
         organizador.idOrganizador = idOrganizador;
-        organizador.nome = dados.nome ?? atual.nome;
-        organizador.email = dados.email ?? atual.email;
+        organizador.nome = (dados.nome !== undefined && dados.nome !== null ? dados.nome : atual.nome);
+        organizador.email = (dados.email !== undefined && dados.email !== null ? dados.email : atual.email);
         organizador.telefone = dados.telefone !== undefined ? dados.telefone : atual.telefone;
 
         // Somente administrador altera o perfil; usuário comum mantém o perfil atual.
         organizador.perfil = ehAdministrador
-            ? (dados.perfil ?? atual.perfil)
+            ? (dados.perfil !== undefined && dados.perfil !== null ? dados.perfil : atual.perfil)
             : atual.perfil;
 
         let senhaHash = null;
@@ -110,7 +110,7 @@ module.exports = class OrganizadorService {
     }
 
     async deleteOrganizador(idOrganizador, usuarioLogado) {
-        if (usuarioLogado?.perfil !== "administrador") {
+        if (usuarioLogado && usuarioLogado.perfil !== "administrador") {
             throw new ErrorResponse(403, "Acesso negado", {
                 mensagem: "Somente administradores podem excluir organizadores."
             });
@@ -163,8 +163,14 @@ module.exports = class OrganizadorService {
             });
         }
 
-        const { senha: _ignorada, ...organizador } = credenciais;
+        const organizador = {
+            idOrganizador: credenciais.idOrganizador,
+            nome: credenciais.nome,
+            email: credenciais.email,
+            telefone: credenciais.telefone,
+            perfil: credenciais.perfil
+        };
         const token = this.#tokenJWT.gerarToken(organizador);
-        return { organizador, token };
+        return { organizador: organizador, token: token };
     }
 };

@@ -5,7 +5,9 @@ const { responder } = require("../utils/resposta");
  */
 module.exports = class AdminMiddleware {
     validarAdministrador = (request, response, next) => {
-        if (request.organizador?.perfil !== "administrador") {
+        const organizador = request.organizador;
+
+        if (!organizador || organizador.perfil !== "administrador") {
             return responder(response, 403, "Acesso negado", {
                 mensagem: "Esta operação exige o perfil administrador."
             });

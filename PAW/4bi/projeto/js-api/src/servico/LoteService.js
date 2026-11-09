@@ -18,9 +18,9 @@ module.exports = class LoteService {
     async createLote(dados = {}) {
         const lote = new Lote();
         lote.nome = dados.nome;
-        lote.preco = dados.preco ?? 0;
+        lote.preco = (dados.preco !== undefined && dados.preco !== null ? dados.preco : 0);
         lote.quantidadeTotal = dados.quantidadeTotal;
-        lote.quantidadeDisponivel = dados.quantidadeDisponivel ?? dados.quantidadeTotal;
+        lote.quantidadeDisponivel = (dados.quantidadeDisponivel !== undefined && dados.quantidadeDisponivel !== null ? dados.quantidadeDisponivel : dados.quantidadeTotal);
         lote.idEvento = dados.idEvento;
 
         await this.#validarRegras(lote);
@@ -53,11 +53,11 @@ module.exports = class LoteService {
 
         const lote = new Lote();
         lote.idLote = idLote;
-        lote.nome = dados.nome ?? atual.nome;
-        lote.preco = dados.preco ?? atual.preco;
-        lote.quantidadeTotal = dados.quantidadeTotal ?? atual.quantidadeTotal;
-        lote.quantidadeDisponivel = dados.quantidadeDisponivel ?? atual.quantidadeDisponivel;
-        lote.idEvento = dados.idEvento ?? atual.idEvento;
+        lote.nome = (dados.nome !== undefined && dados.nome !== null ? dados.nome : atual.nome);
+        lote.preco = (dados.preco !== undefined && dados.preco !== null ? dados.preco : atual.preco);
+        lote.quantidadeTotal = (dados.quantidadeTotal !== undefined && dados.quantidadeTotal !== null ? dados.quantidadeTotal : atual.quantidadeTotal);
+        lote.quantidadeDisponivel = (dados.quantidadeDisponivel !== undefined && dados.quantidadeDisponivel !== null ? dados.quantidadeDisponivel : atual.quantidadeDisponivel);
+        lote.idEvento = (dados.idEvento !== undefined && dados.idEvento !== null ? dados.idEvento : atual.idEvento);
 
         await this.#validarRegras(lote);
 

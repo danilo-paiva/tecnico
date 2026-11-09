@@ -1,27 +1,26 @@
 const { responder } = require("../utils/resposta");
 
-const CAMPOS_OBRIGATORIOS = {
-    POST: ["nome", "quantidadeTotal", "idEvento"]
-};
+const CAMPOS_OBRIGATORIOS_POST = ["nome", "quantidadeTotal", "idEvento"];
 
 /**
  * Middleware de validação do corpo de Lote.
  */
 module.exports = class LoteMiddleware {
     validarBody = (request, response, next) => {
-        const dados = request.body?.lote;
+        const dados = request.body && request.body.lote;
 
-        if (!dados || typeof dados !== "object" || Array.isArray(dados)) {
+        if (!dados || typeof dados !== "object") {
             return responder(response, 400, "Erro na validação de dados", {
                 mensagem: "O campo 'lote' é obrigatório no corpo da requisição."
             });
         }
 
         if (request.method === "POST") {
-            for (const campo of CAMPOS_OBRIGATORIOS.POST) {
+            for (let i = 0; i < CAMPOS_OBRIGATORIOS_POST.length; i++) {
+                const campo = CAMPOS_OBRIGATORIOS_POST[i];
                 if (dados[campo] === undefined || dados[campo] === null || dados[campo] === "") {
                     return responder(response, 400, "Erro na validação de dados", {
-                        campo,
+                        campo: campo,
                         mensagem: `O campo '${campo}' é obrigatório.`
                     });
                 }

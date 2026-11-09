@@ -52,8 +52,7 @@ module.exports = class Servidor {
     }
 
     #configurarMiddlewaresGlobais() {
-        this.#app.disable("x-powered-by");
-        this.#app.use(express.json({ limit: "1mb" }));
+        this.#app.use(express.json());
         this.#app.use(this.#cors);
 
         // O frontend é servido pela própria API (mesma origem).
@@ -153,10 +152,6 @@ module.exports = class Servidor {
 
         // Tratador global de erros
         this.#app.use((erro, request, response, next) => {
-            if (response.headersSent) {
-                return next(erro);
-            }
-
             if (erro instanceof ErrorResponse) {
                 return responder(response, erro.status, erro.message, {
                     detalhes: erro.detalhes
@@ -166,24 +161,6 @@ module.exports = class Servidor {
             if (erro instanceof DomainError) {
                 return responder(response, 400, "Erro de validação", {
                     mensagem: erro.message
-                });
-            }
-
-            if (erro.type === "entity.parse.failed") {
-                return responder(response, 400, "JSON inválido", {
-                    mensagem: "O corpo da requisição não é um JSON válido."
-                });
-            }
-
-            if (erro.code === "ER_DUP_ENTRY") {
-                return responder(response, 409, "Registro duplicado", {
-                    mensagem: "Já existe um registro com estes dados."
-                });
-            }
-
-            if (erro.code === "ER_ROW_IS_REFERENCED_2" || erro.code === "ER_ROW_IS_REFERENCED") {
-                return responder(response, 409, "Registro em uso", {
-                    mensagem: "Existem registros relacionados a este item."
                 });
             }
 

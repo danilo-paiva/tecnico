@@ -2,22 +2,23 @@
  * Cliente HTTP da API (aula paw03x04 / paw04x01).
  * Suporta GET, POST, PUT e DELETE com token Bearer.
  */
-class ApiError extends Error {
-    constructor(status, mensagem, dados = null) {
-        super(mensagem);
-        this.name = "ApiError";
-        this.status = status;
-        this.dados = dados;
-    }
+
+/** Erro da API com o status HTTP (mesmo formato do ErrorResponse da aula). */
+function ApiError(status, mensagem, dados) {
+    const erro = new Error(mensagem);
+    erro.name = "ApiError";
+    erro.status = status;
+    erro.dados = dados || null;
+    return erro;
 }
 
 class ApiService {
     #baseUrl;
     #token;
 
-    constructor(baseUrl, token = null) {
+    constructor(baseUrl, token) {
         this.#baseUrl = String(baseUrl).replace(/\/$/, "");
-        this.#token = token;
+        this.#token = token || null;
     }
 
     get baseUrl() {
@@ -32,33 +33,51 @@ class ApiService {
         this.#token = valor;
     }
 
-    #montarUrl(caminho, query = null) {
-        const url = new URL(`${this.#baseUrl}/${String(caminho).replace(/^\//, "")}`);
+    #montarUrl(caminho, query) {
+        const limpo = String(caminho).replace(/^\//, "");
+        let url = this.#baseUrl + "/" + limpo;
+
         if (query) {
-            for (const [chave, valor] of Object.entries(query)) {
+            const partes = [];
+            for (const chave in query) {
+                const valor = query[chave];
                 if (valor !== undefined && valor !== null && String(valor).trim() !== "") {
-                    url.searchParams.set(chave, valor);
+                    partes.push(chave + "=" + encodeURIComponent(valor));
                 }
             }
+            if (partes.length > 0) {
+                url = url + "?" + partes.join("&");
+            }
         }
-        return url.toString();
+
+        return url;
     }
 
-    async #requisitar(metodo, caminho, { corpo = null, query = null } = {}) {
-        const headers = { "Content-Type": "application/json" };
+    async #requisitar(metodo, caminho, opcoes) {
+        const corpo = opcoes ? opcoes.corpo : null;
+        const query = opcoes ? opcoes.query : null;
+        const url = this.#montarUrl(caminho, query);
+
+        const headers = {
+            "Content-Type": "application/json"
+        };
         if (this.#token) {
-            headers.Authorization = `Bearer ${this.#token}`;
+            headers["Authorization"] = "Bearer " + this.#token;
+        }
+
+        const configuracao = {
+            method: metodo,
+            headers: headers
+        };
+        if (corpo) {
+            configuracao.body = JSON.stringify(corpo);
         }
 
         let resposta;
         try {
-            resposta = await fetch(this.#montarUrl(caminho, query), {
-                method: metodo,
-                headers,
-                body: corpo ? JSON.stringify(corpo) : undefined
-            });
+            resposta = await fetch(url, configuracao);
         } catch (erro) {
-            throw new ApiError(
+            throw ApiError(
                 0,
                 "Não foi possível falar com a API. Confira se o servidor está rodando.",
                 { causa: erro.message }
@@ -70,37 +89,43 @@ class ApiService {
         if (texto) {
             try {
                 json = JSON.parse(texto);
-            } catch {
+            } catch (erro) {
                 json = null;
             }
         }
 
         if (!resposta.ok) {
-            const mensagem =
-                json?.data?.mensagem ||
-                json?.data?.detalhes?.mensagem ||
-                json?.message ||
-                `Erro HTTP ${resposta.status}`;
-            throw new ApiError(resposta.status, mensagem, json?.data ?? null);
+            const dados = json ? json.data : null;
+            let mensagem = "Erro HTTP " + resposta.status;
+
+            if (dados && dados.mensagem) {
+                mensagem = dados.mensagem;
+            } else if (dados && dados.detalhes && dados.detalhes.mensagem) {
+                mensagem = dados.detalhes.mensagem;
+            } else if (json && json.message) {
+                mensagem = json.message;
+            }
+
+            throw ApiError(resposta.status, mensagem, dados);
         }
 
-        return json?.data ?? json;
+        return json && json.data ? json.data : json;
     }
 
-    async get(caminho, query = null) {
+    async get(caminho, query) {
         return this.#requisitar("GET", caminho, { query });
     }
 
-    async post(caminho, corpo, query = null) {
+    async post(caminho, corpo, query) {
         return this.#requisitar("POST", caminho, { corpo, query });
     }
 
     async put(caminho, id, corpo) {
-        return this.#requisitar("PUT", `${caminho}/${id}`, { corpo });
+        return this.#requisitar("PUT", caminho + "/" + id, { corpo });
     }
 
     async delete(caminho, id) {
-        return this.#requisitar("DELETE", `${caminho}/${id}`);
+        return this.#requisitar("DELETE", caminho + "/" + id);
     }
 }
 

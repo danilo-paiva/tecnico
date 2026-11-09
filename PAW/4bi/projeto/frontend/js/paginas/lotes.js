@@ -18,7 +18,17 @@
     const campoTotal = document.getElementById("quantidadeTotal");
     const campoDisponivel = document.getElementById("quantidadeDisponivel");
 
-    const parametros = new URLSearchParams(window.location.search);
+    const parametros = {
+        get(chave) {
+            const busca = window.location.search.replace("?", "");
+            const itens = busca.split("&");
+            for (let i = 0; i < itens.length; i++) {
+                const par = itens[i].split("=");
+                if (par[0] === chave) return decodeURIComponent(par[1] || "");
+            }
+            return null;
+        }
+    };
 
     function filtros() {
         return {
@@ -170,11 +180,11 @@
         const botao = evento.target.closest("button[data-acao]");
         if (!botao) return;
 
-        const item = estado.itens.find((registro) => Number(registro.idLote) === Number(botao.dataset.id));
+        const item = estado.itens.find((registro) => Number(registro.idLote) === Number(botao.getAttribute("data-id")));
         if (!item) return;
 
-        if (botao.dataset.acao === "editar") abrirEdicao(item);
-        if (botao.dataset.acao === "excluir") excluir(item);
+        if (botao.getAttribute("data-acao") === "editar") abrirEdicao(item);
+        if (botao.getAttribute("data-acao") === "excluir") excluir(item);
     });
 
     document.getElementById("btnNovo").addEventListener("click", () => {
@@ -241,10 +251,6 @@
         carregar();
     });
 
-    const aplicarFiltro = UI.debounce(() => carregar(), 450);
-    document.getElementById("fNome").addEventListener("input", aplicarFiltro);
-    document.getElementById("fPrecoMin").addEventListener("input", aplicarFiltro);
-    document.getElementById("fPrecoMax").addEventListener("input", aplicarFiltro);
     selectFiltroEvento.addEventListener("change", () => carregar());
 
     document.getElementById("btnLimpar").addEventListener("click", () => {

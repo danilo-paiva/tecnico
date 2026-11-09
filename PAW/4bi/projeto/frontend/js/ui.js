@@ -3,15 +3,21 @@
  */
 const UI = {
     esc(valor) {
-        return String(valor ?? "")
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;")
-            .replaceAll("'", "&#39;");
+        return String(valor || "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
     },
 
-    toast(mensagem, tipo = "sucesso", titulo = null) {
+    doisDigitos(n) {
+        return n < 10 ? "0" + n : String(n);
+    },
+
+    toast(mensagem, tipo, titulo) {
+        if (!tipo) tipo = "sucesso";
+
         let container = document.querySelector(".toasts");
         if (!container) {
             container = document.createElement("div");
@@ -21,7 +27,7 @@ const UI = {
 
         const titulos = { sucesso: "Tudo certo", erro: "Não foi possível", info: "Aviso" };
         const elemento = document.createElement("div");
-        elemento.className = `toast ${tipo}`;
+        elemento.className = "toast " + tipo;
         elemento.innerHTML = `
             <span class="dot"></span>
             <div>
@@ -34,19 +40,19 @@ const UI = {
             elemento.style.transition = "opacity .2s, transform .2s";
             elemento.style.opacity = "0";
             elemento.style.transform = "translateY(6px)";
-            setTimeout(() => elemento.remove(), 220);
+            setTimeout(() => elemento.parentNode.removeChild(elemento), 220);
         }, 4200);
     },
 
     tratarErro(erro) {
         console.error(erro);
 
-        if (erro?.status === 401) {
+        if (erro && erro.status === 401) {
             Sessao.expirar();
             return;
         }
 
-        if (erro?.status === 0) {
+        if (erro && erro.status === 0) {
             this.toast(
                 "Confira se a API está rodando e se o banco foi importado.",
                 "erro",
@@ -55,100 +61,83 @@ const UI = {
             return;
         }
 
-        this.toast(erro?.message || "Erro inesperado.", "erro");
+        this.toast((erro && erro.message) || "Erro inesperado.", "erro");
     },
 
     abrirModal(id) {
         const modal = document.getElementById(id);
         if (!modal) return;
 
-        modal.classList.add("open");
+        modal.className = modal.className.replace("modal", "modal open");
         modal.setAttribute("aria-hidden", "false");
 
-        modal.querySelectorAll("[data-fechar]").forEach((elemento) => {
-            elemento.onclick = () => this.fecharModal(id);
-        });
+        const fechar = modal.querySelectorAll("[data-fechar]");
+        for (let i = 0; i < fechar.length; i++) {
+            fechar[i].onclick = () => this.fecharModal(id);
+        }
 
         const aoTeclar = (evento) => {
             if (evento.key === "Escape") {
                 this.fecharModal(id);
-                document.removeEventListener("keydown", aoTeclar);
             }
         };
+        modal._aoTeclar = aoTeclar;
         document.addEventListener("keydown", aoTeclar);
 
         const primeiro = modal.querySelector("input:not([type=hidden]), select, textarea");
-        setTimeout(() => primeiro?.focus(), 80);
+        setTimeout(() => {
+            if (primeiro) primeiro.focus();
+        }, 80);
     },
 
     fecharModal(id) {
         const modal = document.getElementById(id);
         if (!modal) return;
-        modal.classList.remove("open");
+
+        modal.className = modal.className.replace(" open", "");
         modal.setAttribute("aria-hidden", "true");
+
+        if (modal._aoTeclar) {
+            document.removeEventListener("keydown", modal._aoTeclar);
+            modal._aoTeclar = null;
+        }
     },
 
-    /** Modal de confirmação reutilizável. Resolve true/false. */
-    confirmar({ titulo = "Confirmar ação", texto = "", rotulo = "Confirmar", perigo = true } = {}) {
-        return new Promise((resolve) => {
-            const wrapper = document.createElement("div");
-            wrapper.className = "modal open";
-            wrapper.innerHTML = `
-                <div class="modal-backdrop" data-cancelar></div>
-                <div class="modal-card" style="width:min(430px,calc(100vw - 32px))" role="dialog" aria-modal="true">
-                    <div class="modal-head">
-                        <div>
-                            <h3>${this.esc(titulo)}</h3>
-                            <p>${this.esc(texto)}</p>
-                        </div>
-                    </div>
-                    <div class="modal-foot" style="padding-top:22px">
-                        <button type="button" class="btn" data-cancelar>Cancelar</button>
-                        <button type="button" class="btn ${perigo ? "btn-danger" : "btn-primary"}" data-confirmar>${this.esc(rotulo)}</button>
-                    </div>
-                </div>`;
-            document.body.appendChild(wrapper);
-
-            const encerrar = (valor) => {
-                wrapper.remove();
-                document.removeEventListener("keydown", aoTeclar);
-                resolve(valor);
-            };
-            const aoTeclar = (evento) => {
-                if (evento.key === "Escape") encerrar(false);
-            };
-
-            wrapper.querySelectorAll("[data-cancelar]").forEach((elemento) => {
-                elemento.addEventListener("click", () => encerrar(false));
-            });
-            wrapper.querySelector("[data-confirmar]").addEventListener("click", () => encerrar(true));
-            document.addEventListener("keydown", aoTeclar);
-            setTimeout(() => wrapper.querySelector("[data-confirmar]")?.focus(), 60);
-        });
-    },
-
-    formatarDataHora(iso) {
-        if (!iso) return "—";
-        const data = new Date(iso);
-        if (Number.isNaN(data.getTime())) return this.esc(iso);
-        const dia = data.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
-        const hora = data.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-        return `${dia} · ${hora}`;
+    /**
+     * Confirmação de exclusão (usa o confirm do navegador, como no exemplo da aula).
+     * Continua sendo chamada com await para não mudar as páginas.
+     */
+    confirmar(opcoes) {
+        const titulo = (opcoes && opcoes.titulo) || "Confirmar ação";
+        const texto = (opcoes && opcoes.texto) || "";
+        return window.confirm(titulo + " " + texto);
     },
 
     formatarData(iso) {
         if (!iso) return "—";
         const data = new Date(iso);
-        if (Number.isNaN(data.getTime())) return this.esc(iso);
-        return data.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+        if (isNaN(data.getTime())) return this.esc(iso);
+        return this.doisDigitos(data.getDate()) + "/" +
+            this.doisDigitos(data.getMonth() + 1) + "/" +
+            data.getFullYear();
+    },
+
+    formatarDataHora(iso) {
+        if (!iso) return "—";
+        const data = new Date(iso);
+        if (isNaN(data.getTime())) return this.esc(iso);
+        return this.formatarData(iso) + " · " +
+            this.doisDigitos(data.getHours()) + ":" +
+            this.doisDigitos(data.getMinutes());
     },
 
     chipData(iso) {
         const data = new Date(iso);
-        if (Number.isNaN(data.getTime())) return { dia: "--", mes: "---" };
+        const meses = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
+        if (isNaN(data.getTime())) return { dia: "--", mes: "---" };
         return {
-            dia: String(data.getDate()).padStart(2, "0"),
-            mes: data.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "").toUpperCase()
+            dia: this.doisDigitos(data.getDate()),
+            mes: meses[data.getMonth()]
         };
     },
 
@@ -158,22 +147,58 @@ const UI = {
         return texto.length >= 16 ? texto.slice(0, 16) : texto;
     },
 
+    formatarNumero(valor) {
+        const numero = Math.round(Number(valor || 0));
+        const texto = String(numero);
+        let comMilhar = "";
+        let contador = 0;
+
+        for (let i = texto.length - 1; i >= 0; i--) {
+            comMilhar = texto[i] + comMilhar;
+            contador++;
+            if (contador === 3 && i > 0) {
+                comMilhar = "." + comMilhar;
+                contador = 0;
+            }
+        }
+
+        return comMilhar;
+    },
+
     formatarMoeda(valor) {
-        return Number(valor || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+        const numero = Number(valor || 0);
+        const partes = numero.toFixed(2).split(".");
+        const inteiro = partes[0];
+        const centavos = partes[1];
+
+        let comMilhar = "";
+        let contador = 0;
+        for (let i = inteiro.length - 1; i >= 0; i--) {
+            comMilhar = inteiro[i] + comMilhar;
+            contador++;
+            if (contador === 3 && i > 0) {
+                comMilhar = "." + comMilhar;
+                contador = 0;
+            }
+        }
+
+        return "R$ " + comMilhar + "," + centavos;
     },
 
     iniciais(nome) {
-        const partes = String(nome || "").trim().split(/\s+/);
-        if (partes.length === 0 || !partes[0]) return "?";
-        return (partes[0][0] + (partes.length > 1 ? partes[partes.length - 1][0] : "")).toUpperCase();
-    },
+        const partes = String(nome || "").trim().split(" ");
+        let primeira = "";
+        let ultima = "";
 
-    debounce(funcao, espera = 350) {
-        let timer = null;
-        return (...args) => {
-            clearTimeout(timer);
-            timer = setTimeout(() => funcao(...args), espera);
-        };
+        for (let i = 0; i < partes.length; i++) {
+            if (partes[i] !== "") {
+                if (primeira === "") primeira = partes[i];
+                ultima = partes[i];
+            }
+        }
+
+        if (primeira === "") return "?";
+        return (primeira.charAt(0) + (ultima !== primeira ? ultima.charAt(0) : "")).toUpperCase();
     },
 
     badgeStatus(status) {
@@ -189,7 +214,9 @@ const UI = {
         return `<span class="badge ${classe}">${this.esc(status || "—")}</span>`;
     },
 
-    linhasVazias(colunas, titulo = "Nada por aqui", texto = "Registre o primeiro item ou ajuste os filtros.") {
+    linhasVazias(colunas, titulo, texto) {
+        if (!titulo) titulo = "Nada por aqui";
+        if (!texto) texto = "Registre o primeiro item ou ajuste os filtros.";
         return `
             <tr>
                 <td colspan="${colunas}">
@@ -215,21 +242,28 @@ const UI = {
             </tr>`;
     },
 
-    preencherSelect(select, itens, { valor = "id", rotulo = "nome", placeholder = null } = {}) {
+    preencherSelect(select, itens, opcoes) {
+        const valor = (opcoes && opcoes.valor) || "id";
+        const rotulo = (opcoes && opcoes.rotulo) || "nome";
+        const placeholder = opcoes ? opcoes.placeholder : null;
         const atual = select.value;
-        const opcoes = [];
+        const lista = [];
 
-        if (placeholder !== null) {
-            opcoes.push(`<option value="">${this.esc(placeholder)}</option>`);
+        if (placeholder !== null && placeholder !== undefined) {
+            lista.push(`<option value="">${this.esc(placeholder)}</option>`);
         }
 
-        for (const item of itens) {
-            opcoes.push(`<option value="${this.esc(item[valor])}">${this.esc(item[rotulo])}</option>`);
+        for (let i = 0; i < itens.length; i++) {
+            lista.push(`<option value="${this.esc(itens[i][valor])}">${this.esc(itens[i][rotulo])}</option>`);
         }
 
-        select.innerHTML = opcoes.join("");
-        if (atual && [...select.options].some((opcao) => opcao.value === atual)) {
-            select.value = atual;
+        select.innerHTML = lista.join("");
+
+        for (let i = 0; i < select.options.length; i++) {
+            if (select.options[i].value === atual) {
+                select.value = atual;
+                break;
+            }
         }
     }
 };

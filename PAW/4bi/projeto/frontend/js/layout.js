@@ -12,7 +12,7 @@
     const template = document.getElementById("conteudo");
     if (!app || !template) return;
 
-    const pagina = document.body.dataset.page || "dashboard";
+    const pagina = document.body.getAttribute("data-page") || "dashboard";
     const usuario = Sessao.usuario() || {};
     const api = Sessao.apiConfig();
 
@@ -101,8 +101,8 @@
 
     document.querySelectorAll("#seletorApi button").forEach((botao) => {
         botao.addEventListener("click", () => {
-            if (botao.dataset.api === Sessao.apiAtual()) return;
-            Sessao.definirApi(botao.dataset.api);
+            if (botao.getAttribute("data-api") === Sessao.apiAtual()) return;
+            Sessao.definirApi(botao.getAttribute("data-api"));
             window.location.reload();
         });
     });
@@ -112,7 +112,7 @@
         const dot = document.getElementById("apiDot");
         const nome = document.getElementById("apiNome");
         if (!dot || !nome) return;
-        dot.classList.add(online ? "on" : "off");
+        dot.className = "api-dot " + (online ? "on" : "off");
         nome.textContent = online ? api.nome : `${api.nome} (offline)`;
     });
 

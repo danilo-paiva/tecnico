@@ -33,9 +33,9 @@ organizadores 1 --- N eventos 1 --- N lotes
 
 Nenhuma tabela de exemplo de aula foi reutilizada: não existem `funcionarios`/`cargos`
 (exemplo do professor) nem as tabelas do projeto do 3º bimestre
-(`locais`, `participantes`, `ingressos`, `compras`). O **tema visual** (paleta, tipografia e
-componentes) segue o do projeto do 3º bimestre, como autorizado — o que muda é o domínio de
-dados e todas as telas.
+(`locais`, `participantes`, `ingressos`, `compras`). O **tema (domínio) de eventos** é o
+mesmo do projeto do 3º bimestre, como autorizado, mas as **três tabelas são novas** e a
+**identidade visual e todas as telas foram refeitas**.
 
 ## Estrutura de pastas
 
@@ -44,7 +44,10 @@ projeto/
 ├── docs/
 │   ├── banco.sql            # cria o banco paw4bi_eventos + seed (senhas: 123456)
 │   ├── insomnia.json        # coleção para testar as duas APIs
-│   └── roteiro-testes.md    # roteiro de testes executado (API + frontend)
+│   ├── roteiro-testes.md    # roteiro de testes executado (API + frontend)
+│   ├── testes/teste-api.js  # 33 verificações automáticas do contrato (roda nas 2 APIs)
+│   ├── ficha-avaliacao.docx # ficha do bimestre (impressa para a apresentação)
+│   └── *.png                # prints das telas (desktop e mobile)
 ├── frontend/                # frontend único (HTML + CSS + JS puro), servido pelas 2 APIs
 │   ├── login.html           # login + criar conta + escolha da API
 │   ├── index.html           # dashboard (contadores)
@@ -63,7 +66,7 @@ projeto/
 
 ## Requisitos
 
-- **Node.js 18+** (testado com Node 20) e npm
+- **Node.js 18+** (testado com Node 24) e npm
 - **Python 3.10+** (testado com 3.11) e pip
 - **MySQL 8** ou **MariaDB** (XAMPP serve)
 
@@ -94,12 +97,11 @@ pip install -r requirements.txt
 python app.py      # ou: python server.py
 ```
 
-Se o MySQL não estiver em `127.0.0.1:3306` com `root` sem senha, use variáveis de ambiente
-(iguais nas duas APIs):
+A conexão está fixa no código, como nos exemplos da aula: `127.0.0.1:3306`, `root`, sem senha,
+banco `paw4bi_eventos` (`js-api/src/config/config.js` e `flask-api/api/config/config.py`).
+Se o seu MySQL usar outro usuário/senha, ajuste essas duas constantes.
 
-```bash
-DB_HOST=127.0.0.1 DB_PORT=3307 DB_USER=root DB_PASSWORD= DB_DATABASE=paw4bi_eventos ...
-```
+No XAMPP: inicie o módulo **MySQL** no painel de controle do XAMPP antes de rodar as APIs.
 
 ### 4. Frontend
 
@@ -180,7 +182,8 @@ Contrato completo (rotas, payloads, filtros, exemplos `curl`) em **[API.md](API.
 ## Frontend
 
 - **login.html** — entrar / criar conta, escolha da API (Node ou Flask) e aviso de sessão
-  expirada. O tema é o mesmo do projeto do 3º bimestre (paleta clara, sidebar, cards).
+  expirada. Identidade própria: sidebar escura, acento verde-limão, cards claros e
+  micro-labels monoespaçadas.
 - **index.html** — dashboard com contadores e resumo (eventos por status, lotes gratuitos,
   ingressos disponíveis, próximos eventos).
 - **organizadores.html** — CRUD + filtros por nome, e-mail e perfil. Para o perfil `comum` o
@@ -190,10 +193,9 @@ Contrato completo (rotas, payloads, filtros, exemplos `curl`) em **[API.md](API.
 - **lotes.html** — CRUD em modal + filtros por nome, evento e faixa de preço, com barra de
   ocupação (`disponivel / total`).
 
-O frontend não usa framework: `js/ApiService.js` (cliente HTTP com Bearer), `js/Sessao.js`
-(API escolhida + token + usuário), `js/UI.js` (toasts, modais, badges, formatação) e
-`js/paginas/*.js` (um módulo por tela).
-`js/paginas/*.js` (um módulo por tela).
+O frontend não usa framework: `js/ApiService.js` (cliente HTTP com Bearer), `js/sessao.js`
+(API escolhida + token + usuário), `js/ui.js` (toasts, modais, badges, formatação),
+`js/layout.js` (sidebar/topbar comuns) e `js/paginas/*.js` (um módulo por tela).
 
 ## Prints das telas
 
@@ -221,6 +223,13 @@ Teste automatizado do contrato (roda igual nas duas APIs, limpa o que cria):
 ```bash
 BASE=http://localhost:3000/api/v1 node docs/testes/teste-api.js    # Node.js
 BASE=http://localhost:8080/api/v1 node docs/testes/teste-api.js    # Flask
+```
+
+No **PowerShell**:
+
+```powershell
+$env:BASE='http://localhost:3000/api/v1'; node docs/testes/teste-api.js
+$env:BASE='http://localhost:8080/api/v1'; node docs/testes/teste-api.js
 ```
 
 O roteiro completo (API das duas linguagens + frontend no navegador) está em

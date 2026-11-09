@@ -40,7 +40,7 @@ Authorization: Bearer <token>
 - Token JWT **HS256**, validade de **30 dias**, claims: `idOrganizador`, `nome`, `email`,
   `perfil` (+ `iss`, `aud`, `sub`, `iat`, `exp`, `nbf`, `jti`).
 - A chave é a mesma nas duas APIs: **o token emitido pela API Node vale na API Flask** e
-  vice-versa. A chave pode ser trocada com a variável de ambiente `JWT_KEY`.
+  vice-versa. A chave está fixa no código (`config.js` / `config.py`), como nos exemplos da aula.
 
 ### Códigos de status usados
 
@@ -280,7 +280,7 @@ obtido na outra API.
 
 - CORS liberado (`Access-Control-Allow-Origin: *`) para permitir que o frontend seja aberto de
   qualquer origem.
-- As duas APIs também **servem o frontend** (`POST /` estático): `http://localhost:3000/login.html`
-  e `http://localhost:8080/login.html`.
+- As duas APIs também **servem o frontend** (arquivos estáticos):
+  `http://localhost:3000/login.html` e `http://localhost:8080/login.html`.
 - Rotas `/api/v1/*` inexistentes respondem **404** no envelope padrão
   (`GET /api/v1/naoexiste não existe nesta API.`) — em qualquer método, nas duas APIs.

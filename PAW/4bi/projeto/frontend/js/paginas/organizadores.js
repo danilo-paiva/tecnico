@@ -150,11 +150,11 @@
         const botao = evento.target.closest("button[data-acao]");
         if (!botao || botao.disabled) return;
 
-        const item = estado.itens.find((registro) => Number(registro.idOrganizador) === Number(botao.dataset.id));
+        const item = estado.itens.find((registro) => Number(registro.idOrganizador) === Number(botao.getAttribute("data-id")));
         if (!item) return;
 
-        if (botao.dataset.acao === "editar") abrirEdicao(item);
-        if (botao.dataset.acao === "excluir") excluir(item);
+        if (botao.getAttribute("data-acao") === "editar") abrirEdicao(item);
+        if (botao.getAttribute("data-acao") === "excluir") excluir(item);
     });
 
     btnNovo.addEventListener("click", abrirNovo);
@@ -169,7 +169,7 @@
         const senha = document.getElementById("senha").value;
 
         if (nome.length < 3) return UI.toast("O nome deve ter pelo menos 3 caracteres.", "erro");
-        if (!email.includes("@")) return UI.toast("Informe um e-mail válido.", "erro");
+        if (email.indexOf("@") === -1) return UI.toast("Informe um e-mail válido.", "erro");
         if (!id && senha.length < 6) return UI.toast("A senha deve ter pelo menos 6 caracteres.", "erro");
         if (senha && senha.length < 6) return UI.toast("A senha deve ter pelo menos 6 caracteres.", "erro");
 
@@ -205,9 +205,6 @@
         carregar();
     });
 
-    const aplicarFiltro = UI.debounce(() => carregar(), 450);
-    document.getElementById("fNome").addEventListener("input", aplicarFiltro);
-    document.getElementById("fEmail").addEventListener("input", aplicarFiltro);
     document.getElementById("fPerfil").addEventListener("change", () => carregar());
 
     document.getElementById("btnLimpar").addEventListener("click", () => {

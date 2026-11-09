@@ -51,6 +51,10 @@ const checar = (nome, condicao, extra = "") => {
     r = await req("GET", "organizadores", null, tokenAna);
     checar("GET organizadores -> 3", r.status === 200 && r.json.data.organizadores.length === 3, JSON.stringify(r.json));
 
+    // Guarda o telefone original do Bruno para devolver o seed ao final.
+    r = await req("GET", "organizadores/2", null, tokenAna);
+    const telefoneOriginal = (r.json && r.json.data && r.json.data.organizadores[0] ? r.json.data.organizadores[0].telefone : null);
+
     r = await req("GET", "organizadores?perfil=administrador", null, tokenAna);
     checar("filtro perfil=administrador -> 1", r.json.data.organizadores.length === 1);
 
@@ -116,6 +120,9 @@ const checar = (nome, condicao, extra = "") => {
 
     r = await req("PUT", "organizadores/2", { organizador: { telefone: "(47) 90000-0000" } }, tokenBruno);
     checar("comum editando a si -> 200", r.status === 200, `(${r.status}) ${JSON.stringify(r.json)}`);
+
+    // Restaura o telefone do seed (sem contar como verificação).
+    await req("PUT", "organizadores/2", { organizador: { telefone: telefoneOriginal } }, tokenAna);
 
     r = await req("POST", "organizadores", { organizador: { nome: "Teste Admin", email: "teste.admin@email.com", senha: "123456", perfil: "administrador" } }, tokenAna);
     checar("admin cria organizador -> 201", r.status === 201 && r.json.data.organizadores[0].perfil === "administrador", `(${r.status}) ${JSON.stringify(r.json)}`);
