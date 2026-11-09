@@ -45,7 +45,6 @@ projeto/
 │   ├── banco.sql            # cria o banco paw4bi_eventos + seed (senhas: 123456)
 │   ├── insomnia.json        # coleção para testar as duas APIs
 │   ├── roteiro-testes.md    # roteiro de testes executado (API + frontend)
-│   ├── arquitetura-mvcs.md  # a arquitetura explicada nas duas APIs (3 explicações cada)
 │   ├── testes/teste-api.js  # 33 verificações automáticas do contrato (roda nas 2 APIs)
 │   ├── ficha-avaliacao.docx # ficha do bimestre (impressa para a apresentação)
 │   └── *.png                # prints das telas (desktop e mobile)
@@ -197,14 +196,6 @@ Contrato completo (rotas, payloads, filtros, exemplos `curl`) em **[API.md](API.
 O frontend não usa framework: `js/ApiService.js` (cliente HTTP com Bearer), `js/sessao.js`
 (API escolhida + token + usuário), `js/ui.js` (toasts, modais, badges, formatação),
 `js/layout.js` (sidebar/topbar comuns) e `js/paginas/*.js` (um módulo por tela).
-
-## Arquitetura explicada
-
-[`docs/arquitetura-mvcs.md`](docs/arquitetura-mvcs.md) tem, **para cada API**, três
-explicações do MVCS: (1) mapa das camadas e responsabilidades, (2) o caminho de uma requisição
-de verdade (o POST duplicado que termina em 409), e (3) onde mora cada decisão — regra de
-domínio no Model, regra de negócio no Service, HTTP no Controle/Middleware — fechando com uma
-tabela Node × Flask lado a lado.
 
 ## Prints das telas
 

@@ -1,0 +1,1878 @@
+<!doctype html>
+<html lang="pt-BR" data-api="js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arquitetura MVCS: Node.js e Flask</title>
+<meta name="description" content="Explicação interativa da arquitetura MVCS do projeto do 4º bimestre de PAW, com trechos reais das APIs em Node.js (Express) e Python (Flask).">
+<meta name="color-scheme" content="light">
+<style>
+:root {
+  --bg: #f4f5f1;
+  --surface: #ffffff;
+  --surface-2: #fafbf7;
+  --surface-3: #eef0e8;
+  --ink: #12170f;
+  --ink-soft: #333b30;
+  --muted: #586053;
+  --line: #e4e7dd;
+  --line-strong: #cfd5c3;
+  --accent: #c8f169;
+  --accent-2: #dff9a3;
+  --accent-ink: #1b2409;
+  --accent-deep: #3f6b16;
+  --danger: #b42318;
+  --danger-soft: #fef3f2;
+  --ok: #0f7b3f;
+  --ok-soft: #e9f8ef;
+  --warn: #8a5a00;
+  --warn-soft: #fdf5e3;
+  --info: #1f5fa8;
+  --info-soft: #eaf2fb;
+  --sidebar: #10160d;
+  --sidebar-line: #232c1d;
+  --sidebar-text: #c9d1c1;
+  --radius: 14px;
+  --radius-sm: 10px;
+  --shadow-sm: 0 1px 2px rgba(18, 23, 15, .06);
+  --shadow: 0 1px 2px rgba(18, 23, 15, .05), 0 18px 40px -28px rgba(18, 23, 15, .45);
+  --font: "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono: Consolas, ui-monospace, "Cascadia Mono", "Courier New", monospace;
+  /* categorias de camada */
+  --c-infra: #586053;  --c-infra-soft: #eef0e8;  --c-infra-ink: #3a4235;
+  --c-http: #1f5fa8;   --c-http-soft: #eaf2fb;   --c-http-ink: #174a85;
+  --c-negocio: #3f6b16; --c-negocio-soft: #e9f5cc; --c-negocio-ink: #2f5410;
+  --c-dominio: #6a3fa0; --c-dominio-soft: #f1ebf8; --c-dominio-ink: #52308a;
+  --c-sql: #8a5a00;    --c-sql-soft: #fdf5e3;    --c-sql-ink: #6f4700;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.6 var(--font);
+}
+h1, h2, h3, h4, p, ul, ol, figure { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+button { font: inherit; color: inherit; }
+code { font-family: var(--mono); font-size: .88em; background: var(--surface-3); border: 1px solid var(--line); border-radius: 6px; padding: 0 .35em; overflow-wrap: anywhere; }
+a { color: var(--accent-deep); }
+:focus-visible { outline: 3px solid var(--info); outline-offset: 2px; border-radius: 6px; }
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.ic { width: 1.1em; height: 1.1em; flex: none; vertical-align: -.18em; }
+.skip { position: absolute; left: 12px; top: -60px; z-index: 100; background: var(--accent); color: var(--accent-ink); padding: 10px 16px; border-radius: 10px; font-weight: 700; text-decoration: none; }
+.skip:focus { top: 12px; }
+
+/* ---------- estrutura ---------- */
+.app { display: grid; grid-template-columns: 252px minmax(0, 1fr); min-height: 100vh; }
+.side {
+  position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  background: var(--sidebar); color: var(--sidebar-text);
+  display: flex; flex-direction: column; gap: 26px; padding: 24px 16px 20px;
+}
+.side :focus-visible { outline-color: var(--accent); }
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-logo { width: 38px; height: 38px; border-radius: 11px; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; flex: none; }
+.brand-logo .ic { width: 22px; height: 22px; }
+.brand b { display: block; color: #fff; font-size: 1.02rem; letter-spacing: .02em; line-height: 1.2; }
+.brand span { font-size: .78rem; color: var(--sidebar-text); }
+.nav ul { display: flex; flex-direction: column; gap: 4px; }
+.nav a {
+  display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px;
+  color: var(--sidebar-text); text-decoration: none; font-weight: 600; font-size: .95rem; min-height: 44px;
+  border: 1px solid transparent;
+}
+.nav a:hover { background: #18210f; color: #fff; }
+.nav .nn { width: 26px; height: 26px; border-radius: 8px; border: 1px solid var(--sidebar-line); display: grid; place-items: center; font-size: .78rem; flex: none; color: var(--sidebar-text); }
+.nav a[aria-current="location"] { background: #1a2414; color: #fff; border-color: var(--sidebar-line); box-shadow: inset 3px 0 0 var(--accent); }
+.nav a[aria-current="location"] .nn { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 700; }
+.side-foot { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
+.side-foot small { font-size: .78rem; color: #9ba592; }
+.side-foot .lbl { font-size: .78rem; color: #9ba592; text-transform: uppercase; letter-spacing: .08em; }
+
+main { min-width: 0; padding: 32px clamp(16px, 3vw, 40px) 72px; }
+.wrap { max-width: 1120px; margin: 0 auto; }
+.sec { margin-top: 48px; }
+.hero, .sec { scroll-margin-top: 24px; }
+section[tabindex="-1"]:focus, #layer-panel:focus { outline: none; }
+.sec-head { margin-bottom: 18px; max-width: 74ch; }
+.eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: .78rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent-deep); }
+.eyebrow i { font-style: normal; background: var(--accent); color: var(--accent-ink); border-radius: 6px; padding: 1px 7px; letter-spacing: .02em; }
+h2 { font-size: clamp(1.4rem, 1.1rem + 1vw, 1.85rem); line-height: 1.2; margin-top: 6px; letter-spacing: -.01em; }
+.lead { color: var(--ink-soft); margin-top: 8px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-sm); min-width: 0; }
+
+/* ---------- seletor de API ---------- */
+.seg { display: inline-flex; padding: 3px; gap: 2px; background: var(--surface-3); border: 1px solid var(--line); border-radius: 999px; }
+.seg-btn { border: 0; background: transparent; padding: 8px 18px; min-height: 42px; border-radius: 999px; font-weight: 700; color: var(--ink-soft); cursor: pointer; }
+.seg-btn:hover { background: rgba(255, 255, 255, .7); }
+.seg-btn[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); box-shadow: inset 0 0 0 1px rgba(63, 107, 22, .4); }
+.side .seg { background: #172012; border-color: var(--sidebar-line); width: 100%; }
+.side .seg-btn { color: var(--sidebar-text); flex: 1; padding: 8px 10px; }
+.side .seg-btn:hover { background: #1f2b18; }
+.side .seg-btn[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+
+/* ---------- hero ---------- */
+.hero { padding: clamp(20px, 3vw, 34px); border-top: 5px solid var(--accent); }
+.kicker { font-size: .8rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent-deep); }
+h1 { font-size: clamp(1.7rem, 1.1rem + 2.4vw, 2.6rem); line-height: 1.12; letter-spacing: -.02em; margin-top: 8px; }
+h1 mark { background: linear-gradient(transparent 62%, var(--accent) 62%); color: inherit; padding: 0 .1em; }
+.sub { margin-top: 12px; color: var(--ink-soft); max-width: 66ch; font-size: 1.05rem; }
+.hero-row { margin-top: 22px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; }
+.hero-row .lbl { font-weight: 700; font-size: .92rem; color: var(--ink-soft); }
+.api-now { color: var(--muted); font-size: .92rem; }
+.callout { margin-top: 22px; padding: 14px 16px; background: var(--surface-2); border: 1px solid var(--line); border-left: 4px solid var(--accent-deep); border-radius: var(--radius-sm); color: var(--ink-soft); max-width: 80ch; }
+.reading { margin-top: 20px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.reading a { display: block; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); text-decoration: none; color: var(--ink); min-height: 44px; }
+.reading a:hover { border-color: var(--accent-deep); background: var(--surface-2); }
+.reading b { display: block; font-size: .95rem; }
+.reading span { font-size: .85rem; color: var(--muted); }
+
+/* ---------- pills / botões ---------- */
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px; font-size: .78rem; font-weight: 700; line-height: 1.6; white-space: nowrap; border: 1px solid transparent; }
+.pill[data-cat="infra"] { background: var(--c-infra-soft); color: var(--c-infra-ink); border-color: #d5dacb; }
+.pill[data-cat="http"] { background: var(--c-http-soft); color: var(--c-http-ink); border-color: #c5daf1; }
+.pill[data-cat="negocio"] { background: var(--c-negocio-soft); color: var(--c-negocio-ink); border-color: #cfe39a; }
+.pill[data-cat="dominio"] { background: var(--c-dominio-soft); color: var(--c-dominio-ink); border-color: #dccdef; }
+.pill[data-cat="sql"] { background: var(--c-sql-soft); color: var(--c-sql-ink); border-color: #eedaa8; }
+.pill.danger { background: var(--danger-soft); color: var(--danger); border-color: #f4c7c2; }
+.pill.ok { background: var(--ok-soft); color: var(--ok); border-color: #bfe5cf; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: var(--radius-sm); border: 1px solid var(--line-strong); background: var(--surface); font-weight: 700; cursor: pointer; color: var(--ink); }
+.btn:hover:not([disabled]) { border-color: var(--accent-deep); background: var(--surface-2); }
+.btn[disabled] { opacity: .45; cursor: not-allowed; }
+.btn.primary { background: var(--accent); border-color: rgba(63, 107, 22, .5); color: var(--accent-ink); }
+.btn.primary:hover:not([disabled]) { background: #bfe95a; }
+.btn[aria-pressed="true"] { background: var(--accent-2); border-color: var(--accent-deep); }
+
+/* ---------- blocos de código ---------- */
+.code { border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); overflow: hidden; min-width: 0; max-width: 100%; }
+.code-h { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 6px 12px; padding: 8px 12px; background: var(--surface-3); border-bottom: 1px solid var(--line); font-size: .78rem; }
+.code-files { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.code-file { font-family: var(--mono); color: var(--ink-soft); overflow-wrap: anywhere; }
+.code-file em { font-style: normal; color: var(--muted); font-family: var(--font); margin-left: 6px; white-space: nowrap; }
+.code-lang { font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-size: .7rem; padding-top: 2px; }
+.code-note { color: var(--ink-soft); font-size: .8rem; }
+.code pre { margin: 0; overflow-x: auto; padding: 10px 0; font: 13px/1.65 var(--mono); tab-size: 4; max-width: 100%; }
+.code pre:focus-visible { outline-offset: -3px; }
+.l { display: block; min-width: max-content; padding-right: 16px; white-space: pre; }
+.l .n { display: inline-block; width: 3.4em; padding-right: 12px; text-align: right; color: var(--muted); user-select: none; -webkit-user-select: none; }
+.l.hl { background: rgba(200, 241, 105, .38); box-shadow: inset 3px 0 0 var(--accent-deep); }
+.l.cut .t { color: var(--muted); }
+.tk-c { color: #55604f; font-style: italic; }
+.tk-s { color: #2f6a14; }
+.tk-k { color: #1f5fa8; font-weight: 600; }
+.tk-n { color: #8a5a00; }
+.tk-d { color: #6a3fa0; }
+.tk-p { color: #1f5fa8; }
+.nogut .l { padding-left: 14px; }
+.code-stack { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+
+/* ---------- 2. mapa ---------- */
+.map { padding: 18px 18px 20px; }
+.strip-hint { display: none; font-size: .85rem; color: var(--muted); margin-bottom: 8px; }
+.strip { overflow-x: auto; padding: 6px 4px 12px; }
+.strip-grid { display: grid; grid-template-columns: repeat(8, minmax(98px, 1fr)); column-gap: 26px; row-gap: 20px; min-width: 100%; width: max-content; }
+.node {
+  position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left;
+  min-height: 84px; padding: 10px 12px 10px; background: var(--surface); border: 1px solid var(--line-strong); border-top: 4px solid var(--cat, var(--c-infra));
+  border-radius: 12px; cursor: pointer; min-width: 0;
+}
+.node[data-cat="infra"] { --cat: var(--c-infra); }
+.node[data-cat="http"] { --cat: var(--c-http); }
+.node[data-cat="negocio"] { --cat: var(--c-negocio); }
+.node[data-cat="dominio"] { --cat: var(--c-dominio); }
+.node[data-cat="sql"] { --cat: var(--c-sql); }
+.node:hover { background: var(--surface-2); border-color: var(--cat); border-top-color: var(--cat); }
+.node .nn { font-size: .72rem; font-weight: 700; color: var(--muted); letter-spacing: .06em; }
+.node .nm { font-weight: 800; font-size: 1rem; line-height: 1.2; }
+.node .nf { font-family: var(--mono); font-size: .72rem; color: var(--muted); overflow-wrap: anywhere; line-height: 1.3; }
+.node[aria-selected="true"] { background: var(--accent); border-color: var(--accent-deep); border-top-color: var(--cat); box-shadow: 0 0 0 3px rgba(200, 241, 105, .55); }
+.node[aria-selected="true"] .nn, .node[aria-selected="true"] .nf { color: var(--accent-ink); }
+.node.flow:not([data-layer="mysql"])::after { content: ""; position: absolute; top: 50%; right: -23px; width: 18px; height: 2px; background: var(--line-strong); }
+.node.flow:not([data-layer="mysql"])::before { content: ""; position: absolute; top: calc(50% - 4px); right: -24px; border-left: 7px solid var(--line-strong); border-top: 5px solid transparent; border-bottom: 5px solid transparent; transform: translateY(-1px); }
+.node.sat { grid-column: 5; grid-row: 2; border-style: dashed; border-top-style: solid; background: var(--surface-2); }
+.node.sat::before { content: ""; position: absolute; left: 50%; top: -21px; height: 20px; border-left: 2px dashed var(--line-strong); }
+.node.sat[aria-selected="true"] { background: var(--accent); }
+.map-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 6px; font-size: .85rem; color: var(--muted); }
+.map-legend .pill { font-weight: 600; }
+.lp { margin-top: 14px; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 20px; padding: 20px; }
+.lp-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.lp-head h3 { font-size: 1.35rem; line-height: 1.2; }
+.lp-sum { margin-top: 8px; color: var(--ink-soft); }
+.lp h4, .sp h4 { font-size: .78rem; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); margin: 16px 0 6px; }
+.fl li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 8px; padding: 4px 0; color: var(--ink); }
+.fl .ic { margin-top: .22em; }
+.fl.yes .ic { color: var(--ok); }
+.fl.no .ic { color: var(--danger); }
+.flowline { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--line-strong); font-size: .88rem; color: var(--ink-soft); }
+.flowline b { color: var(--ink); }
+
+/* ---------- 3. simulador ---------- */
+.sim { padding: 20px; }
+.sim-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 18px; }
+.modes { display: inline-flex; padding: 3px; gap: 2px; background: var(--surface-3); border: 1px solid var(--line); border-radius: 999px; }
+.mode { border: 0; background: transparent; padding: 8px 16px; min-height: 42px; border-radius: 999px; font-weight: 700; cursor: pointer; color: var(--ink-soft); }
+.mode[aria-selected="true"][data-mode="erro"] { background: var(--danger-soft); color: var(--danger); box-shadow: inset 0 0 0 1px #f0b8b2; }
+.mode[aria-selected="true"][data-mode="ok"] { background: var(--ok-soft); color: var(--ok); box-shadow: inset 0 0 0 1px #aedcc2; }
+.req { margin-top: 16px; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 14px; align-items: start; }
+.req-line { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 12px 14px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; }
+.req-line .method { font-family: var(--mono); font-weight: 700; background: var(--ink); color: var(--accent); border-radius: 6px; padding: 1px 9px; font-size: .85rem; }
+.req-line .path { font-family: var(--mono); font-weight: 600; overflow-wrap: anywhere; }
+.req-line .hdr { flex-basis: 100%; font-family: var(--mono); font-size: .8rem; color: var(--ink-soft); overflow-wrap: anywhere; }
+.req-line .why { flex-basis: 100%; font-size: .88rem; color: var(--ink-soft); }
+.steps li { display: contents; }
+.steps { margin-top: 20px; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+.step { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 4px 10px; min-height: 64px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); cursor: pointer; text-align: center; }
+.step:hover { border-color: var(--accent-deep); }
+.step .sn { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: .9rem; background: var(--surface-3); border: 1px solid var(--line-strong); color: var(--ink-soft); }
+.step .sl { font-size: .76rem; line-height: 1.25; color: var(--ink-soft); font-weight: 600; overflow-wrap: anywhere; }
+.step.done .sn { background: var(--accent-2); border-color: var(--accent-deep); color: var(--accent-ink); }
+.step[aria-current="step"] { border-color: var(--accent-deep); background: var(--accent); box-shadow: 0 0 0 3px rgba(200, 241, 105, .5); }
+.step[aria-current="step"] .sn { background: var(--ink); color: var(--accent); border-color: var(--ink); }
+.step[aria-current="step"] .sl { color: var(--accent-ink); }
+.step.last-erro:not([aria-current="step"]) .sn { border-color: #f0b8b2; }
+.step[aria-current="step"].last-erro { background: var(--danger-soft); border-color: var(--danger); box-shadow: 0 0 0 3px rgba(180, 35, 24, .15); }
+.step[aria-current="step"].last-erro .sn { background: var(--danger); border-color: var(--danger); color: #fff; }
+.step[aria-current="step"].last-erro .sl { color: var(--danger); }
+.step[aria-current="step"].last-ok { background: var(--ok-soft); border-color: var(--ok); box-shadow: 0 0 0 3px rgba(15, 123, 63, .15); }
+.step[aria-current="step"].last-ok .sn { background: var(--ok); border-color: var(--ok); color: #fff; }
+.step[aria-current="step"].last-ok .sl { color: var(--ok); }
+.bar { height: 6px; background: var(--surface-3); border-radius: 999px; margin-top: 12px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--accent-deep); border-radius: 999px; transition: width .25s ease; }
+.controls { margin-top: 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.controls .count { margin-left: auto; font-weight: 700; color: var(--ink-soft); }
+.sp { margin-top: 18px; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 20px; padding-top: 18px; border-top: 1px solid var(--line); }
+.sp h3 { font-size: 1.25rem; line-height: 1.25; margin-top: 6px; }
+.sp-tags { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.sp-text { margin-top: 10px; color: var(--ink-soft); }
+.where { margin-top: 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); font-size: .88rem; color: var(--ink-soft); }
+.where b { display: block; font-size: .72rem; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); margin-bottom: 2px; }
+.where code { background: transparent; border: 0; padding: 0; font-size: .86em; }
+.res { grid-column: 1 / -1; padding: 16px; border-radius: 12px; border: 1px solid; }
+.res.erro { background: var(--danger-soft); border-color: #f0b8b2; }
+.res.ok { background: var(--ok-soft); border-color: #aedcc2; }
+.res-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 10px; }
+.res-head strong { font-size: 1.05rem; }
+.res p.after { margin-top: 10px; font-size: .92rem; color: var(--ink-soft); }
+
+/* ---------- 4. decisões ---------- */
+.dec { padding: 20px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chip { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--surface); font-weight: 700; font-size: .9rem; cursor: pointer; }
+.chip::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--dot, var(--ink-soft)); }
+.chip[data-cat="dominio"] { --dot: var(--c-dominio); } .chip[data-cat="negocio"] { --dot: var(--c-negocio); }
+.chip[data-cat="sql"] { --dot: var(--c-sql); } .chip[data-cat="http"] { --dot: var(--c-http); }
+.chip[data-cat="all"]::before { background: var(--ink); }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent-deep); color: var(--accent-ink); }
+.dec-meta { margin: 12px 0 4px; display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font-size: .88rem; color: var(--muted); }
+.link-btn { background: none; border: 0; padding: 4px 2px; color: var(--accent-deep); font-weight: 700; text-decoration: underline; cursor: pointer; min-height: 32px; }
+.dt { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; margin-top: 8px; }
+.dt th { text-align: left; font-size: .75rem; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); padding: 8px 12px; border-bottom: 2px solid var(--line); }
+.dt th:nth-child(1) { width: 34%; } .dt th:nth-child(2) { width: 17%; }
+.dt td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; overflow-wrap: anywhere; }
+.dt tr.row td { border-left: 0; }
+.dt tr.row td:first-child { box-shadow: inset 4px 0 0 var(--cat, var(--line)); }
+.dt tr[data-cat="dominio"] { --cat: var(--c-dominio); } .dt tr[data-cat="negocio"] { --cat: var(--c-negocio); }
+.dt tr[data-cat="sql"] { --cat: var(--c-sql); } .dt tr[data-cat="http"] { --cat: var(--c-http); }
+.rowbtn { display: flex; align-items: flex-start; gap: 8px; width: 100%; background: none; border: 0; padding: 4px 0; text-align: left; cursor: pointer; font-weight: 700; min-height: 36px; }
+.rowbtn .ic { margin-top: .2em; transition: transform .15s ease; color: var(--muted); }
+.rowbtn[aria-expanded="true"] .ic { transform: rotate(90deg); }
+.dt tr.row:hover td { background: var(--surface-2); }
+.dt tr.row.open td { background: var(--surface-2); }
+.dt tr.dim { opacity: .5; }
+.dt .meth { color: var(--ink-soft); font-size: .92rem; }
+.dt tr.detail td { background: var(--surface-2); padding: 4px 12px 18px; }
+.det { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 16px; align-items: start; }
+.det p { color: var(--ink-soft); font-size: .93rem; }
+.det p b { color: var(--ink); }
+.why-box { padding: 12px 14px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--cat, var(--line-strong)); }
+.sep-note { margin-top: 20px; padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface-2); color: var(--ink-soft); }
+.sep-note + .sep-note { margin-top: 10px; }
+
+/* ---------- 5. comparação ---------- */
+.cmp { padding: 20px; }
+.pairs { display: flex; flex-wrap: wrap; gap: 8px; }
+.pair-btn { min-height: 42px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--surface); font-weight: 700; font-size: .9rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+.pair-btn .pn { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: .75rem; background: var(--surface-3); border: 1px solid var(--line-strong); }
+.pair-btn[aria-selected="true"] { background: var(--accent); border-color: var(--accent-deep); color: var(--accent-ink); }
+.pair-btn[aria-selected="true"] .pn { background: var(--ink); color: var(--accent); border-color: var(--ink); }
+.eq { margin-top: 16px; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 10px; align-items: stretch; }
+.eq-side { padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); min-width: 0; }
+.eq-side small { display: block; font-size: .72rem; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); font-weight: 700; margin-bottom: 2px; }
+.eq-side code { background: transparent; border: 0; padding: 0; font-size: .9rem; font-weight: 700; }
+.eq-side.on { border-color: var(--accent-deep); background: var(--accent-2); }
+.eq-mid { display: grid; place-items: center; color: var(--muted); }
+.cmp-note { margin-top: 12px; color: var(--ink-soft); max-width: 80ch; }
+.cmp-bar { margin-top: 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+.cmp-bar .hint { color: var(--muted); font-size: .88rem; }
+.cmp-grid { margin-top: 14px; display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); }
+.cmp-grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.cmp-col h4 { font-size: .78rem; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); margin-bottom: 6px; }
+.tablewrap { margin-top: 28px; overflow-x: auto; padding: 4px 0; }
+.tablewrap h3 { font-size: 1.1rem; margin-bottom: 8px; }
+.pt { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: .92rem; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.pt th, .pt td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; overflow-wrap: anywhere; }
+.pt th { font-size: .75rem; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); background: var(--surface-3); }
+.pt th:first-child, .pt td:first-child { width: 22%; font-weight: 700; }
+html[data-api="js"] .pt th:nth-child(2), html[data-api="js"] .pt td:nth-child(2),
+html[data-api="py"] .pt th:nth-child(3), html[data-api="py"] .pt td:nth-child(3) { background: var(--accent-2); }
+footer { margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--line-strong); color: var(--muted); font-size: .88rem; }
+
+/* ---------- responsivo ---------- */
+@media (max-width: 1180px) {
+  .strip-hint { display: block; }
+}
+@media (max-width: 1040px) {
+  .app { display: block; }
+  .side {
+    position: sticky; top: 0; z-index: 30; height: auto; overflow: visible;
+    display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "brand foot" "nav nav";
+    gap: 8px 12px; padding: 10px 14px 8px; align-items: center;
+  }
+  .brand { grid-area: brand; }
+  .brand span { display: none; }
+  .side-foot { grid-area: foot; margin: 0; flex-direction: row; align-items: center; }
+  .side-foot .lbl, .side-foot small { display: none; }
+  .side .seg { width: auto; }
+  .nav { grid-area: nav; min-width: 0; }
+  .nav ul { flex-direction: row; overflow-x: auto; gap: 6px; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+  .nav a { white-space: nowrap; padding: 6px 12px; min-height: 40px; border: 1px solid var(--sidebar-line); }
+  .nav a[aria-current="location"] { box-shadow: none; border-color: var(--accent); }
+  .hero, .sec { scroll-margin-top: 112px; }
+  main { padding-top: 20px; }
+  .reading { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 860px) {
+  .lp, .sp, .req, .det { grid-template-columns: minmax(0, 1fr); }
+  .cmp-grid.two { grid-template-columns: minmax(0, 1fr); }
+  .eq { grid-template-columns: minmax(0, 1fr); }
+  .eq-mid { transform: rotate(90deg); }
+}
+@media (max-width: 760px) {
+  .steps { gap: 4px; }
+  .step { min-height: 52px; padding: 6px 2px; }
+  .step .sl { display: none; }
+  .dt thead { display: none; }
+  .dt, .dt tbody, .dt tr, .dt td { display: block; width: 100%; }
+  .dt tr.row { margin-top: 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; }
+  .dt tr.row td { border: 0; padding: 6px 12px; }
+  .dt tr.row td:first-child { box-shadow: inset 4px 0 0 var(--cat, var(--line)); padding-top: 10px; }
+  .dt tr.row td:last-child { padding-bottom: 10px; }
+  .dt tr.detail { border: 1px solid var(--line); border-top: 0; border-radius: 0 0 12px 12px; background: var(--surface-2); }
+  .dt tr.detail td { padding: 12px; }
+  .dt tr.row.open { border-radius: 12px 12px 0 0; }
+}
+@media (max-width: 560px) {
+  .reading { grid-template-columns: minmax(0, 1fr); }
+  .sim, .map, .dec, .cmp, .lp { padding: 14px; }
+  .controls .count { flex-basis: 100%; margin-left: 0; }
+  .controls .btn { flex: 1 1 auto; }
+  .seg-btn { padding: 8px 14px; }
+  .brand b { font-size: .95rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 3l9 4.5-9 4.5-9-4.5L12 3zM3 12l9 4.5 9-4.5M3 16.5L12 21l9-4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-check" viewBox="0 0 20 20"><path d="M4 10.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-x" viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+    <symbol id="i-prev" viewBox="0 0 20 20"><path d="M12.5 4l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-next" viewBox="0 0 20 20"><path d="M7.5 4l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-play" viewBox="0 0 20 20"><path d="M6 3.5l10 6.5-10 6.5z" fill="currentColor"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 20 20"><path d="M5.5 3.5h3.5v13H5.5zM11 3.5h3.5v13H11z" fill="currentColor"/></symbol>
+    <symbol id="i-reset" viewBox="0 0 20 20"><path d="M4 10a6 6 0 1 0 2-4.5M4 3.5v3.5h3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-swap" viewBox="0 0 20 20"><path d="M3 7h13m-3-3l3 3-3 3M17 13H4m3-3l-3 3 3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </defs>
+</svg>
+<a class="skip" href="#visao">Pular para o conteúdo</a>
+
+<div class="app">
+  <aside class="side" aria-label="Navegação da página">
+    <div class="brand">
+      <span class="brand-logo"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-layers"></use></svg></span>
+      <div><b>Arquitetura MVCS</b><span>PAW · 4º bimestre</span></div>
+    </div>
+    <nav class="nav" aria-label="Seções">
+      <ul>
+        <li><a href="#visao" data-sec="visao"><span class="nn">1</span>Visão geral</a></li>
+        <li><a href="#mapa" data-sec="mapa"><span class="nn">2</span>Mapa das camadas</a></li>
+        <li><a href="#simulador" data-sec="simulador"><span class="nn">3</span>Simulador</a></li>
+        <li><a href="#decisoes" data-sec="decisoes"><span class="nn">4</span>Onde mora cada decisão</a></li>
+        <li><a href="#comparacao" data-sec="comparacao"><span class="nn">5</span>Node × Flask</a></li>
+      </ul>
+    </nav>
+    <div class="side-foot">
+      <span class="lbl" id="side-lbl">Trechos de código</span>
+      <div class="seg" role="group" aria-labelledby="side-lbl">
+        <button type="button" class="seg-btn" data-api="js" aria-pressed="true">Node.js</button>
+        <button type="button" class="seg-btn" data-api="py" aria-pressed="false">Flask</button>
+      </div>
+      <small>Página autocontida, sem rede.</small>
+    </div>
+  </aside>
+
+  <main id="conteudo">
+    <div class="wrap">
+
+      <!-- 1. VISÃO GERAL -->
+      <section id="visao" class="card hero" aria-labelledby="t-visao" tabindex="-1">
+        <p class="kicker">PAW · 4º bimestre · Projeto Integrador</p>
+        <h1 id="t-visao">Arquitetura <mark>MVCS</mark> nas duas APIs</h1>
+        <p class="sub">O mesmo desenho escrito duas vezes: em Node.js + Express (<code>js-api/</code>) e em Python + Flask (<code>flask-api/</code>). Cada trecho desta página foi copiado do código do projeto; a legenda mostra o arquivo e as linhas.</p>
+        <div class="hero-row">
+          <span class="lbl" id="hero-lbl">Mostrar trechos em:</span>
+          <div class="seg" role="group" aria-labelledby="hero-lbl">
+            <button type="button" class="seg-btn" data-api="js" aria-pressed="true">Node.js</button>
+            <button type="button" class="seg-btn" data-api="py" aria-pressed="false">Flask</button>
+          </div>
+          <span class="api-now" id="api-now"></span>
+        </div>
+        <p class="callout"><strong>MVCS = MVC + Service.</strong> O Controle continua sendo o intermediário entre a entrada (HTTP) e a saída (JSON), mas a regra de negócio sai dele e vai para o Serviço. O Model guarda os dados e a regra de domínio da própria entidade. O DAO isola o SQL. Middleware e Roteador são peças transversais ou de despacho.</p>
+        <nav class="reading" aria-label="Como ler esta página">
+          <a href="#mapa"><b>Mapa das camadas</b><span>O que cada peça faz e não faz</span></a>
+          <a href="#simulador"><b>Simulador</b><span>Um POST, passo a passo</span></a>
+          <a href="#decisoes"><b>Onde mora cada decisão</b><span>Pergunta, camada e método</span></a>
+          <a href="#comparacao"><b>Node × Flask</b><span>Trechos equivalentes</span></a>
+        </nav>
+        <noscript><p class="callout">Esta página precisa de JavaScript para exibir os trechos de código e as interações.</p></noscript>
+      </section>
+
+      <!-- 2. MAPA -->
+      <section id="mapa" class="sec" aria-labelledby="t-mapa" tabindex="-1">
+        <div class="sec-head">
+          <span class="eyebrow"><i>2</i> Mapa das camadas</span>
+          <h2 id="t-mapa">Quem existe, onde fica e quem fala com quem</h2>
+          <p class="lead">A requisição entra pela esquerda e atravessa as peças em ordem; a resposta (ou o erro) volta pelo mesmo caminho. Clique em uma peça, ou use as setas do teclado, para ver o que ela faz, o que ela não faz e o código real.</p>
+        </div>
+        <div class="card map">
+          <p class="strip-hint">Role o diagrama para os lados e toque em uma peça.</p>
+          <div class="strip">
+            <div class="strip-grid" id="tabs" role="tablist" aria-label="Camadas da arquitetura" aria-orientation="horizontal"></div>
+          </div>
+          <div class="map-legend" aria-label="Legenda de cores">
+            <span>Cor da borda:</span>
+            <span class="pill" data-cat="http">HTTP</span>
+            <span class="pill" data-cat="negocio">Regra de negócio</span>
+            <span class="pill" data-cat="dominio">Regra de domínio</span>
+            <span class="pill" data-cat="sql">SQL</span>
+            <span class="pill" data-cat="infra">Infraestrutura</span>
+          </div>
+        </div>
+        <div class="card lp" id="layer-panel" role="tabpanel" tabindex="-1"></div>
+      </section>
+
+      <!-- 3. SIMULADOR -->
+      <section id="simulador" class="sec" aria-labelledby="t-sim" tabindex="-1">
+        <div class="sec-head">
+          <span class="eyebrow"><i>3</i> Simulador de requisição</span>
+          <h2 id="t-sim">O caminho de um <code>POST /api/v1/eventos</code></h2>
+          <p class="lead">O frontend tenta cadastrar um evento. Avance passo a passo e veja, em cada camada, o arquivo, o método e o trecho de código que executa. Troque para o caminho feliz para comparar com a resposta 201.</p>
+        </div>
+        <div class="card sim">
+          <div class="sim-top">
+            <div class="modes" role="tablist" aria-label="Cenário da requisição">
+              <button type="button" class="mode" role="tab" id="mode-erro" data-mode="erro" aria-selected="true" aria-controls="sim-panel">Duplicado (409)</button>
+              <button type="button" class="mode" role="tab" id="mode-ok" data-mode="ok" aria-selected="false" aria-controls="sim-panel" tabindex="-1">Caminho feliz (201)</button>
+            </div>
+            <span class="api-now" id="sim-api"></span>
+          </div>
+          <div class="req" id="sim-req"></div>
+          <ol class="steps" id="stepper" aria-label="Passos da requisição"></ol>
+          <div class="bar" aria-hidden="true"><i id="sim-bar"></i></div>
+          <div class="controls">
+            <button type="button" class="btn" id="sim-prev"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-prev"></use></svg>Anterior</button>
+            <button type="button" class="btn primary" id="sim-next">Próximo<svg class="ic" aria-hidden="true" focusable="false"><use href="#i-next"></use></svg></button>
+            <button type="button" class="btn" id="sim-run" aria-pressed="false"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-play"></use></svg><span>Rodar</span></button>
+            <button type="button" class="btn" id="sim-reset"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-reset"></use></svg>Reiniciar</button>
+            <span class="count" id="sim-count" aria-live="polite"></span>
+          </div>
+          <div class="sp" id="sim-panel" role="tabpanel" aria-labelledby="mode-erro"></div>
+        </div>
+      </section>
+
+      <!-- 4. DECISÕES -->
+      <section id="decisoes" class="sec" aria-labelledby="t-dec" tabindex="-1">
+        <div class="sec-head">
+          <span class="eyebrow"><i>4</i> Onde mora cada decisão</span>
+          <h2 id="t-dec">Cada pergunta tem uma camada responsável</h2>
+          <p class="lead">Clique em uma linha para ver o código que responde à pergunta; as linhas da mesma camada ficam em destaque. Use os filtros para olhar uma camada de cada vez.</p>
+        </div>
+        <div class="card dec">
+          <div class="chips" id="chips" role="group" aria-label="Filtrar por camada"></div>
+          <div class="dec-meta">
+            <span id="dec-count" aria-live="polite"></span>
+            <button type="button" class="link-btn" id="dec-clear" hidden>Limpar destaque</button>
+          </div>
+          <table class="dt">
+            <caption class="sr-only">Perguntas de projeto, a camada que responde cada uma e o método no código</caption>
+            <thead><tr><th scope="col">Pergunta</th><th scope="col">Camada</th><th scope="col">Método no código</th></tr></thead>
+            <tbody id="dt-body"></tbody>
+          </table>
+        </div>
+        <p class="sep-note"><strong>Por que não juntar tudo?</strong> Porque cada camada pode ser trocada sem mexer nas outras: trocar o MySQL por outro banco mexe só no DAO; mudar a regra (“evento só pode ser criado por admin”) mexe só no Serviço; mudar o formato da resposta mexe só no Controle. E o mesmo Serviço pode ser chamado por outro ponto do sistema sem passar por HTTP.</p>
+        <p class="sep-note"><strong>E o “V” do MVCS?</strong> É o frontend (<code>frontend/</code>), servido pela própria API. Ele é “burro” de propósito: só chama as rotas, guarda o token e mostra o que volta. Nenhuma regra de negócio é decidida no navegador.</p>
+      </section>
+
+      <!-- 5. COMPARAÇÃO -->
+      <section id="comparacao" class="sec" aria-labelledby="t-cmp" tabindex="-1">
+        <div class="sec-head">
+          <span class="eyebrow"><i>5</i> Comparação Node × Flask</span>
+          <h2 id="t-cmp">Mesma arquitetura, duas sintaxes</h2>
+          <p class="lead">Mesmas rotas, mesmos status e mesmas mensagens: por isso o mesmo frontend funciona nas duas APIs. Escolha um par e use “Ver lado a lado” para colocar os dois trechos um ao lado do outro.</p>
+        </div>
+        <div class="card cmp">
+          <div class="pairs" id="pairs" role="tablist" aria-label="Pares de trechos equivalentes"></div>
+          <div class="eq" id="eq"></div>
+          <p class="cmp-note" id="cmp-note"></p>
+          <div class="cmp-bar">
+            <button type="button" class="btn" id="cmp-side" aria-pressed="false"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-swap"></use></svg><span>Ver lado a lado</span></button>
+            <span class="hint" id="cmp-hint"></span>
+          </div>
+          <div class="cmp-grid" id="cmp-grid" role="tabpanel" aria-labelledby="pair-0"></div>
+        </div>
+        <div class="tablewrap">
+          <h3>Mesma peça, nome diferente</h3>
+          <table class="pt">
+            <thead><tr><th scope="col">Peça</th><th scope="col">Node.js</th><th scope="col">Flask</th></tr></thead>
+            <tbody>
+              <tr><td>Entrada / servidor</td><td><code>Servidor.js</code> (<code>express</code>, <code>express.json</code>, <code>express.static</code>)</td><td><code>server.py</code> (<code>Flask</code>, <code>before_request</code>, estáticos)</td></tr>
+              <tr><td>Despacho</td><td><code>src/roteador/*.js</code> (<code>express.Router</code>)</td><td><code>api/router/*.py</code> (<code>Blueprint</code> + decorators)</td></tr>
+              <tr><td>Barreira</td><td><code>src/middleware/*.js</code> (função <code>(req, res, next)</code>)</td><td><code>api/middleware/*.py</code> (decorator com <code>@wraps</code>)</td></tr>
+              <tr><td>Orquestração</td><td><code>src/controle/*.js</code> (<code>index/show/store/update/destroy</code>)</td><td><code>api/control/*.py</code> (<code>index/show/store/update/destroy</code>)</td></tr>
+              <tr><td>Regra de negócio</td><td><code>src/servico/*.js</code> (<code>createEvento</code>, <code>findAll</code>, …)</td><td><code>api/service/*.py</code> (<code>create_evento</code>, <code>find_all</code>, …)</td></tr>
+              <tr><td>Domínio</td><td><code>src/modelo/*.js</code> (get/set + <code>DomainError</code>)</td><td><code>api/model/*.py</code> (<code>@property</code> + <code>ValueError</code>)</td></tr>
+              <tr><td>SQL</td><td><code>src/dao/*.js</code> (<code>?</code>)</td><td><code>api/dao/*.py</code> (<code>%s</code>)</td></tr>
+              <tr><td>Erro central</td><td>tratador de 4 argumentos no <code>Servidor.js</code></td><td><code>@app.errorhandler(Exception)</code> no <code>server.py</code></td></tr>
+              <tr><td>Resposta</td><td><code>responder(res, status, msg, data)</code></td><td><code>responder(status, msg, data)</code></td></tr>
+              <tr><td>Usuário logado</td><td><code>request.organizador</code> (setado no <code>JwtMiddleware</code>)</td><td><code>flask.g.organizador</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <footer>Fonte dos trechos: <code>PAW/4bi/projeto/js-api/</code>, <code>PAW/4bi/projeto/flask-api/</code> e <code>docs/banco.sql</code>. Texto-base: <code>docs/arquitetura-mvcs.md</code>.</footer>
+    </div>
+  </main>
+</div>
+<div id="live" class="sr-only" aria-live="polite" role="status"></div>
+
+<!-- Trechos de código reais (gerados por faixa de linhas dos arquivos do projeto; texto escapado) -->
+<template id="c-js.servidor" data-meta="{&quot;lang&quot;:&quot;js&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;js-api/Servidor.js&quot;,&quot;lines&quot;:&quot;101, 106, 147–153&quot;}],&quot;ln&quot;:[101,0,106,0,147,148,149,150,151,152,153],&quot;hl&quot;:[10]}">const eventoService = new EventoService(eventoDAO, organizadorDAO, loteDAO);
+// ...
+const eventoControle = new EventoControle(eventoService);
+// ...
+const eventoRoteador = new EventoRoteador(
+    jwtMiddleware,
+    parametroMiddleware,
+    eventoMiddleware,
+    eventoControle
+);
+this.#app.use(`${prefixo}/eventos`, eventoRoteador.criarRotas());</template>
+<template id="c-js.roteador" data-meta="{&quot;lang&quot;:&quot;js&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;js-api/src/roteador/EventoRoteador.js&quot;,&quot;lines&quot;:&quot;25–26, 37–42&quot;}],&quot;ln&quot;:[25,26,0,37,38,39,40,41,42],&quot;hl&quot;:[1]}">// router.use vale para todas as rotas abaixo: sem token, nada executa.
+router.use(this.#jwtMiddleware.validarToken);
+// ...
+// Ordem: corpo → Controle (no POST exige titulo, dataEvento e idOrganizador).
+router.post(
+    "/",
+    this.#eventoMiddleware.validarBody,
+    asyncHandler(this.#eventoControle.store)
+);</template>
+<template id="c-js.middleware" data-meta="{&quot;lang&quot;:&quot;js&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;js-api/src/middleware/EventoMiddleware.js&quot;,&quot;lines&quot;:&quot;13–20, 35–36&quot;}],&quot;ln&quot;:[13,14,15,16,17,18,19,20,0,35,36],&quot;hl&quot;:[4]}">validarBody = (request, response, next) =&gt; {
+    const dados = request.body &amp;&amp; request.body.evento;
+
+    if (!dados || typeof dados !== "object") {
+        return responder(response, 400, "Erro na validação de dados", {
+            mensagem: "O campo 'evento' é obrigatório no corpo da requisição."
+        });
+    }
+    // ...
+    return next();
+};</template>
+<template id="c-js.controle" data-meta="{&quot;lang&quot;:&quot;js&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;js-api/src/controle/EventoControle.js&quot;,&quot;lines&quot;:&quot;35–39&quot;}],&quot;ln&quot;:[35,36,37,38,39],&quot;hl&quot;:[2]}">/** POST /eventos → 201. @throws ErrorResponse 400 (organizador/data), 409 (duplicado) */
+store = async (request, response) =&gt; {
+    const evento = await this.#eventoService.createEvento(request.body.evento);
+    return responder(response, 201, "Cadastro realizado com sucesso", { eventos: [evento] });
+};</template>
+<template id="c-js.servico" data-meta="{&quot;lang&quot;:&quot;js&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;js-api/src/servico/EventoService.js&quot;,&quot;lines&quot;:&quot;116, 133–143&quot;}],&quot;ln&quot;:[116,0,133,134,135,136,137,138,139,140,141,142,143],&quot;hl&quot;:[9]}">async #validarRegras(evento) {
+    // ...
+    // idEvento é ignorado na comparação: no update o próprio evento não conflita consigo.
+    const duplicado = await this.#eventoDAO.existeTituloData(
+        evento.titulo,
+        evento.dataEvento,
+        evento.idEvento
+    );
+    if (duplicado) {
+        throw new ErrorResponse(409, "Evento duplicado", {
+            mensagem: "Já existe um evento com este título nesta data/hora."
+        });
+    }</template>
+<template id="c-js.dao" data-meta="{&quot;lang&quot;:&quot;js&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;js-api/src/dao/EventoDAO.js&quot;,&quot;lines&quot;:&quot;66–76&quot;}],&quot;ln&quot;:[66,67,68,69,70,71,72,73,74,75,76],&quot;hl&quot;:[3,8]}">async existeTituloData(titulo, dataEvento, ignorarId = null) {
+    // paraSql deixa a data no formato que o MySQL compara com a coluna DATETIME.
+    const parametros = [titulo, paraSql(dataEvento)];
+    let SQL = "SELECT COUNT(*) AS total FROM eventos WHERE titulo = ? AND data_evento = ?";
+    if (ignorarId !== null) {
+        SQL += " AND id_evento &lt;&gt; ?";
+        parametros.push(ignorarId);
+    }
+    const linhas = await Banco.consultar(SQL, parametros);
+    return Number(linhas[0].total) &gt; 0;
+}</template>
+<template id="c-js.banco" data-meta="{&quot;lang&quot;:&quot;js&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;js-api/src/database/Banco.js&quot;,&quot;lines&quot;:&quot;38–43, 49–53&quot;}],&quot;ln&quot;:[38,39,40,41,42,43,0,49,50,51,52,53],&quot;hl&quot;:[3]}">static async consultar(SQL, parametros = []) {
+    // execute() prepara o comando e trata os "?": nada de concatenar valor no SQL.
+    const conexao = await Banco.getConexao();
+    const [linhas] = await conexao.execute(SQL, parametros);
+    return linhas;
+}
+// ...
+static async executar(SQL, parametros = []) {
+    const conexao = await Banco.getConexao();
+    const [resultado] = await conexao.execute(SQL, parametros);
+    return resultado;
+}</template>
+<template id="c-js.modelo" data-meta="{&quot;lang&quot;:&quot;js&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;js-api/src/modelo/Evento.js&quot;,&quot;lines&quot;:&quot;13, 34–36, 59–66&quot;}],&quot;ln&quot;:[13,0,34,35,36,0,59,60,61,62,63,64,65,66],&quot;hl&quot;:[3,10]}">static STATUS = ["planejado", "confirmado", "realizado", "cancelado"];
+// ...
+set titulo(valor) {
+    this.#titulo = texto(valor, "titulo", 3, 150);
+}
+// ...
+set status(valor) {
+    // Aceita qualquer caixa ("Confirmado"), mas grava sempre minúsculo.
+    const limpo = String(valor || "").trim().toLowerCase();
+    if (Evento.STATUS.indexOf(limpo) === -1) {
+        throw new DomainError(`status deve ser ${Evento.STATUS.join(", ")}.`);
+    }
+    this.#status = limpo;
+}</template>
+<template id="c-js.s1" data-meta="{&quot;lang&quot;:&quot;js&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;js-api/Servidor.js&quot;,&quot;lines&quot;:&quot;61–64, 153&quot;}],&quot;ln&quot;:[61,62,63,64,0,153],&quot;hl&quot;:[1,5]}">// Sem isso request.body chegaria undefined: é o que converte o JSON recebido.
+this.#app.use(express.json());
+// CORS antes das rotas: responde o preflight (OPTIONS) de qualquer origem.
+this.#app.use(this.#cors);
+// ...
+this.#app.use(`${prefixo}/eventos`, eventoRoteador.criarRotas());</template>
+<template id="c-js.s3a" data-meta="{&quot;lang&quot;:&quot;js&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;js-api/src/middleware/JwtMiddleware.js&quot;,&quot;lines&quot;:&quot;12–13, 15, 17–21, 25–26&quot;}],&quot;ln&quot;:[12,13,15,17,18,19,20,21,0,25,26],&quot;hl&quot;:[3,9]}">validarToken = (request, response, next) =&gt; {
+    const autorizacao = request.headers.authorization;
+    const tokenJWT = new MeuTokenJWT();
+    if (!tokenJWT.validarToken(autorizacao)) {
+        return responder(response, 401, "Token inválido ou expirado", {
+            mensagem: "Envie o cabeçalho Authorization: Bearer &lt;token&gt;."
+        });
+    }
+    // ...
+    request.organizador = tokenJWT.payload;
+    return next();</template>
+<template id="c-js.s5a" data-meta="{&quot;lang&quot;:&quot;js&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;js-api/src/servico/EventoService.js&quot;,&quot;lines&quot;:&quot;27–28, 36&quot;}],&quot;ln&quot;:[27,28,0,36],&quot;hl&quot;:[3]}">async createEvento(dados = {}) {
+    const evento = new Evento();
+    // ...
+    await this.#validarRegras(evento);</template>
+<template id="c-js.s5ok" data-meta="{&quot;lang&quot;:&quot;js&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;js-api/src/servico/EventoService.js&quot;,&quot;lines&quot;:&quot;27–28, 36–39&quot;}],&quot;ln&quot;:[27,28,0,36,37,38,39],&quot;hl&quot;:[5]}">async createEvento(dados = {}) {
+    const evento = new Evento();
+    // ...
+    await this.#validarRegras(evento);
+
+    const idEvento = await this.#eventoDAO.create(evento);
+    return this.#eventoDAO.findById(idEvento);</template>
+<template id="c-js.s6ok" data-meta="{&quot;lang&quot;:&quot;js&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;js-api/src/dao/EventoDAO.js&quot;,&quot;lines&quot;:&quot;88–95, 98–99, 104&quot;}],&quot;ln&quot;:[88,89,90,91,92,93,94,95,0,98,99,0,104],&quot;hl&quot;:[1,12]}">async create(evento) {
+    const resultado = await Banco.executar(
+        `INSERT INTO eventos (titulo, descricao, data_evento, status, id_organizador)
+         VALUES (?, ?, ?, ?, ?)`,
+        [
+            evento.titulo,
+            evento.descricao,
+            paraSql(evento.dataEvento),
+        // ...
+        ]
+    );
+    // ...
+    return resultado.insertId;</template>
+<template id="c-js.s7a" data-meta="{&quot;lang&quot;:&quot;js&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;js-api/src/utils/asyncHandler.js&quot;,&quot;lines&quot;:&quot;9–10&quot;}],&quot;ln&quot;:[9,10],&quot;hl&quot;:[1]}">const asyncHandler = (fn) =&gt; (request, response, next) =&gt;
+    Promise.resolve(fn(request, response, next)).catch(next);</template>
+<template id="c-js.s7b" data-meta="{&quot;lang&quot;:&quot;js&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;js-api/Servidor.js&quot;,&quot;lines&quot;:&quot;179–185&quot;}],&quot;ln&quot;:[179,180,181,182,183,184,185],&quot;hl&quot;:[3]}">this.#app.use((erro, request, response, next) =&gt; {
+    // Erro esperado da aplicação: usa o status que o Service/Middleware escolheu.
+    if (erro instanceof ErrorResponse) {
+        return responder(response, erro.status, erro.message, {
+            detalhes: erro.detalhes
+        });
+    }</template>
+<template id="c-js.resposta" data-meta="{&quot;lang&quot;:&quot;js&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;js-api/src/utils/resposta.js&quot;,&quot;lines&quot;:&quot;15–22&quot;}],&quot;ln&quot;:[15,16,17,18,19,20,21,22],&quot;hl&quot;:[3]}">const responder = (response, status, mensagem, dados = {}) =&gt; {
+    // success é derivado do status: 2xx → true; qualquer erro → false.
+    return response.status(status).send({
+        success: status &lt; 400,
+        message: mensagem,
+        data: dados
+    });
+};</template>
+<template id="c-js.d.tam" data-meta="{&quot;lang&quot;:&quot;js&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;js-api/src/modelo/Organizador.js&quot;,&quot;lines&quot;:&quot;36–38&quot;}],&quot;ln&quot;:[36,37,38],&quot;hl&quot;:[1]}">set nome(valor) {
+    this.#nome = texto(valor, "nome", 3, 120);
+}</template>
+<template id="c-js.d.status" data-meta="{&quot;lang&quot;:&quot;js&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;js-api/src/modelo/Evento.js&quot;,&quot;lines&quot;:&quot;59–66&quot;}],&quot;ln&quot;:[59,60,61,62,63,64,65,66],&quot;hl&quot;:[3,4]}">set status(valor) {
+    // Aceita qualquer caixa ("Confirmado"), mas grava sempre minúsculo.
+    const limpo = String(valor || "").trim().toLowerCase();
+    if (Evento.STATUS.indexOf(limpo) === -1) {
+        throw new DomainError(`status deve ser ${Evento.STATUS.join(", ")}.`);
+    }
+    this.#status = limpo;
+}</template>
+<template id="c-js.d.disp" data-meta="{&quot;lang&quot;:&quot;js&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;js-api/src/modelo/Lote.js&quot;,&quot;lines&quot;:&quot;56–64&quot;}],&quot;ln&quot;:[56,57,58,59,60,61,62,63,64],&quot;hl&quot;:[4,5]}">set quantidadeDisponivel(valor) {
+    // Compara com o total já definido: por isso o Service define
+    // quantidadeTotal antes de quantidadeDisponivel.
+    const numero = inteiro(valor, "quantidadeDisponivel", 0, 1000000);
+    if (this.#quantidadeTotal !== null &amp;&amp; numero &gt; this.#quantidadeTotal) {
+        throw new DomainError("quantidadeDisponivel não pode ser maior que quantidadeTotal.");
+    }
+    this.#quantidadeDisponivel = numero;
+}</template>
+<template id="c-js.d.email" data-meta="{&quot;lang&quot;:&quot;js&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;js-api/src/servico/OrganizadorService.js&quot;,&quot;lines&quot;:&quot;41–47&quot;}],&quot;ln&quot;:[41,42,43,44,45,46,47],&quot;hl&quot;:[1,2]}">// O banco tem UNIQUE no e-mail, mas checar antes responde 409 com mensagem clara.
+if (await this.#organizadorDAO.existeEmail(organizador.email)) {
+    throw new ErrorResponse(409, "E-mail já cadastrado", {
+        campo: "email",
+        mensagem: `O e-mail ${organizador.email} já está em uso.`
+    });
+}</template>
+<template id="c-js.d.orgev" data-meta="{&quot;lang&quot;:&quot;js&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;js-api/src/servico/OrganizadorService.js&quot;,&quot;lines&quot;:&quot;165–171&quot;}],&quot;ln&quot;:[165,166,167,168,169,170,171],&quot;hl&quot;:[1,2,3]}">// A FK do banco já barraria (ON DELETE NO ACTION), mas aqui a resposta é 409.
+const totalEventos = await this.#eventoDAO.countByOrganizador(idOrganizador);
+if (totalEventos &gt; 0) {
+    throw new ErrorResponse(409, "Organizador possui eventos vinculados", {
+        mensagem: `Exclua ou transfira os ${totalEventos} evento(s) antes de remover este organizador.`
+    });
+}</template>
+<template id="c-js.d.evlotes" data-meta="{&quot;lang&quot;:&quot;js&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;js-api/src/servico/EventoService.js&quot;,&quot;lines&quot;:&quot;100–106&quot;}],&quot;ln&quot;:[100,101,102,103,104,105,106],&quot;hl&quot;:[1,2,3]}">// A FK do banco já impediria (ON DELETE NO ACTION); o 409 explica o motivo.
+const totalLotes = await this.#loteDAO.countByEvento(idEvento);
+if (totalLotes &gt; 0) {
+    throw new ErrorResponse(409, "Evento possui lotes vinculados", {
+        mensagem: `Exclua os ${totalLotes} lote(s) deste evento antes de removê-lo.`
+    });
+}</template>
+<template id="c-js.d.perfil" data-meta="{&quot;lang&quot;:&quot;js&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;js-api/src/servico/OrganizadorService.js&quot;,&quot;lines&quot;:&quot;90–96&quot;}],&quot;ln&quot;:[90,91,92,93,94,95,96],&quot;hl&quot;:[2,3]}">// Permissão: administrador edita todos; comum edita só o id que está no token.
+const ehAdministrador = usuarioLogado &amp;&amp; usuarioLogado.perfil === "administrador";
+if (!ehAdministrador &amp;&amp; Number(usuarioLogado &amp;&amp; usuarioLogado.idOrganizador) !== Number(idOrganizador)) {
+    throw new ErrorResponse(403, "Acesso negado", {
+        mensagem: "Você só pode editar o seu próprio cadastro."
+    });
+}</template>
+<template id="c-js.d.data" data-meta="{&quot;lang&quot;:&quot;js&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;js-api/src/servico/EventoService.js&quot;,&quot;lines&quot;:&quot;125–131&quot;}],&quot;ln&quot;:[125,126,127,128,129,130,131],&quot;hl&quot;:[1,2]}">// Importante: comparar com o "agora", não com a data de criação do registro.
+if (evento.dataEvento.getTime() &lt; Date.now()) {
+    throw new ErrorResponse(400, "Data inválida", {
+        campo: "dataEvento",
+        mensagem: "A data do evento não pode estar no passado."
+    });
+}</template>
+<template id="c-js.d.where" data-meta="{&quot;lang&quot;:&quot;js&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;js-api/src/dao/EventoDAO.js&quot;,&quot;lines&quot;:&quot;25–32, 51–52&quot;}],&quot;ln&quot;:[25,26,27,28,29,30,31,32,0,51,52],&quot;hl&quot;:[5,9]}">async findAll(filtros = {}) {
+    const condicoes = [];
+    const parametros = [];
+
+    if (filtros.titulo) {
+        condicoes.push("e.titulo LIKE ?");
+        parametros.push(`%${filtros.titulo}%`);
+    }
+    // ...
+    const where = condicoes.length &gt; 0 ? ` WHERE ${condicoes.join(" AND ")}` : "";
+    return Banco.consultar(`${SELECT}${where} ORDER BY e.data_evento ASC`, parametros);</template>
+<template id="c-js.d.token" data-meta="{&quot;lang&quot;:&quot;js&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;js-api/src/middleware/JwtMiddleware.js&quot;,&quot;lines&quot;:&quot;17–21&quot;}],&quot;ln&quot;:[17,18,19,20,21],&quot;hl&quot;:[0,1]}">if (!tokenJWT.validarToken(autorizacao)) {
+    return responder(response, 401, "Token inválido ou expirado", {
+        mensagem: "Envie o cabeçalho Authorization: Bearer &lt;token&gt;."
+    });
+}</template>
+<template id="c-js.d.corpo" data-meta="{&quot;lang&quot;:&quot;js&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;js-api/src/middleware/EventoMiddleware.js&quot;,&quot;lines&quot;:&quot;13–20&quot;}],&quot;ln&quot;:[13,14,15,16,17,18,19,20],&quot;hl&quot;:[3,4]}">validarBody = (request, response, next) =&gt; {
+    const dados = request.body &amp;&amp; request.body.evento;
+
+    if (!dados || typeof dados !== "object") {
+        return responder(response, 400, "Erro na validação de dados", {
+            mensagem: "O campo 'evento' é obrigatório no corpo da requisição."
+        });
+    }</template>
+<template id="c-js.d.http" data-meta="{&quot;lang&quot;:&quot;js&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;js-api/src/controle/EventoControle.js&quot;,&quot;lines&quot;:&quot;36–39&quot;}],&quot;ln&quot;:[36,37,38,39],&quot;hl&quot;:[2]}">store = async (request, response) =&gt; {
+    const evento = await this.#eventoService.createEvento(request.body.evento);
+    return responder(response, 201, "Cadastro realizado com sucesso", { eventos: [evento] });
+};</template>
+<template id="c-js.c.svc" data-meta="{&quot;lang&quot;:&quot;js&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;js-api/src/servico/EventoService.js&quot;,&quot;lines&quot;:&quot;27–40&quot;}],&quot;ln&quot;:[27,28,29,30,31,32,33,34,35,36,37,38,39,40],&quot;hl&quot;:[11]}">async createEvento(dados = {}) {
+    const evento = new Evento();
+    evento.titulo = dados.titulo;
+    evento.descricao = dados.descricao;
+    evento.dataEvento = dados.dataEvento;
+    // Sem status informado, o evento entra como "planejado" (mesmo padrão do banco).
+    evento.status = dados.status || "planejado";
+    evento.idOrganizador = dados.idOrganizador;
+
+    await this.#validarRegras(evento);
+
+    const idEvento = await this.#eventoDAO.create(evento);
+    return this.#eventoDAO.findById(idEvento);
+}</template>
+<template id="c-js.c.banco" data-meta="{&quot;lang&quot;:&quot;js&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;js-api/src/dao/EventoDAO.js&quot;,&quot;lines&quot;:&quot;56–59&quot;},{&quot;path&quot;:&quot;js-api/src/database/Banco.js&quot;,&quot;lines&quot;:&quot;38–43&quot;}],&quot;ln&quot;:[56,57,58,59,0,38,39,40,41,42,43],&quot;hl&quot;:[1]}">async findById(idEvento) {
+    const linhas = await Banco.consultar(`${SELECT} WHERE e.id_evento = ?`, [idEvento]);
+    return linhas.length &gt; 0 ? linhas[0] : null;
+}
+// ...
+static async consultar(SQL, parametros = []) {
+    // execute() prepara o comando e trata os "?": nada de concatenar valor no SQL.
+    const conexao = await Banco.getConexao();
+    const [linhas] = await conexao.execute(SQL, parametros);
+    return linhas;
+}</template>
+<template id="c-js.c.erro" data-meta="{&quot;lang&quot;:&quot;js&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;js-api/Servidor.js&quot;,&quot;lines&quot;:&quot;181–192&quot;}],&quot;ln&quot;:[181,182,183,184,185,186,187,188,189,190,191,192],&quot;hl&quot;:[1,8]}">if (erro instanceof ErrorResponse) {
+    return responder(response, erro.status, erro.message, {
+        detalhes: erro.detalhes
+    });
+}
+
+// Erro de domínio (setter do Model): entrada inválida do usuário → 400.
+if (erro instanceof DomainError) {
+    return responder(response, 400, "Erro de validação", {
+        mensagem: erro.message
+    });
+}</template>
+<template id="c-js.c.di" data-meta="{&quot;lang&quot;:&quot;js&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;js-api/Servidor.js&quot;,&quot;lines&quot;:&quot;92–94, 101, 106&quot;}],&quot;ln&quot;:[92,93,94,0,101,0,106],&quot;hl&quot;:[4,6]}">const organizadorDAO = new OrganizadorDAO();
+const eventoDAO = new EventoDAO();
+const loteDAO = new LoteDAO();
+// ...
+const eventoService = new EventoService(eventoDAO, organizadorDAO, loteDAO);
+// ...
+const eventoControle = new EventoControle(eventoService);</template>
+<template id="c-js.c.user" data-meta="{&quot;lang&quot;:&quot;js&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;js-api/src/middleware/JwtMiddleware.js&quot;,&quot;lines&quot;:&quot;25–26&quot;},{&quot;path&quot;:&quot;js-api/src/controle/OrganizadorControle.js&quot;,&quot;lines&quot;:&quot;61&quot;}],&quot;ln&quot;:[25,26,0,61],&quot;hl&quot;:[0]}">request.organizador = tokenJWT.payload;
+return next();
+// ...
+await this.#organizadorService.deleteOrganizador(request.params.id, request.organizador);</template>
+<template id="c-py.servidor" data-meta="{&quot;lang&quot;:&quot;py&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;flask-api/server.py&quot;,&quot;lines&quot;:&quot;130, 136, 160–168&quot;}],&quot;ln&quot;:[130,0,136,0,160,161,162,163,164,165,166,167,168],&quot;hl&quot;:[11]}">self.__evento_service = EventoService(evento_dao, organizador_dao, lote_dao)
+# ...
+evento_control = EventoControl(self.__evento_service)
+# ...
+evento_roteador = EventoRoteador(
+    self.__jwt_middleware,
+    self.__parametro_middleware,
+    self.__evento_middleware,
+    evento_control,
+)
+self.__app.register_blueprint(
+    evento_roteador.create_routes(), url_prefix=f"{prefixo}/eventos"
+)</template>
+<template id="c-py.roteador" data-meta="{&quot;lang&quot;:&quot;py&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;flask-api/api/router/evento_roteador.py&quot;,&quot;lines&quot;:&quot;53–58&quot;}],&quot;ln&quot;:[53,54,55,56,57,58],&quot;hl&quot;:[2,3]}"># Criação: token -&gt; corpo válido -&gt; Control (regras de data/título no Service).
+@self.__blueprint.route("/", methods=["POST"], strict_slashes=False)
+@self.__jwt_middleware.validate_token
+@self.__evento_middleware.validate_body
+def store():
+    return self.__evento_control.store()</template>
+<template id="c-py.middleware" data-meta="{&quot;lang&quot;:&quot;py&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;flask-api/api/middleware/evento_middleware.py&quot;,&quot;lines&quot;:&quot;30–31, 33–40, 51&quot;}],&quot;ln&quot;:[30,31,33,34,35,36,37,38,39,40,0,51],&quot;hl&quot;:[6]}">@wraps(funcao)
+def decorated_function(*args, **kwargs):
+    corpo = request.get_json(silent=True) or {}
+    # O corpo do projeto é sempre { "evento": { ... } } (contrato da API Node.js).
+    dados = corpo.get("evento")
+
+    if not isinstance(dados, dict):
+        return responder(400, "Erro na validação de dados", {
+            "mensagem": "O campo 'evento' é obrigatório no corpo da requisição."
+        })
+    # ...
+    return funcao(*args, **kwargs)</template>
+<template id="c-py.controle" data-meta="{&quot;lang&quot;:&quot;py&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;flask-api/api/control/evento_control.py&quot;,&quot;lines&quot;:&quot;45–48&quot;}],&quot;ln&quot;:[45,46,47,48],&quot;hl&quot;:[2]}">def store(self):
+    """POST /eventos: cria o evento e devolve o registro já com o organizadorNome (201/400/409)."""
+    evento = self.__evento_service.create_evento(request.get_json().get("evento"))
+    return responder(201, "Cadastro realizado com sucesso", {"eventos": [evento]})</template>
+<template id="c-py.servico" data-meta="{&quot;lang&quot;:&quot;py&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;flask-api/api/service/evento_service.py&quot;,&quot;lines&quot;:&quot;111, 133–142&quot;}],&quot;ln&quot;:[111,0,133,134,135,136,137,138,139,140,141,142],&quot;hl&quot;:[8]}">def __validar_regras(self, evento: Evento):
+    # ...
+    # Regra 3: título único na mesma data/hora (409). No create idEvento é None,
+    # então a checagem não ignora nenhum registro; no update, ignora o próprio.
+    if self.__evento_dao.existe_titulo_data(
+        evento.titulo, evento.dataEvento, evento.idEvento
+    ):
+        raise ErrorResponse(
+            409,
+            "Evento duplicado",
+            {"mensagem": "Já existe um evento com este título nesta data/hora."},
+        )</template>
+<template id="c-py.dao" data-meta="{&quot;lang&quot;:&quot;py&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;flask-api/api/dao/evento_dao.py&quot;,&quot;lines&quot;:&quot;74–87&quot;}],&quot;ln&quot;:[74,75,76,77,78,79,80,81,82,83,84,85,86,87],&quot;hl&quot;:[2,12]}">def existe_titulo_data(self, titulo: str, data_evento, ignorar_id: int = None) -&gt; bool:
+    """Diz se já existe evento com o mesmo título na mesma data/hora (ignorar_id serve à edição)."""
+    SQL = "SELECT COUNT(*) AS total FROM eventos WHERE titulo = %s AND data_evento = %s"
+    # para_sql() converte o datetime para o formato DATETIME que o MySQL compara.
+    parametros = [titulo, para_sql(data_evento)]
+
+    if ignorar_id is not None:
+        SQL += " AND id_evento &lt;&gt; %s"
+        parametros.append(ignorar_id)
+
+    with self.__database.get_connection() as conn:
+        with conn.cursor(dictionary=True) as cursor:
+            cursor.execute(SQL, tuple(parametros))
+            return int(cursor.fetchone()["total"]) &gt; 0</template>
+<template id="c-py.banco" data-meta="{&quot;lang&quot;:&quot;py&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;flask-api/api/database/mysql_database.py&quot;,&quot;lines&quot;:&quot;36, 38–42, 46–50&quot;}],&quot;ln&quot;:[36,0,38,39,40,41,42,0,46,47,48,49,50],&quot;hl&quot;:[4]}">def connect(self):
+    # ...
+    if MysqlDatabase.__pool is None:
+        try:
+            MysqlDatabase.__pool = mysql.connector.pooling.MySQLConnectionPool(
+                **self.__config
+            )
+    # ...
+    return MysqlDatabase.__pool
+
+def get_connection(self):
+    """Tira uma conexão nova do pool; o DAO é quem devolve com close()."""
+    return self.connect().get_connection()</template>
+<template id="c-py.modelo" data-meta="{&quot;lang&quot;:&quot;py&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;flask-api/api/model/evento.py&quot;,&quot;lines&quot;:&quot;19, 43–45, 69–75&quot;}],&quot;ln&quot;:[19,0,43,44,45,0,69,70,71,72,73,74,75],&quot;hl&quot;:[4,11]}">STATUS = ("planejado", "confirmado", "realizado", "cancelado")
+# ...
+@titulo.setter
+def titulo(self, valor):
+    self.__titulo = texto(valor, "titulo", 3, 150)
+# ...
+@status.setter
+def status(self, valor):
+    # Comparação contra a tupla STATUS: qualquer outro valor levanta ValueError.
+    limpo = str(valor or "").strip().lower()
+    if limpo not in Evento.STATUS:
+        raise ValueError(f"status deve ser {', '.join(Evento.STATUS)}.")
+    self.__status = limpo</template>
+<template id="c-py.s1" data-meta="{&quot;lang&quot;:&quot;py&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;flask-api/server.py&quot;,&quot;lines&quot;:&quot;112–115, 166–168&quot;}],&quot;ln&quot;:[112,113,114,115,0,166,167,168],&quot;hl&quot;:[0,6]}">@self.__app.before_request
+def log_requisicao():
+    print("-" * 70)
+    print(f"{request.method} {request.path}")
+# ...
+self.__app.register_blueprint(
+    evento_roteador.create_routes(), url_prefix=f"{prefixo}/eventos"
+)</template>
+<template id="c-py.s3a" data-meta="{&quot;lang&quot;:&quot;py&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;flask-api/api/middleware/jwt_middleware.py&quot;,&quot;lines&quot;:&quot;27–28, 30, 32, 34–37, 40–41&quot;}],&quot;ln&quot;:[27,28,30,32,34,35,36,37,0,40,41],&quot;hl&quot;:[4,9]}">@wraps(funcao)
+def decorated_function(*args, **kwargs):
+    autorizacao = request.headers.get("Authorization")
+    token_jwt = MeuTokenJWT()
+    if not token_jwt.validar_token(autorizacao):
+        return responder(401, "Token inválido ou expirado", {
+            "mensagem": "Envie o cabeçalho Authorization: Bearer &lt;token&gt;."
+        })
+    # ...
+    g.organizador = token_jwt.payload
+    return funcao(*args, **kwargs)</template>
+<template id="c-py.s5a" data-meta="{&quot;lang&quot;:&quot;py&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;flask-api/api/service/evento_service.py&quot;,&quot;lines&quot;:&quot;30–32, 40&quot;}],&quot;ln&quot;:[30,31,32,0,40],&quot;hl&quot;:[4]}">def create_evento(self, dados: dict) -&gt; dict:
+    """Recebe os dados do evento, valida as regras e devolve o evento gravado."""
+    evento = Evento()
+    # ...
+    self.__validar_regras(evento)</template>
+<template id="c-py.s5ok" data-meta="{&quot;lang&quot;:&quot;py&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;flask-api/api/service/evento_service.py&quot;,&quot;lines&quot;:&quot;30–32, 40–43&quot;}],&quot;ln&quot;:[30,31,32,0,40,41,42,43],&quot;hl&quot;:[6]}">def create_evento(self, dados: dict) -&gt; dict:
+    """Recebe os dados do evento, valida as regras e devolve o evento gravado."""
+    evento = Evento()
+    # ...
+    self.__validar_regras(evento)
+
+    id_evento = self.__evento_dao.create(evento)
+    return self.__evento_dao.find_by_id(id_evento)</template>
+<template id="c-py.s6ok" data-meta="{&quot;lang&quot;:&quot;py&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;flask-api/api/dao/evento_dao.py&quot;,&quot;lines&quot;:&quot;99–102, 112–116, 121&quot;}],&quot;ln&quot;:[99,100,101,102,0,112,113,114,115,116,0,121],&quot;hl&quot;:[7,9]}">SQL = """
+    INSERT INTO eventos (titulo, descricao, data_evento, status, id_organizador)
+    VALUES (%s, %s, %s, %s, %s)
+"""
+# ...
+with self.__database.get_connection() as conn:
+    with conn.cursor() as cursor:
+        cursor.execute(SQL, params)
+        conn.commit()
+        insert_id = cursor.lastrowid
+# ...
+return insert_id</template>
+<template id="c-py.s6b" data-meta="{&quot;lang&quot;:&quot;py&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;flask-api/api/database/mysql_database.py&quot;,&quot;lines&quot;:&quot;48–50&quot;}],&quot;ln&quot;:[48,49,50],&quot;hl&quot;:[2]}">def get_connection(self):
+    """Tira uma conexão nova do pool; o DAO é quem devolve com close()."""
+    return self.connect().get_connection()</template>
+<template id="c-py.s7b" data-meta="{&quot;lang&quot;:&quot;py&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;flask-api/server.py&quot;,&quot;lines&quot;:&quot;214–215, 218–223&quot;}],&quot;ln&quot;:[214,215,0,218,219,220,221,222,223],&quot;hl&quot;:[0,8]}">@self.__app.errorhandler(Exception)
+def tratar_erro(error):
+    # ...
+    if isinstance(error, ErrorResponse):
+        return jsonify({
+            "success": False,
+            "message": str(error),
+            "data": {"detalhes": error.details},
+        }), error.http_code</template>
+<template id="c-py.resposta" data-meta="{&quot;lang&quot;:&quot;py&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;flask-api/api/utils/resposta.py&quot;,&quot;lines&quot;:&quot;11–18&quot;}],&quot;ln&quot;:[11,12,13,14,15,16,17,18],&quot;hl&quot;:[4]}">def responder(status: int, mensagem: str, dados=None):
+    """Recebe o status HTTP, a mensagem e os dados; devolve a resposta no envelope padrão."""
+    return jsonify({
+        # success é derivado do status: 2xx = True; 4xx/5xx = False.
+        "success": status &lt; 400,
+        "message": mensagem,
+        "data": dados if dados is not None else {},
+    }), status</template>
+<template id="c-py.d.tam" data-meta="{&quot;lang&quot;:&quot;py&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;flask-api/api/model/organizador.py&quot;,&quot;lines&quot;:&quot;44–46&quot;}],&quot;ln&quot;:[44,45,46],&quot;hl&quot;:[2]}">@nome.setter
+def nome(self, valor):
+    self.__nome = texto(valor, "nome", 3, 120)</template>
+<template id="c-py.d.status" data-meta="{&quot;lang&quot;:&quot;py&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;flask-api/api/model/evento.py&quot;,&quot;lines&quot;:&quot;69–75&quot;}],&quot;ln&quot;:[69,70,71,72,73,74,75],&quot;hl&quot;:[4,5]}">@status.setter
+def status(self, valor):
+    # Comparação contra a tupla STATUS: qualquer outro valor levanta ValueError.
+    limpo = str(valor or "").strip().lower()
+    if limpo not in Evento.STATUS:
+        raise ValueError(f"status deve ser {', '.join(Evento.STATUS)}.")
+    self.__status = limpo</template>
+<template id="c-py.d.disp" data-meta="{&quot;lang&quot;:&quot;py&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;flask-api/api/model/lote.py&quot;,&quot;lines&quot;:&quot;65–72&quot;}],&quot;ln&quot;:[65,66,67,68,69,70,71,72],&quot;hl&quot;:[5,6]}">@quantidadeDisponivel.setter
+def quantidadeDisponivel(self, valor):
+    # Regra de domínio: não dá para liberar mais ingressos do que o lote tem.
+    # Se o total ainda não foi definido, a comparação é ignorada (é None).
+    numero = inteiro(valor, "quantidadeDisponivel", 0, 1000000)
+    if self.__quantidade_total is not None and numero &gt; self.__quantidade_total:
+        raise ValueError("quantidadeDisponivel não pode ser maior que quantidadeTotal.")
+    self.__quantidade_disponivel = numero</template>
+<template id="c-py.d.email" data-meta="{&quot;lang&quot;:&quot;py&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;flask-api/api/service/organizador_service.py&quot;,&quot;lines&quot;:&quot;40–46&quot;}],&quot;ln&quot;:[40,41,42,43,44,45,46],&quot;hl&quot;:[1,2]}"># E-mail é único no sistema: confere antes do INSERT para responder 409 com clareza.
+if self.__organizador_dao.existe_email(organizador.email):
+    raise ErrorResponse(
+        409,
+        "E-mail já cadastrado",
+        {"campo": "email", "mensagem": f"O e-mail {organizador.email} já está em uso."},
+    )</template>
+<template id="c-py.d.orgev" data-meta="{&quot;lang&quot;:&quot;py&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;flask-api/api/service/organizador_service.py&quot;,&quot;lines&quot;:&quot;153–165&quot;}],&quot;ln&quot;:[153,154,155,156,157,158,159,160,161,162,163,164,165],&quot;hl&quot;:[1,2,3,4]}"># Proteção 3: com eventos vinculados a exclusão deixaria registros órfãos (409).
+total_eventos = self.__evento_dao.count_by_organizador(id_organizador)
+if total_eventos &gt; 0:
+    raise ErrorResponse(
+        409,
+        "Organizador possui eventos vinculados",
+        {
+            "mensagem": (
+                f"Exclua ou transfira os {total_eventos} evento(s) "
+                "antes de remover este organizador."
+            )
+        },
+    )</template>
+<template id="c-py.d.evlotes" data-meta="{&quot;lang&quot;:&quot;py&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;flask-api/api/service/evento_service.py&quot;,&quot;lines&quot;:&quot;96–107&quot;}],&quot;ln&quot;:[96,97,98,99,100,101,102,103,104,105,106,107],&quot;hl&quot;:[1,2,3,4]}"># Lote aponta para evento: apagar o evento antes deixaria lote órfão (409).
+total_lotes = self.__lote_dao.count_by_evento(id_evento)
+if total_lotes &gt; 0:
+    raise ErrorResponse(
+        409,
+        "Evento possui lotes vinculados",
+        {
+            "mensagem": (
+                f"Exclua os {total_lotes} lote(s) deste evento antes de removê-lo."
+            )
+        },
+    )</template>
+<template id="c-py.d.perfil" data-meta="{&quot;lang&quot;:&quot;py&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;flask-api/api/service/organizador_service.py&quot;,&quot;lines&quot;:&quot;80–87&quot;}],&quot;ln&quot;:[80,81,82,83,84,85,86,87],&quot;hl&quot;:[2,3]}"># Permissão: administrador edita qualquer um; perfil "comum" só edita a si mesmo (403).
+eh_administrador = usuario_logado.get("perfil") == "administrador"
+if not eh_administrador and int(usuario_logado.get("idOrganizador")) != int(id_organizador):
+    raise ErrorResponse(
+        403,
+        "Acesso negado",
+        {"mensagem": "Você só pode editar o seu próprio cadastro."},
+    )</template>
+<template id="c-py.d.data" data-meta="{&quot;lang&quot;:&quot;py&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;flask-api/api/service/evento_service.py&quot;,&quot;lines&quot;:&quot;125–131&quot;}],&quot;ln&quot;:[125,126,127,128,129,130,131],&quot;hl&quot;:[1,2]}"># Regra 2: não se agenda evento no passado (400).
+if evento.dataEvento &lt; datetime.now():
+    raise ErrorResponse(
+        400,
+        "Data inválida",
+        {"campo": "dataEvento", "mensagem": "A data do evento não pode estar no passado."},
+    )</template>
+<template id="c-py.d.where" data-meta="{&quot;lang&quot;:&quot;py&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;flask-api/api/dao/evento_dao.py&quot;,&quot;lines&quot;:&quot;37–43, 58–59&quot;}],&quot;ln&quot;:[37,38,39,40,41,42,43,0,58,59],&quot;hl&quot;:[5,8]}">filtros = filtros or {}
+condicoes = []
+parametros = []
+
+if filtros.get("titulo"):
+    condicoes.append("e.titulo LIKE %s")
+    parametros.append(f"%{filtros['titulo']}%")
+# ...
+where = f" WHERE {' AND '.join(condicoes)}" if condicoes else ""
+SQL = f"{SELECT}{where} ORDER BY e.data_evento ASC"</template>
+<template id="c-py.d.token" data-meta="{&quot;lang&quot;:&quot;py&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;flask-api/api/middleware/jwt_middleware.py&quot;,&quot;lines&quot;:&quot;34–37&quot;}],&quot;ln&quot;:[34,35,36,37],&quot;hl&quot;:[0,1]}">if not token_jwt.validar_token(autorizacao):
+    return responder(401, "Token inválido ou expirado", {
+        "mensagem": "Envie o cabeçalho Authorization: Bearer &lt;token&gt;."
+    })</template>
+<template id="c-py.d.corpo" data-meta="{&quot;lang&quot;:&quot;py&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;flask-api/api/middleware/evento_middleware.py&quot;,&quot;lines&quot;:&quot;33–40&quot;}],&quot;ln&quot;:[33,34,35,36,37,38,39,40],&quot;hl&quot;:[4,5]}">corpo = request.get_json(silent=True) or {}
+# O corpo do projeto é sempre { "evento": { ... } } (contrato da API Node.js).
+dados = corpo.get("evento")
+
+if not isinstance(dados, dict):
+    return responder(400, "Erro na validação de dados", {
+        "mensagem": "O campo 'evento' é obrigatório no corpo da requisição."
+    })</template>
+<template id="c-py.d.http" data-meta="{&quot;lang&quot;:&quot;py&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;flask-api/api/control/evento_control.py&quot;,&quot;lines&quot;:&quot;45–48&quot;}],&quot;ln&quot;:[45,46,47,48],&quot;hl&quot;:[2]}">def store(self):
+    """POST /eventos: cria o evento e devolve o registro já com o organizadorNome (201/400/409)."""
+    evento = self.__evento_service.create_evento(request.get_json().get("evento"))
+    return responder(201, "Cadastro realizado com sucesso", {"eventos": [evento]})</template>
+<template id="c-py.c.svc" data-meta="{&quot;lang&quot;:&quot;py&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;flask-api/api/service/evento_service.py&quot;,&quot;lines&quot;:&quot;30–43&quot;}],&quot;ln&quot;:[30,31,32,33,34,35,36,37,38,39,40,41,42,43],&quot;hl&quot;:[12]}">def create_evento(self, dados: dict) -&gt; dict:
+    """Recebe os dados do evento, valida as regras e devolve o evento gravado."""
+    evento = Evento()
+    evento.titulo = dados.get("titulo")
+    evento.descricao = dados.get("descricao")
+    evento.dataEvento = dados.get("dataEvento")
+    # status é opcional no cadastro: sem valor, o evento nasce "planejado".
+    evento.status = dados.get("status") or "planejado"
+    evento.idOrganizador = dados.get("idOrganizador")
+
+    self.__validar_regras(evento)
+
+    id_evento = self.__evento_dao.create(evento)
+    return self.__evento_dao.find_by_id(id_evento)</template>
+<template id="c-py.c.banco" data-meta="{&quot;lang&quot;:&quot;py&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;flask-api/api/dao/evento_dao.py&quot;,&quot;lines&quot;:&quot;66–72&quot;}],&quot;ln&quot;:[66,67,68,69,70,71,72],&quot;hl&quot;:[4]}">def find_by_id(self, id_evento: int) -&gt; dict | None:
+    """Busca um evento pelo id e devolve o dicionário com o organizadorNome, ou None."""
+    with self.__database.get_connection() as conn:
+        with conn.cursor(dictionary=True) as cursor:
+            cursor.execute(f"{SELECT} WHERE e.id_evento = %s", (id_evento,))
+            linhas = cursor.fetchall()
+    return serializar(linhas[0]) if linhas else None</template>
+<template id="c-py.c.erro" data-meta="{&quot;lang&quot;:&quot;py&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;flask-api/server.py&quot;,&quot;lines&quot;:&quot;218–231&quot;}],&quot;ln&quot;:[218,219,220,221,222,223,224,225,226,227,228,229,230,231],&quot;hl&quot;:[1,8]}">if isinstance(error, ErrorResponse):
+    return jsonify({
+        "success": False,
+        "message": str(error),
+        "data": {"detalhes": error.details},
+    }), error.http_code
+
+# ValueError vem dos setters do Model: dado quebrou a regra de domínio -&gt; 400.
+if isinstance(error, ValueError):
+    return jsonify({
+        "success": False,
+        "message": "Erro de validação",
+        "data": {"mensagem": str(error)},
+    }), 400</template>
+<template id="c-py.c.di" data-meta="{&quot;lang&quot;:&quot;py&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;flask-api/server.py&quot;,&quot;lines&quot;:&quot;120–122, 130, 136&quot;}],&quot;ln&quot;:[120,121,122,0,130,0,136],&quot;hl&quot;:[4,6]}">organizador_dao = OrganizadorDAO(self.__db)
+evento_dao = EventoDAO(self.__db)
+lote_dao = LoteDAO(self.__db)
+# ...
+self.__evento_service = EventoService(evento_dao, organizador_dao, lote_dao)
+# ...
+evento_control = EventoControl(self.__evento_service)</template>
+<template id="c-py.c.user" data-meta="{&quot;lang&quot;:&quot;py&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;flask-api/api/middleware/jwt_middleware.py&quot;,&quot;lines&quot;:&quot;39–40&quot;},{&quot;path&quot;:&quot;flask-api/api/control/organizador_control.py&quot;,&quot;lines&quot;:&quot;75&quot;}],&quot;ln&quot;:[39,40,0,75],&quot;hl&quot;:[1]}"># g.organizador é o que os Controls leem (idOrganizador, nome, email, perfil).
+g.organizador = token_jwt.payload
+# ...
+self.__organizador_service.delete_organizador(id_organizador, g.organizador)</template>
+<template id="c-sql.mysql" data-meta="{&quot;lang&quot;:&quot;sql&quot;,&quot;files&quot;:[{&quot;path&quot;:&quot;docs/banco.sql&quot;,&quot;lines&quot;:&quot;38–47, 49–52&quot;}],&quot;ln&quot;:[38,39,40,41,42,43,44,45,46,47,0,49,50,51,52],&quot;hl&quot;:[9]}">CREATE TABLE eventos (
+  id_evento      INT          NOT NULL AUTO_INCREMENT,
+  titulo         VARCHAR(150) NOT NULL,
+  descricao      TEXT         DEFAULT NULL,
+  data_evento    DATETIME     NOT NULL,
+  status         VARCHAR(20)  NOT NULL DEFAULT 'planejado',
+  id_organizador INT          NOT NULL,
+  created_at     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id_evento),
+  UNIQUE KEY uq_evento_titulo_data (titulo, data_evento),
+  -- ...
+  CONSTRAINT fk_evento_organizador
+    FOREIGN KEY (id_organizador) REFERENCES organizadores (id_organizador)
+    ON DELETE NO ACTION
+) ENGINE=InnoDB;</template>
+<template id="c-m.req.erro" data-meta="{&quot;lang&quot;:&quot;json&quot;,&quot;files&quot;:[],&quot;ln&quot;:[],&quot;hl&quot;:[],&quot;note&quot;:&quot;Corpo enviado. Título e data já existem no seed (docs/banco.sql, linha 88).&quot;}">{
+  "evento": {
+    "titulo": "Expo Inovação",
+    "dataEvento": "2027-05-05T09:00",
+    "idOrganizador": 1
+  }
+}</template>
+<template id="c-m.req.ok" data-meta="{&quot;lang&quot;:&quot;json&quot;,&quot;files&quot;:[],&quot;ln&quot;:[],&quot;hl&quot;:[],&quot;note&quot;:&quot;Corpo enviado. Título e data ainda não existem no banco (exemplo).&quot;}">{
+  "evento": {
+    "titulo": "Feira de Robótica",
+    "dataEvento": "2027-08-10T09:00",
+    "idOrganizador": 1
+  }
+}</template>
+<template id="c-m.res.erro" data-meta="{&quot;lang&quot;:&quot;json&quot;,&quot;files&quot;:[],&quot;ln&quot;:[],&quot;hl&quot;:[],&quot;note&quot;:&quot;HTTP 409. Mensagem e detalhes vêm do ErrorResponse lançado no Serviço.&quot;}">{
+  "success": false,
+  "message": "Evento duplicado",
+  "data": {
+    "detalhes": {
+      "mensagem": "Já existe um evento com este título nesta data/hora."
+    }
+  }
+}</template>
+<template id="c-m.res.ok" data-meta="{&quot;lang&quot;:&quot;json&quot;,&quot;files&quot;:[],&quot;ln&quot;:[],&quot;hl&quot;:[],&quot;note&quot;:&quot;HTTP 201. Campos = colunas do SELECT do DAO; idEvento e createdAt são ilustrativos.&quot;}">{
+  "success": true,
+  "message": "Cadastro realizado com sucesso",
+  "data": {
+    "eventos": [
+      {
+        "idEvento": 5,
+        "titulo": "Feira de Robótica",
+        "descricao": null,
+        "dataEvento": "2027-08-10T09:00:00",
+        "status": "planejado",
+        "idOrganizador": 1,
+        "organizadorNome": "Ana Souza",
+        "createdAt": "2026-11-08T10:15:00"
+      }
+    ]
+  }
+}</template>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ------------------------------------------------------------ utilidades */
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function rich(s) { return esc(s).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>'); }
+  function icon(n) { return '<svg class="ic" aria-hidden="true" focusable="false"><use href="#i-' + n + '"></use></svg>'; }
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function announce(msg) { var l = $('#live'); l.textContent = ''; setTimeout(function () { l.textContent = msg; }, 30); }
+
+  var APIS = {
+    js: { label: 'Node.js', full: 'Node.js + Express', dir: 'js-api/', lang: 'JavaScript' },
+    py: { label: 'Flask', full: 'Python + Flask', dir: 'flask-api/', lang: 'Python' }
+  };
+  var CAT_LABEL = { infra: 'Infraestrutura', http: 'HTTP', negocio: 'Regra de negócio', dominio: 'Regra de domínio', sql: 'SQL' };
+  var state = { api: 'js', layer: 'servidor', mode: 'erro', step: 0, playing: false, filter: 'all', focus: null, open: {}, pair: 0, side: false };
+  var timer = null;
+
+  function loadApi() { try { var v = localStorage.getItem('mvcs-api'); if (v === 'js' || v === 'py') return v; } catch (e) { } return 'js'; }
+  function saveApi(v) { try { localStorage.setItem('mvcs-api', v); } catch (e) { } }
+
+  /* ------------------------------------------------------------ realce de sintaxe */
+  var LANGS = {
+    js: [['c', '\\/\\/[^\\n]*|\\/\\*[\\s\\S]*?\\*\\/'], ['s', '`(?:\\\\[\\s\\S]|[^`\\\\])*`|"(?:\\\\.|[^"\\\\\\n])*"|\'(?:\\\\.|[^\'\\\\\\n])*\''], ['k', '\\b(?:const|let|var|async|await|new|return|if|else|throw|class|static|extends|this|for|of|in|typeof|instanceof|function|try|catch|null|undefined|true|false|module|exports|require)\\b'], ['n', '\\b\\d+(?:\\.\\d+)?\\b']],
+    py: [['c', '#[^\\n]*'], ['s', '[fFrRbB]{0,2}(?:"""[\\s\\S]*?"""|\'\'\'[\\s\\S]*?\'\'\'|"(?:\\\\.|[^"\\\\\\n])*"|\'(?:\\\\.|[^\'\\\\\\n])*\')'], ['d', '@[A-Za-z_][\\w.]*'], ['k', '\\b(?:def|class|return|if|else|elif|raise|with|as|import|from|not|in|is|None|True|False|for|try|except|finally|pass|and|or|while|lambda)\\b'], ['n', '\\b\\d+(?:\\.\\d+)?\\b']],
+    sql: [['c', '--[^\\n]*'], ['s', '\'(?:\'\'|[^\'\\n])*\''], ['k', '\\b(?:SELECT|COUNT|FROM|WHERE|AND|INSERT|INTO|VALUES|UPDATE|SET|DELETE|CREATE|TABLE|NOT|NULL|DEFAULT|PRIMARY|KEY|UNIQUE|CONSTRAINT|FOREIGN|REFERENCES|ON|NO|ACTION|AUTO_INCREMENT|ENGINE|CURRENT_TIMESTAMP)\\b'], ['d', '\\b(?:INT|VARCHAR|TEXT|DATETIME|TIMESTAMP|DECIMAL)\\b(?:\\(\\d+(?:,\\d+)?\\))?'], ['n', '\\b\\d+\\b']],
+    json: [['p', '"(?:\\\\.|[^"\\\\\\n])*"(?=\\s*:)'], ['s', '"(?:\\\\.|[^"\\\\\\n])*"'], ['k', '\\b(?:true|false|null)\\b'], ['n', '-?\\b\\d+(?:\\.\\d+)?\\b']]
+  };
+  var RX = {};
+  Object.keys(LANGS).forEach(function (l) {
+    RX[l] = { re: new RegExp(LANGS[l].map(function (p) { return '(' + p[1] + ')'; }).join('|'), 'g'), types: LANGS[l].map(function (p) { return p[0]; }) };
+  });
+
+  function tokenize(text, lang) {
+    var out = [], last = 0, m, r = RX[lang];
+    r.re.lastIndex = 0;
+    while ((m = r.re.exec(text)) !== null) {
+      if (m[0] === '') { r.re.lastIndex++; continue; }
+      if (m.index > last) out.push([null, text.slice(last, m.index)]);
+      var t = null;
+      for (var i = 0; i < r.types.length; i++) { if (m[i + 1] !== undefined) { t = r.types[i]; break; } }
+      out.push([t, m[0]]);
+      last = m.index + m[0].length;
+    }
+    if (last < text.length) out.push([null, text.slice(last)]);
+    // divide em linhas
+    var lines = [[]];
+    out.forEach(function (tk) {
+      var parts = tk[1].split('\n');
+      parts.forEach(function (p, idx) {
+        if (idx > 0) lines.push([]);
+        if (p !== '') lines[lines.length - 1].push([tk[0], p]);
+      });
+    });
+    return lines;
+  }
+
+  var cache = {};
+  function getCode(id) {
+    if (cache[id]) return cache[id];
+    var tpl = document.getElementById('c-' + id);
+    if (!tpl) return null;
+    var meta = JSON.parse(tpl.getAttribute('data-meta'));
+    var text = tpl.content.textContent;
+    cache[id] = { meta: meta, lines: tokenize(text, meta.lang) };
+    return cache[id];
+  }
+
+  var LANG_NAME = { js: 'JavaScript', py: 'Python', sql: 'SQL', json: 'JSON' };
+  function codeCard(id) {
+    var c = getCode(id);
+    var fig = el('figure', 'code');
+    if (c && !c.meta.ln.length) fig.className += ' nogut';
+    if (!c) { fig.textContent = 'Trecho não encontrado: ' + id; return fig; }
+    var cap = el('figcaption', 'code-h');
+    var files = el('div', 'code-files');
+    if (c.meta.files.length) {
+      c.meta.files.forEach(function (f) {
+        var d = el('span', 'code-file', f.path);
+        var em = el('em', null, (f.lines.indexOf(',') > -1 || f.lines.indexOf('–') > -1 ? 'linhas ' : 'linha ') + f.lines);
+        d.appendChild(em);
+        files.appendChild(d);
+      });
+    }
+    if (c.meta.note) files.appendChild(el('span', 'code-note', c.meta.note));
+    cap.appendChild(files);
+    cap.appendChild(el('span', 'code-lang', LANG_NAME[c.meta.lang] || c.meta.lang));
+    fig.appendChild(cap);
+    var pre = el('pre');
+    pre.tabIndex = 0;
+    pre.setAttribute('role', 'group');
+    pre.setAttribute('aria-label', 'Trecho de código ' + (LANG_NAME[c.meta.lang] || '') + (c.meta.files[0] ? ': ' + c.meta.files[0].path : ''));
+    var code = el('code');
+    c.lines.forEach(function (ln, i) {
+      var row = el('span', 'l');
+      var n = c.meta.ln[i];
+      if (c.meta.hl.indexOf(i) > -1) row.className += ' hl';
+      var isCut = c.meta.ln.length && n === 0;
+      if (isCut) row.className += ' cut';
+      if (c.meta.ln.length) {
+        var g = el('span', 'n', n ? String(n) : '…');
+        g.setAttribute('aria-hidden', 'true');
+        row.appendChild(g);
+      }
+      var t = el('span', 't');
+      ln.forEach(function (tk) {
+        if (tk[0]) { var s = el('span', 'tk-' + tk[0], tk[1]); t.appendChild(s); } else { t.appendChild(document.createTextNode(tk[1])); }
+      });
+      if (!ln.length) t.appendChild(document.createTextNode(' '));
+      row.appendChild(t);
+      code.appendChild(row);
+      code.appendChild(document.createTextNode('\n'));
+    });
+    pre.appendChild(code);
+    fig.appendChild(pre);
+    return fig;
+  }
+  function stack(ids) { var s = el('div', 'code-stack'); ids.forEach(function (id) { s.appendChild(codeCard(id)); }); return s; }
+
+  /* ------------------------------------------------------------ dados: camadas */
+  var ORDER = ['servidor', 'roteador', 'middleware', 'controle', 'servico', 'dao', 'banco', 'mysql'];
+  var LAYERS = [
+    {
+      id: 'servidor', n: 1, name: 'Servidor', cat: 'infra',
+      sub: { js: 'Servidor.js', py: 'server.py' },
+      sum: { js: 'Ponto de montagem da API: liga todas as peças e não decide nada.', py: 'Ponto de montagem da API: liga todas as peças e não decide nada.' },
+      faz: {
+        js: ['Cria DAOs → Serviços → Controles → Roteadores e injeta cada dependência no construtor (injeção de dependência).', 'Liga `express.json()`, o CORS e o servidor de arquivos estáticos: o frontend é servido pela própria API.', 'Registra cada roteador no seu prefixo (`/api/v1/eventos`…) e, por último, o tratador de erro central.'],
+        py: ['O `Server.__init__` cria o Flask e liga o CORS e os estáticos; o `init()` conecta no banco e chama `__configurar_modulos()`.', '`__configurar_modulos()` faz a injeção de dependência (DAOs → Services → Controls → Roteadores) e registra os Blueprints.', '`__configurar_tratamento_de_erros()` instala o `errorhandler(Exception)` que traduz as exceções para o envelope padrão.']
+      },
+      nao: {
+        js: ['Não tem regra de negócio: quem decide 400/403/404/409 são os Services.', 'Não escreve SQL.'],
+        py: ['Não valida dados, não decide permissão e não conhece tabela.', 'Só liga os objetos: DAO → Service → Control → Roteador.']
+      },
+      code: { js: 'js.servidor', py: 'py.servidor' }
+    },
+    {
+      id: 'roteador', n: 2, name: 'Roteador', cat: 'http',
+      sub: { js: 'roteador/', py: 'router/' },
+      sum: { js: 'Casa a URL e o método HTTP com um Controle e define em que ordem as barreiras rodam.', py: 'Casa a URL e o método HTTP com um Control e define em que ordem as barreiras rodam.' },
+      faz: {
+        js: ['Casa URL + método com um Controle (`router.post("/", …, store)`).', 'Diz em que ordem os middlewares rodam; `router.use(validarToken)` vale para todas as rotas do roteador.'],
+        py: ['É o `Blueprint` da entidade: cada rota declara os decorators na ordem em que devem rodar (de cima para baixo) e chama o Control.']
+      },
+      nao: { js: ['Não valida nada.', 'Não decide nada.'], py: ['Não valida nada.', 'Não decide nada.'] },
+      code: { js: 'js.roteador', py: 'py.roteador' }
+    },
+    {
+      id: 'middleware', n: 3, name: 'Middleware', cat: 'http',
+      sub: { js: 'middleware/', py: 'middleware/' },
+      sum: { js: 'Barreira antes do Controle: se a forma da requisição está errada, a resposta sai aqui.', py: 'Barreira antes do Control: se a forma da requisição está errada, a resposta sai aqui.' },
+      faz: {
+        js: ['Barreira antes do Controle: token JWT, perfil administrador, `:id` inteiro e corpo com o envelope `{recurso: {...}}`.', 'Funções `(request, response, next)`: respondem na hora ou chamam `next()`.'],
+        py: ['Decorators com `@wraps` + `*args/**kwargs`: validam o token (guardando os claims em `flask.g`), exigem `administrador`, checam o `<int:id>` e o envelope `{recurso: {...}}`.', 'Respondem na hora ou devolvem a função da rota.']
+      },
+      nao: { js: ['Não salva nada.', 'Não consulta o banco para regra de negócio.'], py: ['Não salva nada.', 'Não consulta o banco para regra de negócio.'] },
+      code: { js: 'js.middleware', py: 'py.middleware' }
+    },
+    {
+      id: 'controle', n: 4, name: 'Controle', cat: 'http',
+      sub: { js: 'controle/', py: 'control/' },
+      sum: { js: 'Intermediário entre HTTP e Serviço: só orquestra.', py: 'Intermediário entre HTTP e Service: só orquestra.' },
+      faz: {
+        js: ['Lê `params`, `query` e `body`.', 'Chama um único método do Serviço.', 'Monta a resposta no envelope `{ success, message, data }` com `responder(...)`.'],
+        py: ['Lê `request.args`, `view_args` e `get_json()`.', 'Chama um único método do Service.', 'Devolve `responder(...)` no envelope `{ success, message, data }`.']
+      },
+      nao: { js: ['Não tem regra de negócio.', 'Não escreve SQL.'], py: ['Não tem regra de negócio.', 'Não escreve SQL.'] },
+      code: { js: 'js.controle', py: 'py.controle' }
+    },
+    {
+      id: 'servico', n: 5, name: 'Serviço', cat: 'negocio',
+      sub: { js: 'servico/', py: 'service/' },
+      sum: { js: 'Onde mora a regra de negócio: o que depende do banco, do usuário logado ou do relógio.', py: 'Onde mora a regra de negócio: o que depende do banco, do usuário logado ou do relógio.' },
+      faz: {
+        js: ['Regra de negócio: duplicidade, vínculo, data no passado, permissão por perfil, valores padrão.', 'Monta o Model (os setters validam o domínio), chama os DAOs e lança `ErrorResponse` com o status.'],
+        py: ['Regra de negócio e orquestração das entidades: duplicidade, vínculo, data no passado, permissão por perfil.', 'Monta o Model (os setters validam o domínio), chama os DAOs e levanta `ErrorResponse` com o status.']
+      },
+      nao: { js: ['Não conhece `request`/`response`.', 'Não escreve SQL.'], py: ['Não conhece `request`.', 'Não escreve SQL.'] },
+      code: { js: 'js.servico', py: 'py.servico' }
+    },
+    {
+      id: 'dao', n: 6, name: 'DAO', cat: 'sql',
+      sub: { js: 'dao/', py: 'dao/' },
+      sum: { js: 'Isola o SQL: só sabe de tabelas, colunas e parâmetros.', py: 'Isola o SQL: só sabe de tabelas, colunas e parâmetros.' },
+      faz: {
+        js: ['Só SQL com `?` (prepared statement) e o nome das colunas.', 'Devolve linhas, contagens ou o `insertId` para o Serviço.'],
+        py: ['SQL com `%s` dentro de `with get_connection() as conn:` e `commit()` nas escritas.', 'Devolve dicionários já serializados; nunca devolve o Model.']
+      },
+      nao: { js: ['Não valida.', 'Não decide.'], py: ['Não valida.', 'Não decide.'] },
+      code: { js: 'js.dao', py: 'py.dao' }
+    },
+    {
+      id: 'banco', n: 7, name: 'Banco', cat: 'infra',
+      sub: { js: 'Banco.js', py: 'mysql_database.py' },
+      sum: { js: 'Entrega a conexão com o MySQL para os DAOs.', py: 'Entrega conexões do pool para os DAOs.' },
+      faz: {
+        js: ['Conexão única com o MySQL (`mysql2`), criada na primeira chamada (Singleton).', 'Métodos `consultar` (SELECT) e `executar` (INSERT/UPDATE/DELETE) com parâmetros `?`.'],
+        py: ['`MysqlDatabase`: pool de conexões (`MySQLConnectionPool`) singleton.', '`get_connection()` entrega uma conexão do pool ao DAO.']
+      },
+      nao: { js: ['Não conhece entidade.', 'Não tem regra de negócio.'], py: ['Não conhece entidade.', 'Não tem SQL de negócio.'] },
+      code: { js: 'js.banco', py: 'py.banco' }
+    },
+    {
+      id: 'mysql', n: 8, name: 'MySQL', cat: 'infra',
+      sub: { js: 'paw4bi_eventos', py: 'paw4bi_eventos' },
+      sum: { js: 'O banco de dados: guarda os dados e a última linha de defesa da integridade.', py: 'O banco de dados: guarda os dados e a última linha de defesa da integridade.' },
+      faz: {
+        js: ['Guarda as três tabelas: `organizadores` 1—N `eventos` 1—N `lotes`.', 'Garante integridade: chaves primárias, `UNIQUE (titulo, data_evento)` em `eventos` e chaves estrangeiras com `ON DELETE NO ACTION`.'],
+        py: ['Guarda as três tabelas: `organizadores` 1—N `eventos` 1—N `lotes`.', 'Garante integridade: chaves primárias, `UNIQUE (titulo, data_evento)` em `eventos` e chaves estrangeiras com `ON DELETE NO ACTION`.']
+      },
+      nao: { js: ['Não conhece HTTP.', 'Não monta mensagem para o usuário: só aceita ou recusa.'], py: ['Não conhece HTTP.', 'Não monta mensagem para o usuário: só aceita ou recusa.'] },
+      code: { js: 'sql.mysql', py: 'sql.mysql' }
+    },
+    {
+      id: 'modelo', n: 0, name: 'Model', cat: 'dominio', sat: true,
+      sub: { js: 'modelo/', py: 'model/' },
+      sum: { js: 'Peça de apoio, fora da linha principal: o Serviço monta o Model e os setters validam a regra de domínio.', py: 'Peça de apoio, fora da linha principal: o Service monta o Model e os setters validam a regra de domínio.' },
+      faz: {
+        js: ['Guarda os dados da entidade e a regra de domínio nos setters: tipo, tamanho, faixa, `status`/`perfil` dentro da lista.', 'Dado inválido lança `DomainError`, que o tratador central transforma em 400.'],
+        py: ['Guarda os dados da entidade e a regra de domínio em `@property`/`@setter`: tipo, tamanho, faixa, `status`/`perfil` dentro da lista.', 'Dado inválido levanta `ValueError`, que o `errorhandler` transforma em 400.']
+      },
+      nao: {
+        js: ['Não sabe de banco nem de HTTP.', 'Não decide duplicidade nem “data no futuro”: isso é regra de negócio do Serviço.'],
+        py: ['Não sabe de banco nem de HTTP.', 'Não decide duplicidade nem “data no futuro”: isso é regra de negócio do Service.']
+      },
+      code: { js: 'js.modelo', py: 'py.modelo' }
+    }
+  ];
+  function layerById(id) { for (var i = 0; i < LAYERS.length; i++) if (LAYERS[i].id === id) return LAYERS[i]; return LAYERS[0]; }
+
+  /* ------------------------------------------------------------ mapa */
+  function renderTabs() {
+    var host = $('#tabs');
+    host.innerHTML = '';
+    LAYERS.forEach(function (L) {
+      var b = el('button', 'node' + (L.sat ? ' sat' : ' flow'));
+      b.type = 'button';
+      b.id = 'tab-' + L.id;
+      b.setAttribute('role', 'tab');
+      b.setAttribute('aria-controls', 'layer-panel');
+      b.setAttribute('aria-selected', String(L.id === state.layer));
+      b.tabIndex = L.id === state.layer ? 0 : -1;
+      b.setAttribute('data-cat', L.cat);
+      b.setAttribute('data-layer', L.id);
+      b.appendChild(el('span', 'nn', L.sat ? 'APOIO' : String(L.n)));
+      b.appendChild(el('span', 'nm', L.name));
+      b.appendChild(el('span', 'nf', L.sub[state.api]));
+      b.addEventListener('click', function () { selectLayer(L.id, false); });
+      host.appendChild(b);
+    });
+  }
+  function selectLayer(id, focus) {
+    state.layer = id;
+    $$('#tabs .node').forEach(function (b) {
+      var on = b.getAttribute('data-layer') === id;
+      b.setAttribute('aria-selected', String(on));
+      b.tabIndex = on ? 0 : -1;
+      if (on && focus) b.focus();
+    });
+    renderLayerPanel();
+    var t = $('#tab-' + id);
+    if (t && t.scrollIntoView) t.scrollIntoView({ block: 'nearest', inline: 'center', behavior: reduce ? 'auto' : 'smooth' });
+  }
+  function renderLayerPanel() {
+    var L = layerById(state.layer), api = state.api, p = $('#layer-panel');
+    p.setAttribute('aria-labelledby', 'tab-' + L.id);
+    p.innerHTML = '';
+    var left = el('div', 'lp-info');
+    var idx = ORDER.indexOf(L.id);
+    var head = '<div class="lp-head"><h3>' + esc(L.name) + '</h3><span class="pill" data-cat="' + L.cat + '">' + esc(CAT_LABEL[L.cat]) + '</span>' +
+      (L.sat ? '<span class="pill" data-cat="infra">Peça de apoio</span>' : '<span class="pill" data-cat="infra">Peça ' + L.n + ' de 8</span>') + '</div>' +
+      '<p class="lp-sum">' + rich(L.sum[api]) + '</p>';
+    var faz = '<h4>O que faz</h4><ul class="fl yes">' + L.faz[api].map(function (t) { return '<li>' + icon('check') + '<span>' + rich(t) + '</span></li>'; }).join('') + '</ul>';
+    var nao = '<h4>O que não faz</h4><ul class="fl no">' + L.nao[api].map(function (t) { return '<li>' + icon('x') + '<span>' + rich(t) + '</span></li>'; }).join('') + '</ul>';
+    var flow;
+    if (L.sat) flow = '<span>Usado pelo <b>Serviço</b> (monta e valida)</span><span>Lido pelo <b>DAO</b> (grava)</span>';
+    else {
+      var prev = idx > 0 ? layerById(ORDER[idx - 1]).name : 'a requisição HTTP';
+      var next = idx < ORDER.length - 1 ? layerById(ORDER[idx + 1]).name : 'ninguém: é o fim do caminho';
+      flow = '<span>Recebe de <b>' + esc(prev) + '</b></span><span>Entrega para <b>' + esc(next) + '</b></span>';
+    }
+    left.innerHTML = head + faz + nao + '<div class="flowline">' + flow + '</div>';
+    p.appendChild(left);
+    p.appendChild(stack([L.code[api]]));
+  }
+  $('#tabs').addEventListener('keydown', function (e) {
+    var ids = LAYERS.map(function (l) { return l.id; });
+    var i = ids.indexOf(state.layer), n = null;
+    if (e.key === 'ArrowRight') n = ids[(i + 1) % ids.length];
+    else if (e.key === 'ArrowLeft') n = ids[(i - 1 + ids.length) % ids.length];
+    else if (e.key === 'Home') n = ids[0];
+    else if (e.key === 'End') n = ids[ids.length - 1];
+    else if (e.key === 'ArrowDown' && state.layer === 'servico') n = 'modelo';
+    else if (e.key === 'ArrowUp' && state.layer === 'modelo') n = 'servico';
+    if (n) { e.preventDefault(); selectLayer(n, true); }
+  });
+
+  /* ------------------------------------------------------------ simulador */
+  var STEPS = [
+    {
+      label: 'Servidor', cat: 'infra',
+      title: { all: 'O Servidor recebe e despacha' },
+      text: {
+        js: { all: 'O `express.json()` transforma o corpo em objeto (`request.body`), o CORS libera a origem e o `EventoRoteador` assume o caminho `/api/v1/eventos`.' },
+        py: { all: '`before_request` imprime o separador no terminal; o Flask resolve a rota pelo Blueprint `evento`, registrado em `/api/v1/eventos`.' }
+      },
+      where: { js: ['js-api/Servidor.js', '#configurarMiddlewaresGlobais() e #configurarRotas()'], py: ['flask-api/server.py', '__configurar_middlewares() e __configurar_modulos()'] },
+      code: { js: { all: ['js.s1'] }, py: { all: ['py.s1'] } }
+    },
+    {
+      label: 'Roteador', cat: 'http',
+      title: { all: 'O Roteador define a ordem' },
+      text: {
+        js: { all: '`router.use(validarToken)` vale para todas as rotas (sem token, a requisição para aqui com **401**). Em seguida, `POST /` chama `EventoMiddleware.validarBody` e só depois `EventoControle.store`.' },
+        py: { all: 'A função `store()` tem dois decorators, que executam **de cima para baixo**: `@validate_token` → `@validate_body` → corpo da função (`evento_control.store()`).' }
+      },
+      where: { js: ['js-api/src/roteador/EventoRoteador.js', 'criarRotas()'], py: ['flask-api/api/router/evento_roteador.py', 'create_routes() → store()'] },
+      code: { js: { all: ['js.roteador'] }, py: { all: ['py.roteador'] } }
+    },
+    {
+      label: 'Middleware', cat: 'http',
+      title: { all: 'Os middlewares deixam passar' },
+      text: {
+        js: { all: '`validarToken` confere o Bearer e guarda os claims em `request.organizador`. `validarBody` confere se veio o objeto `evento` e, no POST, se `titulo`, `dataEvento` e `idOrganizador` estão presentes (faltou algo: **400**). Aqui está tudo certo, então chama `next()`.' },
+        py: { all: '`validate_token` valida assinatura e expiração com PyJWT e guarda os claims em `flask.g.organizador` (token ruim: **401**). `validate_body` exige `titulo`, `dataEvento` e `idOrganizador` dentro de `evento` (faltou algo: **400**). Aqui está tudo certo.' }
+      },
+      where: { js: ['js-api/src/middleware/JwtMiddleware.js e EventoMiddleware.js', 'validarToken e validarBody'], py: ['flask-api/api/middleware/jwt_middleware.py e evento_middleware.py', 'validate_token e validate_body'] },
+      code: { js: { all: ['js.s3a', 'js.middleware'] }, py: { all: ['py.s3a', 'py.middleware'] } }
+    },
+    {
+      label: 'Controle', cat: 'http',
+      title: { all: 'O Controle chama o Serviço' },
+      text: {
+        js: { all: 'Pega `request.body.evento` e chama `eventoService.createEvento(...)`. Não sabe que existe duplicidade: só entrega e espera.' },
+        py: { all: '`store()` pega o JSON e chama `create_evento(dados)`. Não conhece duplicidade: só entrega e espera.' }
+      },
+      where: { js: ['js-api/src/controle/EventoControle.js', 'store'], py: ['flask-api/api/control/evento_control.py', 'EventoControl.store'] },
+      code: { js: { all: ['js.controle'] }, py: { all: ['py.controle'] } }
+    },
+    {
+      label: 'Serviço', cat: 'negocio',
+      title: { erro: 'O Serviço encontra o duplicado', ok: 'O Serviço aprova e manda gravar' },
+      text: {
+        js: {
+          erro: 'Cria o `Evento` (os setters do Model validam título, data e status), confere se o organizador existe (**400**), compara a data com `Date.now()` (**400**) e chama `eventoDAO.existeTituloData(...)`. Como já existe, lança `ErrorResponse(409, "Evento duplicado")`.',
+          ok: 'Passando nas três regras (organizador existe, data no futuro, título único na data), o Serviço manda gravar com `eventoDAO.create(evento)` e relê o registro com `findById`, que já traz o `organizadorNome`.'
+        },
+        py: {
+          erro: 'Monta o `Evento` (os setters validam) e chama `__validar_regras`: organizador existe (**400**), data no passado (**400**) e `evento_dao.existe_titulo_data(...)`. Como já existe, levanta `ErrorResponse(409, "Evento duplicado")`.',
+          ok: 'Passando nas três regras, o Service manda gravar com `evento_dao.create(evento)` e relê o registro com `find_by_id`, que já traz o `organizadorNome`.'
+        }
+      },
+      where: { js: ['js-api/src/servico/EventoService.js', 'createEvento() → #validarRegras()'], py: ['flask-api/api/service/evento_service.py', 'create_evento() → __validar_regras()'] },
+      code: { js: { erro: ['js.s5a', 'js.servico'], ok: ['js.s5ok'] }, py: { erro: ['py.s5a', 'py.servico'], ok: ['py.s5ok'] } }
+    },
+    {
+      label: 'DAO e Banco', cat: 'sql',
+      title: { erro: 'O DAO pergunta ao MySQL', ok: 'O DAO grava com INSERT' },
+      text: {
+        js: {
+          erro: '`existeTituloData` roda `SELECT COUNT(*) ... WHERE titulo = ? AND data_evento = ?`, com a data convertida por `paraSql()`. `Banco.consultar` executa na conexão aberta com o MySQL e o total volta maior que zero.',
+          ok: '`create` roda `INSERT INTO eventos (...) VALUES (?, ?, ?, ?, ?)` por `Banco.executar` e devolve `resultado.insertId`.'
+        },
+        py: {
+          erro: '`existe_titulo_data` roda `SELECT COUNT(*) ... WHERE titulo = %s AND data_evento = %s`, com os parâmetros em `tuple()`. O DAO pega uma conexão do pool (`get_connection()`) e executa; o total volta maior que zero.',
+          ok: '`create` roda `INSERT INTO eventos (...) VALUES (%s, ...)`, faz `commit()` e `cursor.lastrowid` volta como id do evento.'
+        }
+      },
+      where: { js: ['js-api/src/dao/EventoDAO.js e src/database/Banco.js', 'existeTituloData() → Banco.consultar()'], py: ['flask-api/api/dao/evento_dao.py e api/database/mysql_database.py', 'existe_titulo_data() → get_connection()'] },
+      whereOk: { js: ['js-api/src/dao/EventoDAO.js', 'create() → Banco.executar()'], py: ['flask-api/api/dao/evento_dao.py', 'create() → get_connection()'] },
+      code: { js: { erro: ['js.dao', 'js.banco'], ok: ['js.s6ok'] }, py: { erro: ['py.dao', 'py.s6b'], ok: ['py.s6ok'] } }
+    },
+    {
+      label: 'Resposta', cat: 'http',
+      title: { erro: 'O erro sobe e vira o JSON 409', ok: 'A resposta 201 volta ao cliente' },
+      text: {
+        js: {
+          erro: 'O `throw` sobe pelo Serviço → Controle → `asyncHandler` → tratador de erro do `Servidor.js`, que traduz `ErrorResponse` para o envelope com o status 409. O frontend lê `data.detalhes.mensagem` e mostra no toast.',
+          ok: 'O Controle monta a resposta com `responder(response, 201, ...)`: o envelope `{ success, message, data }` com o evento já salvo.'
+        },
+        py: {
+          erro: 'A exceção sobe até o `errorhandler(Exception)` do `server.py`, que devolve o mesmo envelope da API Node (`{success, message, data}`) com o status do `ErrorResponse`: 409.',
+          ok: 'O Control devolve `responder(201, ...)`: o envelope `{ success, message, data }` com o evento já salvo.'
+        }
+      },
+      where: { js: ['js-api/Servidor.js, src/utils/asyncHandler.js e src/utils/resposta.js', '#configurarTratamentoDeErros()'], py: ['flask-api/server.py e api/utils/resposta.py', 'tratar_erro() em __configurar_tratamento_de_erros()'] },
+      whereOk: { js: ['js-api/src/controle/EventoControle.js e src/utils/resposta.js', 'store → responder()'], py: ['flask-api/api/control/evento_control.py e api/utils/resposta.py', 'store → responder()'] },
+      code: { js: { erro: ['js.s7a', 'js.s7b'], ok: ['js.controle', 'js.resposta'] }, py: { erro: ['py.s7b'], ok: ['py.controle', 'py.resposta'] } },
+      final: true
+    }
+  ];
+  function pick(o) { return o[state.mode] !== undefined ? o[state.mode] : o.all; }
+
+  function renderSimReq() {
+    var h = $('#sim-req'); h.innerHTML = '';
+    var line = el('div', 'req-line');
+    line.innerHTML = '<span class="method">POST</span><span class="path">/api/v1/eventos</span>' +
+      '<span class="hdr">Authorization: Bearer &lt;token&gt;</span>' +
+      '<span class="why">' + (state.mode === 'erro'
+        ? 'O frontend tenta cadastrar o evento <strong>Expo Inovação</strong> na data que já existe no banco.'
+        : 'O frontend cadastra um evento novo: título e data que ainda não existem no banco.') + '</span>';
+    h.appendChild(line);
+    h.appendChild(stack([state.mode === 'erro' ? 'm.req.erro' : 'm.req.ok']));
+  }
+  function renderStepper() {
+    var ol = $('#stepper'); ol.innerHTML = '';
+    STEPS.forEach(function (s, i) {
+      var li = el('li');
+      var b = el('button', 'step' + (i < state.step ? ' done' : '') + (s.final ? ' last-' + state.mode : ''));
+      b.type = 'button';
+      b.setAttribute('aria-label', 'Passo ' + (i + 1) + ': ' + s.label);
+      if (i === state.step) b.setAttribute('aria-current', 'step');
+      b.innerHTML = '<span class="sn">' + (i + 1) + '</span><span class="sl">' + esc(s.label) + '</span>';
+      b.addEventListener('click', function () { stopRun(); goStep(i); });
+      li.appendChild(b);
+      ol.appendChild(li);
+    });
+  }
+  function renderSimPanel() {
+    var s = STEPS[state.step], api = state.api, p = $('#sim-panel');
+    p.setAttribute('aria-labelledby', 'mode-' + state.mode);
+    p.innerHTML = '';
+    var left = el('div', 'sp-info');
+    var last = !!s.final;
+    var tags = '<div class="sp-tags"><span class="pill" data-cat="' + s.cat + '">Passo ' + (state.step + 1) + ' de 7 · ' + esc(s.label) + '</span>' +
+      (last ? (state.mode === 'erro' ? '<span class="pill danger">HTTP 409 Conflict</span>' : '<span class="pill ok">HTTP 201 Created</span>') : '') + '</div>';
+    var w = (state.mode === 'ok' && s.whereOk) ? s.whereOk[api] : s.where[api];
+    left.innerHTML = tags + '<h3>' + esc(pick(s.title)) + '</h3><p class="sp-text">' + rich(pick(s.text[api])) + '</p>' +
+      '<div class="where"><b>Arquivo e método</b><code>' + esc(w[0]) + '</code><br><code>' + esc(w[1]) + '</code></div>';
+    p.appendChild(left);
+    p.appendChild(stack(pick(s.code[api])));
+    if (last) {
+      var r = el('div', 'res ' + state.mode);
+      var h = el('div', 'res-head');
+      h.innerHTML = state.mode === 'erro'
+        ? '<span class="pill danger">409 Conflict</span><strong>Resposta que o cliente recebe</strong>'
+        : '<span class="pill ok">201 Created</span><strong>Resposta que o cliente recebe</strong>';
+      r.appendChild(h);
+      r.appendChild(stack([state.mode === 'erro' ? 'm.res.erro' : 'm.res.ok']));
+      var after = el('p', 'after');
+      after.innerHTML = rich(state.mode === 'erro'
+        ? 'O envelope é sempre `{ success, message, data }`, inclusive nos erros. `success` é derivado do status (`status < 400`).'
+        : 'Mesmo envelope do erro, agora com `success: true`. O corpo traz a lista `eventos` com as colunas do SELECT do DAO.');
+      r.appendChild(after);
+      p.appendChild(r);
+    }
+  }
+  function updateSimMeta() {
+    $('#sim-count').textContent = 'Passo ' + (state.step + 1) + ' de ' + STEPS.length;
+    $('#sim-bar').style.width = ((state.step + 1) / STEPS.length * 100) + '%';
+    $('#sim-prev').disabled = state.step === 0;
+    $('#sim-next').disabled = state.step === STEPS.length - 1;
+    if ($('#sim-next').disabled && document.activeElement === $('#sim-next')) $('#sim-prev').focus();
+    if ($('#sim-prev').disabled && document.activeElement === $('#sim-prev')) $('#sim-next').focus();
+  }
+  function renderSim() {
+    $('#sim-api').textContent = 'Código exibido: ' + APIS[state.api].full;
+    renderSimReq(); renderStepper(); renderSimPanel(); updateSimMeta();
+  }
+  function goStep(i) {
+    state.step = Math.max(0, Math.min(STEPS.length - 1, i));
+    var had = document.activeElement && $('#stepper').contains(document.activeElement);
+    renderStepper(); renderSimPanel(); updateSimMeta();
+    if (had) { var cb = $('#stepper [aria-current="step"]'); if (cb) cb.focus(); }
+    announce('Passo ' + (state.step + 1) + ' de 7: ' + STEPS[state.step].label);
+    if (state.playing && state.step === STEPS.length - 1) stopRun();
+  }
+  function setMode(m, focus) {
+    state.mode = m; stopRun();
+    $$('.mode').forEach(function (b) {
+      var on = b.getAttribute('data-mode') === m;
+      b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1;
+      if (on && focus) b.focus();
+    });
+    renderSim();
+    announce(m === 'erro' ? 'Cenário: título e data duplicados, resposta 409.' : 'Cenário: caminho feliz, resposta 201.');
+  }
+  function setRunUi() {
+    var b = $('#sim-run');
+    b.setAttribute('aria-pressed', String(state.playing));
+    b.innerHTML = icon(state.playing ? 'pause' : 'play') + '<span>' + (state.playing ? 'Pausar' : 'Rodar') + '</span>';
+  }
+  function stopRun() { if (timer) { clearInterval(timer); timer = null; } state.playing = false; setRunUi(); }
+  function startRun() {
+    if (state.step === STEPS.length - 1) goStep(0);
+    state.playing = true; setRunUi();
+    timer = setInterval(function () {
+      if (state.step >= STEPS.length - 1) { stopRun(); return; }
+      goStep(state.step + 1);
+    }, 2600);
+  }
+  $('#sim-prev').addEventListener('click', function () { stopRun(); goStep(state.step - 1); });
+  $('#sim-next').addEventListener('click', function () { stopRun(); goStep(state.step + 1); });
+  $('#sim-reset').addEventListener('click', function () { stopRun(); goStep(0); });
+  $('#sim-run').addEventListener('click', function () { if (state.playing) stopRun(); else startRun(); });
+  $$('.mode').forEach(function (b) { b.addEventListener('click', function () { setMode(b.getAttribute('data-mode'), false); }); });
+  $('.modes').addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft' || e.key === 'Home' || e.key === 'End') {
+      e.preventDefault(); setMode(state.mode === 'erro' ? 'ok' : 'erro', true);
+    }
+  });
+
+  /* ------------------------------------------------------------ decisões */
+  var CAT_WHY = {
+    dominio: 'Regra do próprio dado: vale em qualquer lugar em que a entidade for criada, sem saber de banco nem de HTTP. Dado inválido nem chega ao banco.',
+    negocio: 'Regra que depende do banco, do usuário logado ou do relógio. Por isso mora no Serviço, que pode ser chamado sem passar por HTTP.',
+    sql: 'Só monta e executa SQL. Trocar o banco ou a forma de filtrar mexe apenas aqui.',
+    http: 'Traduz a entrada e a saída HTTP (token, formato do corpo, status). Mudar o formato da resposta mexe apenas aqui.'
+  };
+  var CAT_NAME = { dominio: 'Model', negocio: 'Serviço', sql: 'DAO', http: 'Controle e Middleware' };
+  var ROWS = [
+    { id: 'tam', q: 'O campo tem o tamanho certo?', cat: 'dominio', layer: 'Model', m: { js: '`Organizador.set nome` → `texto(valor, "nome", 3, 120)`', py: '`Organizador.nome` (`@nome.setter`) → `texto(valor, "nome", 3, 120)`' } },
+    { id: 'status', q: 'Esse `status` existe?', cat: 'dominio', layer: 'Model', m: { js: '`Evento.set status` usa `Evento.STATUS`', py: '`Evento.status` (`@status.setter`) usa `Evento.STATUS`' } },
+    { id: 'disp', q: 'O disponível pode ser maior que o total?', cat: 'dominio', layer: 'Model', m: { js: '`Lote.set quantidadeDisponivel`', py: '`Lote.quantidadeDisponivel` (`@quantidadeDisponivel.setter`)' } },
+    { id: 'email', q: 'Esse e-mail já está cadastrado?', cat: 'negocio', layer: 'Serviço', m: { js: '`OrganizadorService.createOrganizador` → `organizadorDAO.existeEmail` → 409', py: '`organizador_service.create_organizador` → `organizador_dao.existe_email` → 409' } },
+    { id: 'orgev', q: 'Esse organizador tem eventos?', cat: 'negocio', layer: 'Serviço', m: { js: '`OrganizadorService.deleteOrganizador` → `eventoDAO.countByOrganizador` → 409', py: '`organizador_service.delete_organizador` → `evento_dao.count_by_organizador` → 409' } },
+    { id: 'evlotes', q: 'Esse evento já tem lotes?', cat: 'negocio', layer: 'Serviço', m: { js: '`EventoService.deleteEvento` → `loteDAO.countByEvento` → 409', py: '`evento_service.delete_evento` → `lote_dao.count_by_evento` → 409' } },
+    { id: 'perfil', q: 'Um perfil `comum` pode editar outro cadastro?', cat: 'negocio', layer: 'Serviço', m: { js: '`OrganizadorService.updateOrganizador(..., usuarioLogado)` → 403', py: '`organizador_service.update_organizador(..., usuario_logado)` → 403' } },
+    { id: 'data', q: 'A data está no passado?', cat: 'negocio', layer: 'Serviço', m: { js: '`EventoService.#validarRegras` (usa `Date.now()`) → 400', py: '`evento_service.__validar_regras` (usa `datetime.now()`) → 400' } },
+    { id: 'where', q: 'Existe um `WHERE` para montar?', cat: 'sql', layer: 'DAO', m: { js: '`EventoDAO.findAll` monta os filtros dinâmicos', py: '`evento_dao.find_all` monta os filtros dinâmicos' } },
+    { id: 'token', q: 'O token JWT é válido?', cat: 'http', layer: 'Middleware', m: { js: '`JwtMiddleware.validarToken` → 401', py: '`JwtMiddleware.validate_token` → 401' } },
+    { id: 'corpo', q: 'O corpo veio no envelope `{ evento: {...} }`?', cat: 'http', layer: 'Middleware', m: { js: '`EventoMiddleware.validarBody` → 400', py: '`EventoMiddleware.validate_body` → 400' } },
+    { id: 'http', q: 'Qual status HTTP devolver?', cat: 'http', layer: 'Controle', m: { js: '`EventoControle.store` → `responder(..., 201, ...)`', py: '`EventoControl.store` → `responder(201, ...)`' } }
+  ];
+  var CHIPS = [['all', 'Todas'], ['dominio', 'Model · domínio'], ['negocio', 'Serviço · negócio'], ['sql', 'DAO · SQL'], ['http', 'Controle e Middleware · HTTP']];
+
+  function renderChips() {
+    var h = $('#chips'); h.innerHTML = '';
+    CHIPS.forEach(function (c) {
+      var b = el('button', 'chip', c[1]);
+      b.type = 'button'; b.setAttribute('data-cat', c[0]);
+      b.setAttribute('aria-pressed', String(state.filter === c[0]));
+      b.addEventListener('click', function () { state.filter = c[0]; renderChips(); renderRows(); });
+      h.appendChild(b);
+    });
+  }
+  function renderRows() {
+    var body = $('#dt-body'); body.innerHTML = '';
+    var shown = 0;
+    ROWS.forEach(function (r) {
+      if (state.filter !== 'all' && state.filter !== r.cat) return;
+      shown++;
+      var dim = state.focus && state.focus !== r.cat;
+      var open = !!state.open[r.id];
+      var tr = el('tr', 'row' + (open ? ' open' : '') + (dim ? ' dim' : ''));
+      tr.setAttribute('data-cat', r.cat);
+      var td1 = el('td'), btn = el('button', 'rowbtn');
+      btn.type = 'button';
+      btn.setAttribute('aria-expanded', String(open));
+      btn.setAttribute('aria-controls', 'det-' + r.id);
+      btn.innerHTML = icon('next') + '<span>' + rich(r.q) + '</span>';
+      td1.appendChild(btn);
+      var td2 = el('td'); td2.innerHTML = '<span class="pill" data-cat="' + r.cat + '">' + esc(r.layer) + '</span>';
+      var td3 = el('td'); td3.className = 'meth'; td3.innerHTML = rich(r.m[state.api]);
+      tr.appendChild(td1); tr.appendChild(td2); tr.appendChild(td3);
+      body.appendChild(tr);
+      var dt = el('tr', 'detail' + (dim ? ' dim' : ''));
+      dt.id = 'det-' + r.id; dt.setAttribute('data-cat', r.cat);
+      dt.hidden = !open;
+      var td = el('td'); td.colSpan = 3;
+      var det = el('div', 'det');
+      var why = el('div', 'why-box');
+      why.innerHTML = '<p><b>Quem responde:</b> ' + esc(CAT_NAME[r.cat]) + '</p><p>' + esc(CAT_WHY[r.cat]) + '</p>';
+      det.appendChild(why);
+      if (open) det.appendChild(stack([state.api + '.d.' + r.id]));
+      td.appendChild(det); dt.appendChild(td);
+      body.appendChild(dt);
+      btn.addEventListener('click', function () { toggleRow(r); });
+    });
+    $('#dec-count').textContent = 'Mostrando ' + shown + ' de ' + ROWS.length + ' perguntas' + (state.focus ? ' · destaque: ' + CAT_NAME[state.focus] : '');
+    $('#dec-clear').hidden = !state.focus;
+  }
+  function toggleRow(r) {
+    var was = !!state.open[r.id];
+    if (was) { delete state.open[r.id]; state.focus = null; }
+    else { state.open[r.id] = true; state.focus = r.cat; }
+    renderRows();
+    var b = $('[aria-controls="det-' + r.id + '"]');
+    if (b) b.focus();
+  }
+  $('#dec-clear').addEventListener('click', function () { state.focus = null; renderRows(); });
+
+  /* ------------------------------------------------------------ comparação */
+  var PAIRS = [
+    { t: 'Guarda de rota', js: '`router.use(validarToken)`', py: '`@jwt.validate_token` (decorator)', note: 'No Node, `router.use` vale para todas as rotas do roteador de uma vez; no Flask, o decorator é repetido em cada rota e executa de cima para baixo.', c: { js: 'js.roteador', py: 'py.roteador' } },
+    { t: 'Serviço', js: '`EventoService.createEvento`', py: '`evento_service.create_evento`', note: 'Mesma sequência: monta o Model, valida as regras, chama o DAO e relê o registro. Muda a sintaxe (`async/await` e campos `#privados` no Node; chamadas síncronas e `__privados` no Python) e a caixa dos nomes (camelCase × snake_case).', c: { js: 'js.c.svc', py: 'py.c.svc' } },
+    { t: 'Acesso ao banco', js: '`Banco.consultar`', py: '`cursor.execute`', note: 'No Node, o DAO chama `Banco.consultar(SQL, parametros)`: uma conexão única do `mysql2`, com marcador `?`. No Flask, o DAO abre `with get_connection()` do pool e usa `cursor.execute`, com marcador `%s`.', c: { js: 'js.c.banco', py: 'py.c.banco' } },
+    { t: 'Middleware de corpo', js: '`validarBody(request, response, next)`', py: '`validate_body` com `@wraps`', note: 'No Node, o middleware é uma função que chama `next()` quando está tudo certo; no Flask, é um decorator que devolve a função da rota (`funcao(*args, **kwargs)`).', c: { js: 'js.middleware', py: 'py.middleware' } },
+    { t: 'Erro central', js: '`(erro, request, response, next)`', py: '`@app.errorhandler(Exception)`', note: 'Os dois traduzem `ErrorResponse` e o erro de domínio (`DomainError` no Node, `ValueError` no Flask) para o mesmo envelope `{success, message, data}`. No Express, o tratador é reconhecido pelos 4 parâmetros.', c: { js: 'js.c.erro', py: 'py.c.erro' } },
+    { t: 'Injeção de dependência', js: '`new EventoService(eventoDAO, ...)`', py: '`EventoService(evento_dao, ...)`', note: 'Nenhuma camada cria a sua dependência: todas recebem pelo construtor, de baixo para cima (DAO → Serviço → Controle → Roteador). Nos dois casos a montagem fica no arquivo do servidor.', c: { js: 'js.c.di', py: 'py.c.di' } },
+    { t: 'Usuário logado', js: '`request.organizador`', py: '`flask.g.organizador`', note: 'O middleware de JWT guarda os claims do token; o Controle os lê e passa ao Serviço como argumento. O Serviço continua sem conhecer HTTP: recebe só os claims.', c: { js: 'js.c.user', py: 'py.c.user' } }
+  ];
+  function renderPairs() {
+    var h = $('#pairs'); h.innerHTML = '';
+    PAIRS.forEach(function (p, i) {
+      var b = el('button', 'pair-btn');
+      b.type = 'button'; b.id = 'pair-' + i;
+      b.setAttribute('role', 'tab');
+      b.setAttribute('aria-selected', String(i === state.pair));
+      b.setAttribute('aria-controls', 'cmp-grid');
+      b.tabIndex = i === state.pair ? 0 : -1;
+      b.innerHTML = '<span class="pn">' + (i + 1) + '</span>' + esc(p.t);
+      b.addEventListener('click', function () { selectPair(i, false); });
+      h.appendChild(b);
+    });
+  }
+  function selectPair(i, focus) {
+    state.pair = i;
+    $$('#pairs .pair-btn').forEach(function (b, k) { b.setAttribute('aria-selected', String(k === i)); b.tabIndex = k === i ? 0 : -1; if (k === i && focus) b.focus(); });
+    renderPair();
+  }
+  function renderPair() {
+    var p = PAIRS[state.pair], api = state.api, other = api === 'js' ? 'py' : 'js';
+    $('#cmp-grid').setAttribute('aria-labelledby', 'pair-' + state.pair);
+    var eq = $('#eq');
+    eq.innerHTML = '<div class="eq-side' + (api === 'js' ? ' on' : '') + '"><small>Node.js</small><code>' + rich(p.js).replace(/<\/?code>/g, '') + '</code></div>' +
+      '<div class="eq-mid" aria-hidden="true">' + icon('swap') + '</div>' +
+      '<div class="eq-side' + (api === 'py' ? ' on' : '') + '"><small>Flask</small><code>' + rich(p.py).replace(/<\/?code>/g, '') + '</code></div>';
+    $('#cmp-note').innerHTML = rich(p.note);
+    var btn = $('#cmp-side');
+    btn.setAttribute('aria-pressed', String(state.side));
+    $('span', btn).textContent = state.side ? 'Ver um de cada vez' : 'Ver lado a lado';
+    $('#cmp-hint').textContent = state.side ? 'Os dois trechos aparecem juntos.' : 'Mostrando só ' + APIS[api].label + '. Troque a API no seletor do topo ou clique em “Ver lado a lado”.';
+    var g = $('#cmp-grid'); g.innerHTML = '';
+    g.className = 'cmp-grid' + (state.side ? ' two' : '');
+    var order = state.side ? ['js', 'py'] : [api];
+    order.forEach(function (k) {
+      var col = el('div', 'cmp-col');
+      col.appendChild(el('h4', null, APIS[k].full));
+      col.appendChild(codeCard(p.c[k]));
+      g.appendChild(col);
+    });
+  }
+  $('#cmp-side').addEventListener('click', function () { state.side = !state.side; renderPair(); });
+  $('#pairs').addEventListener('keydown', function (e) {
+    var n = state.pair;
+    if (e.key === 'ArrowRight') n = (n + 1) % PAIRS.length;
+    else if (e.key === 'ArrowLeft') n = (n - 1 + PAIRS.length) % PAIRS.length;
+    else if (e.key === 'Home') n = 0;
+    else if (e.key === 'End') n = PAIRS.length - 1;
+    else return;
+    e.preventDefault(); selectPair(n, true);
+  });
+
+  /* ------------------------------------------------------------ seletor de API */
+  function setApi(v, silent) {
+    state.api = v;
+    document.documentElement.setAttribute('data-api', v);
+    $$('.seg-btn').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-api') === v)); });
+    $('#api-now').textContent = 'Pasta de origem: ' + APIS[v].dir + ' (' + APIS[v].full + ')';
+    saveApi(v);
+    renderTabs(); renderLayerPanel(); renderSim(); renderRows(); renderPair();
+    if (!silent) announce('Trechos de código agora em ' + APIS[v].full + '.');
+  }
+  $$('.seg-btn').forEach(function (b) { b.addEventListener('click', function () { if (b.getAttribute('data-api') !== state.api) { stopRun(); setApi(b.getAttribute('data-api')); } }); });
+
+  /* ------------------------------------------------------------ navegação */
+  var links = $$('.nav a');
+  var secs = links.map(function (a) { return document.getElementById(a.getAttribute('data-sec')); });
+  function setActive(id) {
+    links.forEach(function (a) {
+      var on = a.getAttribute('data-sec') === id;
+      if (on) a.setAttribute('aria-current', 'location'); else a.removeAttribute('aria-current');
+      if (on && a.scrollIntoView && window.innerWidth <= 1040) { var ul = a.closest('ul'); if (ul) ul.scrollLeft = Math.max(0, a.offsetLeft - 24); }
+    });
+  }
+  var ticking = false;
+  function spy() {
+    ticking = false;
+    var y = window.innerHeight * 0.32, cur = secs[0].id;
+    if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) cur = secs[secs.length - 1].id;
+    else secs.forEach(function (s) { if (s.getBoundingClientRect().top <= y) cur = s.id; });
+    setActive(cur);
+  }
+  window.addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(spy); } }, { passive: true });
+  window.addEventListener('resize', spy);
+  links.forEach(function (a) { a.addEventListener('click', function () { setActive(a.getAttribute('data-sec')); }); });
+
+  /* ------------------------------------------------------------ início */
+  renderChips(); renderPairs();
+  setApi(loadApi(), true);
+  spy();
+})();
+</script>
+</body>
+</html>

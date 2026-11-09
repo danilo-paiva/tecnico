@@ -1,5 +1,11 @@
 # Arquitetura MVCS nas duas APIs — três explicações
 
+> **Material de apoio (fora da pasta do projeto).** Este documento e o
+> `arquitetura-mvcs.html` ficam em `PAW/4bi/explicacoes/` de propósito: o que vai para o
+> classroom é só `PAW/4bi/projeto/`. Os arquivos citados aqui estão em
+> `PAW/4bi/projeto/js-api/` e `PAW/4bi/projeto/flask-api/` (os caminhos abaixo são relativos à
+> pasta do projeto).
+
 Documento de apoio à apresentação. O mesmo desenho aparece duas vezes: em **JavaScript
 (Node.js + Express)** e em **Python (Flask)**. As três explicações de cada API são três
 ângulos do mesmo assunto:
