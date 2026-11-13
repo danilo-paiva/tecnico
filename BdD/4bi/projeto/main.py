@@ -16,7 +16,7 @@ from pathlib import Path
 
 from pymongo.errors import DuplicateKeyError
 
-from conexao import banco
+from conexao import meu_banco
 from regras import (ErroDeNegocio, agrupar_por_situacao, converter_nota,
                     exigir_texto, formatar_media, media_ponderada,
                     normalizar_codigo, situacao, validar_bimestre)
@@ -33,9 +33,9 @@ from regras import (ErroDeNegocio, agrupar_por_situacao, converter_nota,
 #
 # As notas ficam em OUTRA coleção: é isso que dá sentido ao estágio
 # $lookup no relatório — o "JOIN" do MongoDB.
-TURMAS = banco['turmas_p07']
-ALUNOS = banco['alunos_p07']
-NOTAS = banco['notas_p07']
+TURMAS = meu_banco['turmas_p07']
+ALUNOS = meu_banco['alunos_p07']
+NOTAS = meu_banco['notas_p07']
 
 
 def preparar_indices() -> None:
