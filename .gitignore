@@ -42,6 +42,8 @@ desktop.ini
 # Segredos / ambiente
 .env
 .env.*
+# o modelo (sem senha) continua versionado
+!.env.example
 
 *.key
 *.pem
