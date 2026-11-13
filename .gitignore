@@ -26,6 +26,7 @@
 *.pyc
 **/venv/
 **/.venv/
+**/.pytest_cache/
 
 # IDEs
 **/.idea/
@@ -41,6 +42,7 @@ desktop.ini
 # Segredos / ambiente
 .env
 .env.*
+
 *.key
 *.pem
 
@@ -58,3 +60,6 @@ desktop.ini
 PVB/4bi/projeto*/**/pessoas.json
 PVB/4bi/projeto*/**/grafico.html
 PVB/4bi/projeto*/**/pessoas.html
+
+# BdD 4bi - boletim exportado pelo projeto 07 (gerado pelo programa)
+BdD/4bi/projeto*/**/boletim_*.csv

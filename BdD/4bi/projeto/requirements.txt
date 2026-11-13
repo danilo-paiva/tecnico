@@ -1,0 +1,4 @@
+# Dependências do projeto 07 (Turmas e Boletins)
+
+pymongo>=4.10,<5
+python-dotenv>=1,<2
