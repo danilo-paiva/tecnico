@@ -1,8 +1,11 @@
-"""Menu de terminal do sistema de turmas e boletins (projeto 07).
+"""Sistema de turmas e boletins (projeto 07 — MongoDB + PyMongo).
 
-Este arquivo só cuida de ENTRADA e SAÍDA: mostra o menu, pergunta os
-dados e imprime (ou exporta) o resultado. As regras ficam em regras.py
-e todas as consultas ao MongoDB ficam em repositorio.py.
+Este arquivo tem as duas partes que falam do MongoDB:
+  1. as consultas (índices, cadastros, lançamento de nota e o boletim);
+  2. o menu de terminal que usa essas consultas.
+
+As regras puras (validação, médias, situação) ficam em regras.py e a
+conexão com o Atlas/servidor local fica em conexao.py.
 
 Executar a partir desta pasta:
     python main.py
@@ -11,11 +14,166 @@ Executar a partir desta pasta:
 import csv
 from pathlib import Path
 
+from pymongo.errors import DuplicateKeyError
+
+from conexao import banco
 from regras import (ErroDeNegocio, agrupar_por_situacao, converter_nota,
-                    formatar_media, media_ponderada, normalizar_codigo,
-                    situacao, validar_bimestre)
-from repositorio import (boletim, criar_aluno, criar_turma, lancar_nota,
-                         listar_turmas, preparar_indices)
+                    exigir_texto, formatar_media, media_ponderada,
+                    normalizar_codigo, situacao, validar_bimestre)
+
+# ===========================================================================
+# 1) MongoDB — coleções, índices e consultas
+# ===========================================================================
+
+# Coleções do projeto (sufixo p07 = projeto 07, padrão da disciplina):
+#
+#     turmas_p07  { codigo }
+#     alunos_p07  { matricula, nome, turma }
+#     notas_p07   { matricula, bimestre, valor }
+#
+# As notas ficam em OUTRA coleção: é isso que dá sentido ao estágio
+# $lookup no relatório — o "JOIN" do MongoDB.
+TURMAS = banco['turmas_p07']
+ALUNOS = banco['alunos_p07']
+NOTAS = banco['notas_p07']
+
+
+def preparar_indices() -> None:
+    """Garante os índices do projeto (create_index pode ser repetido).
+
+    * codigo único  -> duas turmas não podem ter o mesmo código;
+    * matricula única -> matrícula identifica um único aluno;
+    * (matricula, bimestre) composto e único -> uma nota por aluno por
+      bimestre. É esse índice que faz o upsert do lançamento de nota
+      atualizar em vez de duplicar.
+    """
+    TURMAS.create_index('codigo', unique=True)
+    ALUNOS.create_index('matricula', unique=True)
+    NOTAS.create_index([('matricula', 1), ('bimestre', 1)], unique=True)
+
+
+def turma_existe(codigo: str) -> bool:
+    """Consulta barata: projeta só o _id, que já basta para saber se existe."""
+    return TURMAS.find_one({'codigo': codigo}, {'_id': 1}) is not None
+
+
+def listar_turmas() -> list[str]:
+    """Códigos das turmas em ordem alfabética.
+
+    O segundo argumento do find() é a PROJEÇÃO: {'_id': 0} tira o _id do
+    resultado e {'codigo': 1} mantém apenas o campo código.
+    """
+    cursor = TURMAS.find({}, {'_id': 0, 'codigo': 1}).sort('codigo', 1)
+    return [turma['codigo'] for turma in cursor]
+
+
+def criar_turma(codigo) -> str:
+    """Cadastra uma turma e devolve o código já normalizado."""
+    codigo = normalizar_codigo(codigo)
+    try:
+        TURMAS.insert_one({'codigo': codigo})
+    except DuplicateKeyError:
+        # Quem barrou foi o índice único, não o Python: convertemos o erro
+        # do driver em uma mensagem que o usuário entende.
+        raise ErroDeNegocio(f'A turma {codigo} já existe.') from None
+    return codigo
+
+
+def criar_aluno(matricula, nome, codigo_turma) -> dict:
+    """Cadastra um aluno em uma turma existente e devolve o documento."""
+    matricula = exigir_texto(matricula, 'matrícula')
+    nome = exigir_texto(nome, 'nome do aluno')
+    codigo_turma = normalizar_codigo(codigo_turma)
+
+    # Integridade "manual": o MongoDB não tem chave estrangeira, então o
+    # código confere se a turma existe antes de gravar o vínculo.
+    if not turma_existe(codigo_turma):
+        raise ErroDeNegocio(
+            f'A turma {codigo_turma} não existe. Cadastre a turma antes do aluno.')
+
+    aluno = {'matricula': matricula, 'nome': nome, 'turma': codigo_turma}
+    try:
+        ALUNOS.insert_one(aluno)
+    except DuplicateKeyError:
+        raise ErroDeNegocio(f'A matrícula {matricula} já está cadastrada.') from None
+    return aluno
+
+
+def lancar_nota(matricula, bimestre, valor) -> bool:
+    """Grava a nota de um bimestre.
+
+    Devolve True se a nota é nova e False se uma nota existente foi
+    atualizada (é o que a tela mostra para o usuário).
+
+    O upsert=True diz: "se nenhum documento casar com o filtro, crie um".
+    Como (matricula, bimestre) é único, lançar a mesma nota duas vezes
+    atualiza o valor em vez de criar um documento duplicado.
+    """
+    matricula = exigir_texto(matricula, 'matrícula')
+    if ALUNOS.find_one({'matricula': matricula}, {'_id': 1}) is None:
+        raise ErroDeNegocio(
+            f'Aluno {matricula} não encontrado. Cadastre o aluno antes da nota.')
+
+    resultado = NOTAS.update_one(
+        {'matricula': matricula, 'bimestre': bimestre},  # filtro (usa o índice composto)
+        {'$set': {'valor': valor}},                      # o que muda
+        upsert=True,                                     # cria se não existir
+    )
+    # upserted_id só vem preenchido quando o documento foi criado agora.
+    return resultado.upserted_id is not None
+
+
+def boletim(codigo_turma) -> list[dict]:
+    """Relatório da turma: junta alunos + notas e calcula a média NO banco.
+
+    Recebe o código da turma e devolve uma lista de documentos:
+        {'matricula': '2026001', 'nome': 'Ana Silva', 'media': 7.75,
+         'notas': [{'bimestre': 1, 'valor': 8.0}, ...]}
+    """
+    codigo = normalizar_codigo(codigo_turma)
+    if not turma_existe(codigo):
+        raise ErroDeNegocio(f'A turma {codigo} não existe.')
+
+    pipeline = [
+        # 1) $match: reduz o conjunto para os alunos da turma pedida.
+        {'$match': {'turma': codigo}},
+
+        # 2) $lookup: para cada aluno, busca em notas_p07 os documentos em
+        #    que foreignField == localField, e guarda o array em 'notas'.
+        #    É o equivalente ao JOIN do SQL, só que o resultado é uma lista
+        #    dentro do próprio documento (modelo documental).
+        {'$lookup': {
+            'from': 'notas_p07',          # coleção de onde trazer
+            'localField': 'matricula',    # campo no documento do aluno
+            'foreignField': 'matricula',  # campo correspondente na nota
+            'as': 'notas',                # nome do campo que recebe o array
+        }},
+
+        # 3) $project: monta a "forma" final do relatório.
+        #    $avg recebe a lista de valores e devolve a média; se a lista
+        #    estiver vazia o resultado é null (por isso 'sem notas').
+        #    'notas': 1 mantém o array que o $lookup criou — é com ele que
+        #    mostramos as notas por bimestre e calculamos a ponderada.
+        {'$project': {
+            '_id': 0,
+            'matricula': 1,
+            'nome': 1,
+            'media': {'$avg': '$notas.valor'},
+            'notas': 1,
+        }},
+
+        # 4) $sort: ordem alfabética do relatório.
+        {'$sort': {'nome': 1}},
+    ]
+
+    # aggregate() devolve um cursor, então materializamos em lista para
+    # poder contar os alunos e calcular a média da turma na tela.
+    return list(ALUNOS.aggregate(pipeline))
+
+
+# ===========================================================================
+# 2) Tela — relatório (texto e CSV) e menu
+# ===========================================================================
 
 MENU = """
 [1] Cadastrar turma
@@ -41,10 +199,6 @@ def escolher_turma(rotulo: str = 'Código da turma') -> str:
         print(f"Turmas cadastradas: {', '.join(turmas)}")
     return input(f'{rotulo}: ')
 
-
-# ---------------------------------------------------------------------------
-# Relatório
-# ---------------------------------------------------------------------------
 
 def montar_relatorio(codigo_turma: str) -> list[dict]:
     """Transforma os documentos do banco nas linhas do relatório.
@@ -148,10 +302,7 @@ def exportar_csv(codigo_turma: str) -> None:
     print(f'CSV gerado: {destino.name} ({len(linhas)} alunos)')
 
 
-# ---------------------------------------------------------------------------
-# Uma função por opção do menu. Assim o main() fica curto e cada ação pode
-# ser lida (e testada) separadamente.
-# ---------------------------------------------------------------------------
+# --- Uma função por opção do menu: o main() fica curto ----------------------
 
 def opcao_criar_turma() -> None:
     codigo = criar_turma(input('Código da turma (ex.: ADS-A): '))
